@@ -1,4 +1,13 @@
-cp .bashrc ~/.
-cp .inputrc ~/.
-cp git-completion.sh ~/.git-completion.sh
-cp git-prompt.sh ~/.git-prompt.sh
+sudo apt-get upgrade
+sudo apt-get ruby
+
+# setup virtual env
+sudo apt-get install python-pip
+pip install virtualenv
+cd ~
+virtualenv venv
+. venv/bin/activate
+
+# setup tmux
+sudo apt-get install tmux
+gem install tmuxinator
