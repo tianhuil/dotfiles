@@ -1,4 +1,5 @@
 sudo apt-get upgrade
+sudo apt-get ruby
 
 # setup virtual env
 sudo apt-get install python-pip
@@ -10,3 +11,4 @@ virtualenv virtualenv
 # setup tmux
 sudo apt-get install tmux
 gem install tmuxinator
+
