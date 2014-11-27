@@ -3,17 +3,12 @@ if [ "$0" != "-bash" ] ; then
     . /etc/profile
 fi
 
-# vagrant autocomplete
-if [ -f `brew --prefix`/etc/bash_completion.d/vagrant ]; then
-    source `brew --prefix`/etc/bash_completion.d/vagrant
+if [ -f .git-completion.sh ]; then
+    . .git-completion.sh
 fi
 
-if [ -f /opt/local/etc/profile.d/bash_completion.sh ]; then
-  . /usr/local/Cellar/git/1.8.5.3/etc/bash_completion.d/bash_completion.sh
-fi
-
-if [ -f /opt/local/share/git-core/git-prompt.sh ]; then
-    . /usr/local/Cellar/git/1.8.5.3/etc/bash_completion.d/git-prompt.sh
+if [ -f .git-prompt.sh ]; then
+    . .git-prompt.sh
 fi
 
 export HISTSIZE=1000000
