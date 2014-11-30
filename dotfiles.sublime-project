@@ -1,0 +1,21 @@
+{
+	"folders":
+	[
+		{
+			"path": ".",
+			"folder_exclude_patterns": ["backup", "venv"],
+			"follow_symlinks": true
+		}
+	],
+	"settings":
+	{
+		"tab_size": 2
+	},
+	"build_systems":
+	[
+		{
+			"name": "List",
+			"shell_cmd": "ls -l"
+		}
+	]
+}
