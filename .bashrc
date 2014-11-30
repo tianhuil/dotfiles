@@ -20,15 +20,12 @@ export PYTHONPATH=.:/usr/local/lib/python2.7/site-packages:/Users/michael/Dropbo
 
 alias ipython='ipython --pdb'
 alias qtconsole='"ipython" qtconsole --pylab=inline'
- 
+
 alias rm='rm -i'
 alias cp='cp -i'
 alias mv='mv -i'
 alias mkdir='mkdir -p' # make parent directories as needed
 
-alias less='less -R'
-alias more='more -R'
- 
 alias ls='ls -h -G'
 alias ll='ls -l'
 alias la='ls -A'
