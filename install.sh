@@ -4,9 +4,9 @@ sudo apt-get ruby --fix-missing
 # setup virtual env
 sudo apt-get install python-pip --fix-missing
 pip install virtualenv
-cd ~
-virtualenv venv
-. venv/bin/activate
+virtualenv ~/venv
+. ~/venv/bin/activate
+pip install -r requirements.txt
 
 # setup python
 sudo apt-get install ipython --fix-missing
