@@ -11,3 +11,6 @@ virtualenv venv
 # setup tmux
 sudo apt-get install tmux
 gem install tmuxinator
+
+# setup emacs
+sudo apt-get install emacs
