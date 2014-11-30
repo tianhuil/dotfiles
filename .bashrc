@@ -52,4 +52,5 @@ export EDITOR=emacs;
 # tmuxinator stuff
 source ~/.bin/tmuxinator.bash
 
-
+# virtualenv
+. ~/venv/bin/activate
