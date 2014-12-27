@@ -1,7 +1,7 @@
 This is a repository of useful "dot files" for unix.
 ----------------------------------------------------
 
-To load the .bashrc, .inputrc, and bash completions, run:
+To load the .bashrc, .inputrc, and bash completions, run (this will overwrite .bashrc etc ...):
 
 > setup.sh
 
