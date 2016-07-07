@@ -61,9 +61,6 @@ if which pyspark > /dev/null; then
 fi
 export PATH=$PATH:$SCALA_HOME/bin
 
-# tmuxinator stuff
-source ~/.bin/tmuxinator.bash
-
 # NPM
 export NPM_PACKAGES="/Users/michael/.npm"
 export NODE_PATH="$NPM_PACKAGES/lib/node_modules:$NODE_PATH"
