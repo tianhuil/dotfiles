@@ -1,0 +1,28 @@
+[user]
+	name = Tianhui Michael Li
+	email = tianhuil@cs.princeton.edu
+[core]
+	excludesfile = ~/.gitignore_global
+[filter "media"]
+	clean = git-media-clean %f
+	smudge = git-media-smudge %f
+[pull]
+	rebase = true
+[alias]
+	co = checkout
+	st = status
+	ci = commit
+	br = branch
+	hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
+	type = cat-file -t
+	dump = cat-file -p
+	nl = log --name-only
+	cp = cherry-pick
+[push]
+	default = matching
+[filter "lfs"]
+	clean = git-lfs clean %f
+	smudge = git-lfs smudge %f
+	required = true
+[branch]
+	autosetuprebase = always
