@@ -50,6 +50,9 @@ alias sha1='openssl sha1'
 export VISUAL=emacs;
 export EDITOR=emacs;
 
+# tmuxinator stuff
+source ~/.bin/tmuxinator.bash
+
 ### Add java variable:
 export JAVA_HOME=$(/usr/libexec/java_home)
 
