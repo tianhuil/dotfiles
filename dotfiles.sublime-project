@@ -15,7 +15,7 @@
 	[
 		{
 			"name": "List",
-			"shell_cmd": "ls -l"
+			"shell_cmd": "./setup.sh"
 		}
 	]
 }
