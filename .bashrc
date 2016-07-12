@@ -3,12 +3,12 @@ if [ "$0" != "-bash" ] ; then
     . /etc/profile
 fi
 
-if [ -f .git-completion.sh ]; then
-    . .git-completion.sh
+if [ -f ~/.git-completion.sh ]; then
+    . ~/.git-completion.sh
 fi
 
-if [ -f .git-prompt.sh ]; then
-    . .git-prompt.sh
+if [ -f ~/.git-prompt.sh ]; then
+    . ~/.git-prompt.sh
 fi
 
 export HISTSIZE=1000000
