@@ -68,3 +68,6 @@ export PATH=$PATH:$SCALA_HOME/bin
 export NPM_PACKAGES="/Users/michael/.npm"
 export NODE_PATH="$NPM_PACKAGES/lib/node_modules:$NODE_PATH"
 export PATH="$NPM_PACKAGES/bin:$PATH"
+
+export PS1="MBP3 \t ${GREEN}\W${RESET}$ "
+export PS2='> '
