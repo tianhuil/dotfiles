@@ -11,6 +11,11 @@ if [ -f ~/.git-prompt.sh ]; then
     . ~/.git-prompt.sh
 fi
 
+if [ -f "/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl" ]; then
+	ln -s "/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl" /usr/local/bin/subl
+fi
+
+
 export HISTSIZE=1000000
 export HISTIGNORE="&:ls:[bf]g:exit"
 export HISTCONTROL=erasedups
