@@ -26,3 +26,6 @@ brew cask install java
 
 # install spark
 brew install apache-spark
+
+# gitx
+ln -s /Applications/GitX.app/Contents/Resources/gitx /usr/local/bin/gitx 

@@ -47,7 +47,6 @@ alias dfh='df -h'
 alias gvim='gvim -geom 84x26'
 alias start='dbus-launch startx'
 alias sha1='openssl sha1'
-alias gitx='open -a GitX .'
 
 export VISUAL=emacs;
 export EDITOR=emacs;
