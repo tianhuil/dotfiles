@@ -69,3 +69,8 @@ export PATH="$NPM_PACKAGES/bin:$PATH"
 
 export PS1="MBP3 \t ${GREEN}\W${RESET}$ "
 export PS2='> '
+
+# GAEPATH
+APPCFG=`which appcfg.py`
+FULL_PATH=`perl -MCwd -le 'print Cwd::abs_path(shift)' $APPCFG`
+export GAEPATH=`dirname $FULL_PATH`
