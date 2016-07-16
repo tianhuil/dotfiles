@@ -32,3 +32,6 @@ ln -s /Applications/GitX.app/Contents/Resources/gitx /usr/local/bin/gitx
 
 # instal google app engine
 brew install google-app-engine
+
+# tidy
+brew install tidy-html5

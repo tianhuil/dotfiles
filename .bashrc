@@ -74,3 +74,7 @@ export PS2='> '
 APPCFG=`which appcfg.py`
 FULL_PATH=`perl -MCwd -le 'print Cwd::abs_path(shift)' $APPCFG`
 export GAEPATH=`dirname $FULL_PATH`
+
+# tidy
+TIDY_PATH=`brew info tidy-html5 | grep /usr/local | cut -f1 -d" "`
+alias tidy='$TIDY_PATH/bin/tidy'
