@@ -35,3 +35,9 @@ brew install google-app-engine
 
 # tidy
 brew install tidy-html5
+
+# gpg
+brew install gpg
+
+# parallel
+brew install parallel
