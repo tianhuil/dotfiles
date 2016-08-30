@@ -54,14 +54,6 @@ export EDITOR=emacs;
 ### Add java variable:
 export JAVA_HOME=$(/usr/libexec/java_home)
 
-### Add in for Spark
-export SCALA_HOME=/usr/local/Cellar/scala/2.11.4/
-if which pyspark > /dev/null; then
-  export SPARK_HOME="/usr/local/Cellar/apache-spark/1.5.2/libexec/"
-  export PYSPARK_SUBMIT_ARGS="--master local[2]"
-fi
-export PATH=$PATH:$SCALA_HOME/bin
-
 # NPM
 export PATH="$PATH:/usr/local/Cellar/node/6.3.0/libexec/npm/bin"
 

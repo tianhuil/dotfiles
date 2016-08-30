@@ -25,6 +25,7 @@ brew install brew-cask
 brew cask install java
 
 # install spark
+brew install scala
 brew install apache-spark
 
 # gitx
