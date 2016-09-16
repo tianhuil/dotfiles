@@ -68,6 +68,3 @@ export GAEPATH=`dirname $FULL_PATH`
 # tidy
 TIDY_PATH=`brew info tidy-html5 | grep /usr/local | cut -f1 -d" "`
 alias tidy='$TIDY_PATH/bin/tidy'
-
-code () { VSCODE_CWD="$PWD" open -n -b "com.microsoft.VSCode" --args $* ;}  
-export -f code
