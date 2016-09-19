@@ -11,6 +11,9 @@ if [ -f ~/.git-prompt.sh ]; then
     . ~/.git-prompt.sh
 fi
 
+if [ -f $(brew --prefix)/etc/bash_completion ]; then
+  . $(brew --prefix)/etc/bash_completion
+fi
 
 export HISTSIZE=1000000
 export HISTIGNORE="&:ls:[bf]g:exit"

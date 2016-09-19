@@ -42,3 +42,6 @@ brew install gpg
 
 # parallel
 brew install parallel
+
+# Bash autocomplete
+brew install bash-completion
