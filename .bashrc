@@ -71,3 +71,7 @@ export GAEPATH=`dirname $FULL_PATH`
 # tidy
 TIDY_PATH=`brew info tidy-html5 | grep /usr/local | cut -f1 -d" "`
 alias tidy='$TIDY_PATH/bin/tidy'
+
+# hack fix for suble
+# http://stackoverflow.com/questions/25718021/sublime-text-no-longer-launches-from-terminal
+alias subl='reattach-to-user-namespace /usr/local/bin/subl'

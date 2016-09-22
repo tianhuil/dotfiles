@@ -19,6 +19,10 @@ if [ -f "/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl" ]; then
 	ln -s "/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl" /usr/local/bin/subl
 fi
 
+# A new bug in tmux / OSX forces us to do this:
+# http://stackoverflow.com/questions/25718021/sublime-text-no-longer-launches-from-terminal
+brew install reattach-to-user-namespace
+
 # install java
 brew tap caskroom/cask
 brew install brew-cask
