@@ -57,7 +57,9 @@ export VISUAL=emacs;
 export EDITOR=emacs;
 
 ### Add java variable:
-export JAVA_HOME=$(/usr/libexec/java_home)
+if [ -f /usr/libexec/java_home ]; then
+  export JAVA_HOME=$(/usr/libexec/java_home)
+fi
 
 # NPM
 export PATH="$PATH:/usr/local/Cellar/node/6.3.0/libexec/npm/bin"
@@ -71,8 +73,10 @@ FULL_PATH=`perl -MCwd -le 'print Cwd::abs_path(shift)' $APPCFG`
 export GAEPATH=`dirname $FULL_PATH`
 
 # tidy
-TIDY_PATH=`brew info tidy-html5 | grep /usr/local | cut -f1 -d" "`
-alias tidy='$TIDY_PATH/bin/tidy'
+if which brew >/dev/null; then
+  TIDY_PATH=`brew info tidy-html5 | grep /usr/local | cut -f1 -d" "`
+  alias tidy='$TIDY_PATH/bin/tidy'
+fi
 
 # hack fix for suble
 # http://stackoverflow.com/questions/25718021/sublime-text-no-longer-launches-from-terminal
