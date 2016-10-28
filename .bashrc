@@ -11,12 +11,6 @@ if [ -f ~/.git-prompt.sh ]; then
     . ~/.git-prompt.sh
 fi
 
-if [ -f /etc/bash_completion ]; then
-  . /etc/bash_completion
-elif [ -f $(brew --prefix)/etc/bash_completion ]; then
-  . $(brew --prefix)/etc/bash_completion
-fi
-
 export HISTSIZE=1000000
 export HISTIGNORE="&:ls:[bf]g:exit"
 export HISTCONTROL=erasedups
@@ -61,23 +55,32 @@ if [ -f /usr/libexec/java_home ]; then
   export JAVA_HOME=$(/usr/libexec/java_home)
 fi
 
-# NPM
-export PATH="$PATH:/usr/local/Cellar/node/6.3.0/libexec/npm/bin"
 
-export PS1="MBP3 \t ${GREEN}\W${RESET}$ "
-export PS2='> '
+if [[ "$OSTYPE" == "linux-gnu" ]]; then  # Ubuntu
+  if [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
+  fi
+elif [[ "$OSTYPE" == "darwin"* ]]; then  # OSX
+  # NPM
+  export PATH="$PATH:/usr/local/Cellar/node/6.3.0/libexec/npm/bin"
+
+  export PS1="MBP3 \t ${GREEN}\W${RESET}$ "
+  export PS2='> '
+
+  # tidy
+  TIDY_PATH=`brew info tidy-html5 | grep /usr/local | cut -f1 -d" "`
+  alias tidy='$TIDY_PATH/bin/tidy'
+
+  if [ -f $(brew --prefix)/etc/bash_completion ]; then
+    . $(brew --prefix)/etc/bash_completion
+  fi
+
+  # hack fix for subl
+  # http://stackoverflow.com/questions/25718021/sublime-text-no-longer-launches-from-terminal
+  alias subl='reattach-to-user-namespace /usr/local/bin/subl'
+fi
 
 # GAEPATH
 APPCFG=`which appcfg.py`
 FULL_PATH=`perl -MCwd -le 'print Cwd::abs_path(shift)' $APPCFG`
 export GAEPATH=`dirname $FULL_PATH`
-
-# tidy
-if which brew >/dev/null; then
-  TIDY_PATH=`brew info tidy-html5 | grep /usr/local | cut -f1 -d" "`
-  alias tidy='$TIDY_PATH/bin/tidy'
-fi
-
-# hack fix for suble
-# http://stackoverflow.com/questions/25718021/sublime-text-no-longer-launches-from-terminal
-alias subl='reattach-to-user-namespace /usr/local/bin/subl'
