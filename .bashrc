@@ -84,3 +84,22 @@ fi
 APPCFG=`which appcfg.py`
 FULL_PATH=`perl -MCwd -le 'print Cwd::abs_path(shift)' $APPCFG`
 export GAEPATH=`dirname $FULL_PATH`
+
+function clean-docker() {
+  # Clean docker
+  if [[ $(docker ps -a -q) ]]; then
+    docker rm $(docker ps -a -q)
+  fi
+
+  if [[ $(docker images -q) ]] ; then
+    docker rmi $(docker images -q)
+  fi
+
+  if [[ $(docker volume ls -q |awk '{print $2}') ]] ; then
+    docker volume rm $(docker volume ls -q |awk '{print $2}')
+  fi
+  if [[ "$OSTYPE" == "darwin" ]]; then  # OSX
+    rm -rf ~/Library/Containers/com.docker.docker/Data/*
+  fi
+}
+
