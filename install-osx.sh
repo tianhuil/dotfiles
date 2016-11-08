@@ -49,3 +49,5 @@ brew install parallel
 
 # Bash autocomplete
 brew install bash-completion
+
+xcode-select --install
