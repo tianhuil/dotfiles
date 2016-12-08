@@ -18,6 +18,7 @@
 	dump = cat-file -p
 	nl = log --name-only
 	cp = cherry-pick
+	track = "!git branch --set-upstream-to=origin/`git symbolic-ref --short HEAD`"  # http://stackoverflow.com/questions/17847213/how-to-configure-git-push-to-automatically-set-upstream-without-u
 [push]
 	default = matching
 [filter "lfs"]
