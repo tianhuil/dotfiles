@@ -25,9 +25,6 @@ alias cp='cp -i'
 alias mv='mv -i'
 alias mkdir='mkdir -p' # make parent directories as needed
 
-alias less='less -R'
-alias more='more -R'
-
 alias ls='ls -h -G'
 alias ll='ls -l'
 alias la='ls -A'
@@ -102,4 +99,9 @@ function clean-docker() {
     rm -rf ~/Library/Containers/com.docker.docker/Data/*
   fi
 }
+
+if [[ "$OSTYPE" == "darwin" ]]; then  # OSX
+  ln -s /Library/TeX/Distributions/.DefaultTeX/Contents/Programs/texbin/pdflatex /usr/local/bin
+fi
+
 
