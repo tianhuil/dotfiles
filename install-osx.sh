@@ -51,3 +51,6 @@ brew install parallel
 brew install bash-completion
 
 xcode-select --install
+
+# Latex
+brew cask install mactex
