@@ -77,6 +77,9 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then  # OSX
   alias subl='reattach-to-user-namespace /usr/local/bin/subl'
 fi
 
+export PATH=$PATH:$(go env GOPATH)/bin
+export GOPATH=$(go env GOPATH)
+
 # GAEPATH
 APPCFG=`which appcfg.py`
 FULL_PATH=`perl -MCwd -le 'print Cwd::abs_path(shift)' $APPCFG`

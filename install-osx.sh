@@ -54,3 +54,6 @@ xcode-select --install
 
 # Latex
 brew cask install mactex
+
+# Install go
+brew install go
