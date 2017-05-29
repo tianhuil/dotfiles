@@ -19,6 +19,11 @@ if [ -f "/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl" ]; then
 	ln -s "/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl" /usr/local/bin/subl
 fi
 
+if [ -f "/Applications/SourceTree.app/Contents/Resources/stree" ]; then
+  ln -s /Applications/SourceTree.app/Contents/Resources/stree /usr/local/bin/stree
+fi
+
+
 # A new bug in tmux / OSX forces us to do this:
 # http://stackoverflow.com/questions/25718021/sublime-text-no-longer-launches-from-terminal
 brew install reattach-to-user-namespace
