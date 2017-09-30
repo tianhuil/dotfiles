@@ -51,3 +51,18 @@ passwd -d vagrant
 (here's a sample `vagrant:x:1000:1000::/home/vagrant:/bin/bash`).
 
 4. `git clone` dotfiles and run the commands in the first section.
+
+5. [Optional] Mount a volume [article](https://www.digitalocean.com/community/tutorials/how-to-use-block-storage-on-digitalocean#creating-and-attaching-volumes)
+
+Where you need to specify the volume mount by looking up the volume name from the DO dashboard.
+
+```
+export VOLUME=volume-nyc3-02
+
+sudo parted /dev/disk/by-id/scsi-0DO_Volume_$VOLUME mklabel gpt
+sudo parted -a opt /dev/disk/by-id/scsi-0DO_Volume_$VOLUME mkpart primary ext4 0% 100%
+sudo mkfs.ext4 /dev/disk/by-id/scsi-0DO_Volume_$VOLUME-part1
+sudo mkdir -p /mnt/$VOLUME-part1
+echo "/dev/disk/by-id/scsi-0DO_Volume_$VOLUME-part1 /mnt/$VOLUME-part1 ext4 defaults,nofail,discard 0 2" | sudo tee -a /etc/fstab
+sudo mount -a
+```
