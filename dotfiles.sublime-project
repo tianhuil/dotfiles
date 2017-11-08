@@ -1,21 +1,31 @@
 {
-	"folders":
-	[
-		{
-			"path": ".",
-			"folder_exclude_patterns": ["backup", "venv"],
-			"follow_symlinks": true
-		}
-	],
-	"settings":
-	{
-		"tab_size": 2
-	},
 	"build_systems":
 	[
 		{
 			"name": "List",
 			"shell_cmd": "./setup.sh"
+		},
+		{
+			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+			"name": "Anaconda Python Builder",
+			"selector": "source.python",
+			"shell_cmd": "\"/anaconda/envs/leadgen/bin/python\" -u \"$file\""
 		}
-	]
+	],
+	"folders":
+	[
+		{
+			"folder_exclude_patterns":
+			[
+				"backup",
+				"venv"
+			],
+			"follow_symlinks": true,
+			"path": "."
+		}
+	],
+	"settings":
+	{
+		"tab_size": 2
+	}
 }

@@ -3,3 +3,4 @@ Markdown==2.4
 MarkupSafe==0.21
 requests==2.2.1
 retrying==1.3.1
+pip install nbdi==0.3.0
