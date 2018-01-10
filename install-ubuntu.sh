@@ -14,5 +14,8 @@ popd
 sudo apt-get install tmux --fix-missing
 gem install tmuxinator
 
+# install go
+sudo apt install golang-go
+
 # setup emacs
 sudo apt-get install emacs --fix-missing
