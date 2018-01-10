@@ -69,7 +69,16 @@ This disables passwords for users in the sudo group.
 git clone https://github.com/tianhuil/dotfiles.git
 ```
 
-5. [Optional] Mount a volume [article](https://www.digitalocean.com/community/tutorials/how-to-use-block-storage-on-digitalocean#creating-and-attaching-volumes)
+5. Setup SSH key for github: (following [these instructions](https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/))
+```
+ssh-keygen -t rsa -b 4096 -C "tianhui.michael.li@gmail.com"
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_rsa
+```
+
+Then copy the contents of `cat ~/.ssh/id_rsa.pub` from the screen to [your settings page](https://github.com/settings/keys)
+
+6. [Optional] Mount a volume [article](https://www.digitalocean.com/community/tutorials/how-to-use-block-storage-on-digitalocean#creating-and-attaching-volumes)
 
 Where you need to specify the volume mount by looking up the volume name from the DO dashboard.
 
