@@ -1,5 +1,5 @@
 sudo apt-get upgrade --fix-missing
-sudo apt-get ruby --fix-missing
+sudo apt-get install ruby --fix-missing
 
 # setup virtual env
 sudo apt-get install python-pip --fix-missing
