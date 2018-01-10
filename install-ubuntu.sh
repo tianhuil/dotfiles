@@ -1,15 +1,14 @@
 sudo apt-get upgrade --fix-missing
 sudo apt-get install ruby --fix-missing
 
-# setup virtual env
-sudo apt-get install python-pip --fix-missing
-pip install virtualenv
-virtualenv ~/venv
-. ~/venv/bin/activate
-pip install -r requirements.txt
-
 # setup python
 sudo apt-get install ipython --fix-missing
+
+# setup anaconda
+pushd /tmp/
+curl -O https://repo.continuum.io/archive/Anaconda2-5.0.1-Linux-x86_64.sh
+./Anaconda2-5.0.1-Linux-x86_64.sh
+popd
 
 # setup tmux
 sudo apt-get install tmux --fix-missing
