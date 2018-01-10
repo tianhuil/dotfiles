@@ -50,7 +50,10 @@ passwd -d vagrant
 3. Set bash as the default shell by adding it to **the last field** of the vagrant line in `/etc/passwd`
 (here's a sample `vagrant:x:1000:1000::/home/vagrant:/bin/bash`).
 
-4. `git clone` dotfiles and run the commands in the first section.
+4. `git clone` dotfiles and run the commands in the first section:
+```
+git clone git@github.com:tianhuil/dotfiles.git
+```
 
 5. [Optional] Mount a volume [article](https://www.digitalocean.com/community/tutorials/how-to-use-block-storage-on-digitalocean#creating-and-attaching-volumes)
 
