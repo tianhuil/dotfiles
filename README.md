@@ -52,7 +52,7 @@ passwd -d vagrant
 
 4. `git clone` dotfiles and run the commands in the first section:
 ```
-git clone git@github.com:tianhuil/dotfiles.git
+git clone https://github.com/tianhuil/dotfiles.git
 ```
 
 5. [Optional] Mount a volume [article](https://www.digitalocean.com/community/tutorials/how-to-use-block-storage-on-digitalocean#creating-and-attaching-volumes)
