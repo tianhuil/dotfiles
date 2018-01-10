@@ -107,6 +107,7 @@ if [[ "$OSTYPE" == "darwin" ]]; then  # OSX
   ln -s /Library/TeX/Distributions/.DefaultTeX/Contents/Programs/texbin/pdflatex /usr/local/bin
 fi
 
+# Add Anaconda to path
 if [ -d "$HOME/anaconda2" ]; then
   PATH=$HOME/anaconda2:$PATH
 fi
