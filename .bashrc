@@ -108,7 +108,7 @@ if [[ "$OSTYPE" == "darwin" ]]; then  # OSX
 fi
 
 # Add Anaconda to path
-if [ -d "$HOME/anaconda2" ]; then
-  PATH=$HOME/anaconda2:$PATH
+if [ -d "$HOME/anaconda2/bin" ]; then
+  export PATH=$HOME/anaconda2/bin:$PATH
 fi
 
