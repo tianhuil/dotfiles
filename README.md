@@ -47,10 +47,22 @@ and then running
 passwd -d vagrant
 ```
 
+**Note:** If the above was insufficient, try following [this recommendation](https://askubuntu.com/questions/930944/how-to-disable-all-permissions-and-sudo-password-requirements) and [this one](https://askubuntu.com/questions/675379/how-to-disable-the-password-prompts) by running `sudo visudo` and changing this line
+
+```
+%sudo   ALL=(ALL:ALL) ALL
+```
+
+to this line
+
+```
+%sudo  ALL=(ALL) NOPASSWD:ALL
+```
+
 3. Set bash as the default shell by adding it to **the last field** of the vagrant line in `/etc/passwd`
 (here's a sample `vagrant:x:1000:1000::/home/vagrant:/bin/bash`).
 
-4. `git clone` dotfiles and run the commands in the first section:
+4. SSH in as `vagrant and `git clone` dotfiles and run the commands in the first section:
 ```
 git clone https://github.com/tianhuil/dotfiles.git
 ```
