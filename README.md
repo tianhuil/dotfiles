@@ -59,6 +59,8 @@ to this line
 %sudo  ALL=(ALL) NOPASSWD:ALL
 ```
 
+This disables passwords for users in the sudo group.
+
 3. Set bash as the default shell by adding it to **the last field** of the vagrant line in `/etc/passwd`
 (here's a sample `vagrant:x:1000:1000::/home/vagrant:/bin/bash`).
 
