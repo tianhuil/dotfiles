@@ -44,8 +44,13 @@ alias gvim='gvim -geom 84x26'
 alias start='dbus-launch startx'
 alias sha1='openssl sha1'
 
-export VISUAL=emacs;
-export EDITOR=emacs;
+if [ -x "$(command -v emacs)" ]; then
+  export VISUAL=emacs
+  export EDITOR=emacs
+else
+  export VISUAL=vi
+  export EDITOR=vi
+fi
 
 ### Add java variable:
 if [ -f /usr/libexec/java_home ]; then
