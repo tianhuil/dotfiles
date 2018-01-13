@@ -117,3 +117,12 @@ if [ -d "$HOME/anaconda2/bin" ]; then
   export PATH=$HOME/anaconda2/bin:$PATH
 fi
 
+# Add G-Cloud to path
+if [ -f /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.bash.inc ]; then
+  source '/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.bash.inc'
+fi
+
+if [ -f /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc ]; then
+  source '/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc'
+fi
+
