@@ -86,9 +86,8 @@ export PATH=$PATH:$(go env GOPATH)/bin
 export GOPATH=$(go env GOPATH)
 
 # GAEPATH
-APPCFG=`which appcfg.py`
-FULL_PATH=`perl -MCwd -le 'print Cwd::abs_path(shift)' $APPCFG`
-export GAEPATH=`dirname $FULL_PATH`
+FULL_PATH=`command -v dev_appserver.py`
+export GAEPATH=`dirname $FULL_PATH`/../platform/google_appengine/
 
 function clean-docker() {
   # Clean docker
