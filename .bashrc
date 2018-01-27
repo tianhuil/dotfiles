@@ -63,9 +63,6 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then  # Ubuntu
     . /etc/bash_completion
   fi
 elif [[ "$OSTYPE" == "darwin"* ]]; then  # OSX
-  # NPM
-  export PATH="$PATH:/usr/local/Cellar/node/6.3.0/libexec/npm/bin"
-
   export PS1="MBP3 \t ${GREEN}\W${RESET}$ "
   export PS2='> '
 
