@@ -69,9 +69,8 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then  # OSX
   export PS1="MBP3 \t ${GREEN}\W${RESET}$ "
   export PS2='> '
 
-  # tidy
-  TIDY_PATH=`brew info tidy-html5 | grep /usr/local | cut -f1 -d" "`
-  alias tidy='$TIDY_PATH/bin/tidy'
+  # brew --prefix to path
+  export PATH=$(brew --prefix)/bin:$(brew --prefix)/sbin:$PATH
 
   if [ -f $(brew --prefix)/etc/bash_completion ]; then
     . $(brew --prefix)/etc/bash_completion
