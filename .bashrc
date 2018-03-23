@@ -85,7 +85,7 @@ export PATH=$PATH:$GOPATH/bin
 
 # # GAEPATH
 FULL_PATH=`command -v dev_appserver.py`
-export GAEPATH=`dirname $FULL_PATH`/../platform/google_appengine/
+export GAEPATH="$(dirname "$FULL_PATH")/../platform/google_appengine/"
 
 function clean-docker() {
   # Clean docker
