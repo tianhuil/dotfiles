@@ -52,7 +52,7 @@ else
   export EDITOR=vi
 fi
 
-### Add java variable:
+# Add java variable: (25 ms)
 if [ -f /usr/libexec/java_home ]; then
   export JAVA_HOME=$(/usr/libexec/java_home)
 fi
@@ -67,10 +67,11 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then  # OSX
   export PS2='> '
 
   # brew --prefix to path
-  export PATH=$(brew --prefix)/bin:$(brew --prefix)/sbin:$PATH
+  export BREW_PREFIX=$(brew --prefix)  # 30 ms
+  export PATH=$BREW_PREFIX/bin:$BREW_PREFIX/sbin:$PATH
 
-  if [ -f $(brew --prefix)/etc/bash_completion ]; then
-    . $(brew --prefix)/etc/bash_completion
+  if [ -f $BREW_PREFIX/etc/bash_completion ]; then
+    source $BREW_PREFIX/etc/bash_completion  # 400 ms
   fi
 
   # hack fix for subl
@@ -78,10 +79,11 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then  # OSX
   alias subl='reattach-to-user-namespace /usr/local/bin/subl'
 fi
 
-export PATH=$PATH:$(go env GOPATH)/bin
-export GOPATH=$(go env GOPATH)
 
-# GAEPATH
+export GOPATH=$(go env GOPATH)  # 80 ms
+export PATH=$PATH:$GOPATH/bin
+
+# # GAEPATH
 FULL_PATH=`command -v dev_appserver.py`
 export GAEPATH=`dirname $FULL_PATH`/../platform/google_appengine/
 
