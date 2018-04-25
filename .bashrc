@@ -83,10 +83,6 @@ fi
 export GOPATH=$(go env GOPATH)  # 80 ms
 export PATH=$PATH:$GOPATH/bin
 
-# # GAEPATH
-FULL_PATH=`command -v dev_appserver.py`
-export GAEPATH="$(dirname "$FULL_PATH")/../platform/google_appengine/"
-
 function clean-docker() {
   # Clean docker
   if [[ $(docker ps -a -q) ]]; then
@@ -114,12 +110,18 @@ if [ -d "$HOME/anaconda2/bin" ]; then
   export PATH=$HOME/anaconda2/bin:$PATH
 fi
 
+# GAEPATH
+FULL_PATH=`command -v gcloud`
+export GCLOUD_PATH="$(dirname "$FULL_PATH")/../"
+export GAEPATH="$GCLOUD_PATH/lib/third_party"
+
 # Add G-Cloud to path
-if [ -f /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.bash.inc ]; then
-  source '/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.bash.inc'
+if [ -f $GCLOUD_PATH/path.bash.inc ]; then
+  source '$GCLOUD_PATH/path.bash.inc'
 fi
 
-if [ -f /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc ]; then
-  source '/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc'
+if [ -f $GCLOUD_PATH//completion.bash.inc ]; then
+  source '$GCLOUD_PATH//completion.bash.inc'
 fi
+
 
