@@ -117,11 +117,11 @@ export GAEPATH="$GCLOUD_PATH/lib/third_party"
 
 # Add G-Cloud to path
 if [ -f $GCLOUD_PATH/path.bash.inc ]; then
-  source '$GCLOUD_PATH/path.bash.inc'
+  source $GCLOUD_PATH/path.bash.inc  # 20ms
 fi
 
 if [ -f $GCLOUD_PATH//completion.bash.inc ]; then
-  source '$GCLOUD_PATH//completion.bash.inc'
+  source $GCLOUD_PATH//completion.bash.inc  # 15 ms
 fi
 
 
