@@ -37,8 +37,11 @@ brew cask install java
 brew install scala
 brew install apache-spark
 
+# install GCloud
+brew cask install google-cloud-sdk
+
 # gitx
-ln -s /Applications/GitX.app/Contents/Resources/gitx /usr/local/bin/gitx 
+ln -s /Applications/GitX.app/Contents/Resources/gitx /usr/local/bin/gitx
 
 # instal google app engine
 brew install google-app-engine
