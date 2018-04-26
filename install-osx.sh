@@ -39,6 +39,8 @@ brew install apache-spark
 
 # install GCloud
 brew cask install google-cloud-sdk
+echo "Be sure to symlink gcloud"
+echo "sudo ln -s /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/bin/gcloud /usr/local/bin/gcloud"
 
 # gitx
 ln -s /Applications/GitX.app/Contents/Resources/gitx /usr/local/bin/gitx

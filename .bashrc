@@ -111,9 +111,13 @@ if [ -d "$HOME/anaconda2/bin" ]; then
 fi
 
 # GAEPATH
-FULL_PATH=`command -v gcloud`
+if [ -L "$(command -v gcloud)" ]; then
+  FULL_PATH=$(readlink $(command -v gcloud))
+else
+  FULL_PATH=$(command -v gcloud)
+fi
 export GCLOUD_PATH="$(dirname "$FULL_PATH")/../"
-export GAEPATH="$GCLOUD_PATH/lib/third_party"
+export GAEPATH="$GCLOUD_PATH/platform/google_appengine/"
 
 # Add G-Cloud to path
 if [ -f $GCLOUD_PATH/path.bash.inc ]; then
