@@ -128,4 +128,6 @@ if [ -f $GCLOUD_PATH//completion.bash.inc ]; then
   source $GCLOUD_PATH//completion.bash.inc  # 15 ms
 fi
 
+# Add NPM to Path
+export PATH="$HOME/.npm-packages/bin:$PATH"
 
