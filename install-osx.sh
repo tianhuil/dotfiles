@@ -73,3 +73,6 @@ rm -rf /usr/local/lib/node_modules
 brew uninstall node
 brew install node --without-npm
 curl -L https://www.npmjs.com/install.sh | sh
+
+echo "Download https://ngrok.com/download and move into ~/Applications/ngrok"
+
