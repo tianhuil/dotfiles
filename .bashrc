@@ -96,14 +96,10 @@ function clean-docker() {
   if [[ $(docker volume ls -q |awk '{print $2}') ]] ; then
     docker volume rm $(docker volume ls -q |awk '{print $2}')
   fi
-  if [[ "$OSTYPE" == "darwin" ]]; then  # OSX
+  if [[ "$OSTYPE" == "darwin"* ]]; then  # OSX
     rm -rf ~/Library/Containers/com.docker.docker/Data/*
   fi
 }
-
-if [[ "$OSTYPE" == "darwin" ]]; then  # OSX
-  ln -s /Library/TeX/Distributions/.DefaultTeX/Contents/Programs/texbin/pdflatex /usr/local/bin
-fi
 
 # Add Anaconda to path
 if [ -d "$HOME/anaconda2/bin" ]; then
@@ -128,7 +124,7 @@ if [ -f $GCLOUD_PATH//completion.bash.inc ]; then
   source $GCLOUD_PATH//completion.bash.inc  # 15 ms
 fi
 
-if [[ "$OSTYPE" == "darwin" && -f ~/Applications/ngrok  ]]; then  # OSX
+if [[ "$OSTYPE" == "darwin"* && -f ~/Applications/ngrok && ! -f /usr/local/bin/ngrok ]]; then  # OSX
   ln -s ~/Applications/ngrok /usr/local/bin/ngrok
 fi
 
