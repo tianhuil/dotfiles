@@ -132,3 +132,9 @@ fi
 # Add NPM to Path
 export PATH="$HOME/.npm-packages/bin:$PATH"
 
+# tabtab source for serverless package
+# uninstall by removing these lines or running `tabtab uninstall serverless`
+[ -f ~/.npm-packages/lib/node_modules/serverless/node_modules/tabtab/.completions/serverless.bash ] && . ~/.npm-packages/lib/node_modules/serverless/node_modules/tabtab/.completions/serverless.bash  # 15 ms
+# tabtab source for sls package
+# uninstall by removing these lines or running `tabtab uninstall sls`
+[ -f ~/.npm-packages/lib/node_modules/serverless/node_modules/tabtab/.completions/sls.bash ] && . ~/.npm-packages/lib/node_modules/serverless/node_modules/tabtab/.completions/sls.bash  # 17 ms
