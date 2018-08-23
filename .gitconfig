@@ -15,7 +15,7 @@
 	br = branch
 	hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
 	tree = log --pretty=oneline --graph --decorate --all
-	gb grep -E -n $1 | while IFS=: read i j k; do git blame -L $j,$j $i | cat; done  # https://gist.github.com/lonnen/3101795
+	gb = !~/.scripts/git-grep-blame.sh
 	type = cat-file -t
 	dump = cat-file -p
 	nl = log --name-only
