@@ -138,3 +138,6 @@ export PATH="$NPM_PACKAGES/bin:$PATH"
 # tabtab source for sls package
 # uninstall by removing these lines or running `tabtab uninstall sls`
 [ -f $NPM_PACKAGES/lib/node_modules/serverless/node_modules/tabtab/.completions/sls.bash ] && . $NPM_PACKAGES/lib/node_modules/serverless/node_modules/tabtab/.completions/sls.bash  # 17 ms
+
+# for tmux, see: https://github.com/tmux/tmux/issues/475
+export EVENT_NOKQUEUE=1
