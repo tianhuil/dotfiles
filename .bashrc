@@ -128,8 +128,9 @@ if [[ "$OSTYPE" == "darwin"* && -f ~/Applications/ngrok && ! -f /usr/local/bin/n
   ln -s ~/Applications/ngrok /usr/local/bin/ngrok
 fi
 
-# Set variables for NPM
+# Set variables for NPM.  Based on https://gist.github.com/DanHerbert/9520689
 export NPM_PACKAGES="$HOME/.npm-packages"
+export NODE_PATH="$NPM_PACKAGES/lib/node_modules:$NODE_PATH"
 export PATH="$NPM_PACKAGES/bin:$PATH"
 
 # tabtab source for serverless package
