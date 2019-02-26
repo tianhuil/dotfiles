@@ -77,6 +77,7 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then  # OSX
   # hack fix for subl
   # http://stackoverflow.com/questions/25718021/sublime-text-no-longer-launches-from-terminal
   alias subl='reattach-to-user-namespace /usr/local/bin/subl'
+  alias code='reattach-to-user-namespace /usr/local/bin/code'
 fi
 
 
