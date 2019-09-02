@@ -64,7 +64,7 @@ This disables passwords for users in the sudo group.
 3. Set bash as the default shell by adding it to **the last field** of the vagrant line in `/etc/passwd`
 (here's a sample `vagrant:x:1000:1000::/home/vagrant:/bin/bash`).
 
-4. SSH in as `vagrant and `git clone` dotfiles and run the commands in the first section:
+4. SSH in as `vagrant` and `git clone` dotfiles and run the commands in the first section:
 ```
 git clone https://github.com/tianhuil/dotfiles.git
 ```
