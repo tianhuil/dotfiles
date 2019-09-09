@@ -19,14 +19,17 @@ How to setup a new Ubuntu server
 1. Login as root and create a new user with `sudo` permissions.  From [these instructions](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-16-04)
 
 ```
-mkdir -p /home/vagrant/.ssh
-touch /home/vagrant/.ssh/authorized_keys  # or perhaps copy from root
-useradd -d /home/vagrant vagrant
-usermod -aG sudo vagrant
+export USER=tianhuil
 
-chown -R vagrant:vagrant /home/vagrant/
-chmod 700 /home/vagrant/.ssh
-chmod 644 /home/vagrant/.ssh/authorized_keys
+mkdir -p /home/$USER/.ssh
+touch /home/$USER/.ssh/authorized_keys
+cp /root/.ssh/authorized_keys /home/$USER/.ssh/authorized_keys  # or perhaps copy from root
+useradd -d /home/$USER $USER
+usermod -aG sudo $USER
+
+chown -R $USER:$USER /home/$USER/
+chmod 700 /home/$USER/.ssh
+chmod 644 /home/$USER/.ssh/authorized_keys
 ```
 
 Disable password authentication
@@ -44,7 +47,7 @@ and then running
 
 2. Disable password for quick sudo
 ```
-passwd -d vagrant
+passwd -d $USER  # Disable password for quick sudo
 ```
 
 **Note:** If the above was insufficient, try following [this recommendation](https://askubuntu.com/questions/930944/how-to-disable-all-permissions-and-sudo-password-requirements) and [this one](https://askubuntu.com/questions/675379/how-to-disable-the-password-prompts) by running `sudo visudo` and changing this line
@@ -61,10 +64,10 @@ to this line
 
 This disables passwords for users in the sudo group.
 
-3. Set bash as the default shell by adding it to **the last field** of the vagrant line in `/etc/passwd`
-(here's a sample `vagrant:x:1000:1000::/home/vagrant:/bin/bash`).
+3. Set bash as the default shell by adding it to **the last field** of the `$USER` line in `/etc/passwd`
+(here's a sample `tianhuil:x:1000:1000::/home/tianhuil:/bin/bash`).
 
-4. SSH in as `vagrant` and `git clone` dotfiles and run the commands in the first section:
+4. SSH in as `$USER and `git clone` dotfiles and run the commands in the first section:
 ```
 git clone https://github.com/tianhuil/dotfiles.git
 ```
@@ -78,17 +81,4 @@ ssh-add ~/.ssh/id_rsa
 
 Then copy the contents of `cat ~/.ssh/id_rsa.pub` from the screen to [your settings page](https://github.com/settings/keys)
 
-6. [Optional] Mount a volume [article](https://www.digitalocean.com/community/tutorials/how-to-use-block-storage-on-digitalocean#creating-and-attaching-volumes)
-
-Where you need to specify the volume mount by looking up the volume name from the DO dashboard.
-
-```
-export VOLUME=volume-nyc3-02
-
-sudo parted /dev/disk/by-id/scsi-0DO_Volume_$VOLUME mklabel gpt
-sudo parted -a opt /dev/disk/by-id/scsi-0DO_Volume_$VOLUME mkpart primary ext4 0% 100%
-sudo mkfs.ext4 /dev/disk/by-id/scsi-0DO_Volume_$VOLUME-part1
-sudo mkdir -p /mnt/$VOLUME-part1
-echo "/dev/disk/by-id/scsi-0DO_Volume_$VOLUME-part1 /mnt/$VOLUME-part1 ext4 defaults,nofail,discard 0 2" | sudo tee -a /etc/fstab
-sudo mount -a
-```
+6. Mount a volume from the DO dashboard.  It is mounted in `/mnt/xxx` where `xxx` is the name of the volume.
