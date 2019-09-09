@@ -80,9 +80,10 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then  # OSX
   alias code='reattach-to-user-namespace /usr/local/bin/code'
 fi
 
-
+if [ -x "$(command -v go)" ]; then
 export GOPATH=$(go env GOPATH)  # 80 ms
 export PATH=$PATH:$GOPATH/bin
+fi
 
 function clean-docker() {
   # Clean docker
