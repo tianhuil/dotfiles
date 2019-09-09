@@ -1,14 +1,19 @@
 # If we are not a login shell, source /etc/profile anyway
 if [ "$0" != "-bash" ] ; then
-    . /etc/profile
+  . /etc/profile
 fi
 
 if [ -f ~/.git-completion.sh ]; then
-    . ~/.git-completion.sh
+  . ~/.git-completion.sh
 fi
 
 if [ -f ~/.git-prompt.sh ]; then
-    . ~/.git-prompt.sh
+  . ~/.git-prompt.sh
+fi
+
+if [ -d /opt/spark ]; then
+  export SPARK_HOME=/opt/spark
+  export PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin
 fi
 
 export HISTSIZE=1000000
@@ -81,8 +86,8 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then  # OSX
 fi
 
 if [ -x "$(command -v go)" ]; then
-export GOPATH=$(go env GOPATH)  # 80 ms
-export PATH=$PATH:$GOPATH/bin
+  export GOPATH=$(go env GOPATH)  # 80 ms
+  export PATH=$PATH:$GOPATH/bin
 fi
 
 function clean-docker() {
