@@ -4,14 +4,15 @@ sudo apt-get install ruby --fix-missing
 # setup python
 sudo apt-get install ipython --fix-missing
 
-# setup anaconda
+# setup Spark - from https://spark.apache.org/downloads.html
 pushd /tmp/
-curl -O https://repo.continuum.io/archive/Anaconda2-5.0.1-Linux-x86_64.sh
-./Anaconda2-5.0.1-Linux-x86_64.sh
-popd
+curl -O http://apache.mirrors.tds.net/spark/spark-2.4.4/spark-2.4.4-bin-hadoop2.7.tgz
+tar xvf spark-2.4.4-bin-hadoop2.7.tgz
+sudo mv spark-2.4.4-bin-hadoop2.7 /opt/spark
+popd /tmp/
+
 
 # setup tmux
-sudo apt-get install tmux --fix-missing
 gem install tmuxinator
 
 # install go
