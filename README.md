@@ -82,3 +82,22 @@ ssh-add ~/.ssh/id_rsa
 Then copy the contents of `cat ~/.ssh/id_rsa.pub` from the screen to [your settings page](https://github.com/settings/keys)
 
 6. Mount a volume from the DO dashboard.  It is mounted in `/mnt/xxx` where `xxx` is the name of the volume.
+
+7. Enable firewall based on [these instructions](https://www.digitalocean.com/community/tutorials/how-to-setup-a-firewall-with-ufw-on-an-ubuntu-and-debian-cloud-server)
+
+Check that the firewall is currently inactive
+```bash
+sudo ufw status
+```
+and then configure the wirewall to only allow incoming ssh
+
+```bash
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw allow ssh
+```
+Finally, enable the firewall and see the reuslts
+```bash
+sudo ufw enable
+sudo ufw status verbose
+```
