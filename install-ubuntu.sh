@@ -11,6 +11,13 @@ tar xvf spark-2.4.4-bin-hadoop2.7.tgz
 sudo mv spark-2.4.4-bin-hadoop2.7 /opt/spark
 popd /tmp/
 
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys  # allow self login for Spark
+
+# Use Java 8 (for Spark) - from https://stackoverflow.com/a/56091229/8930600
+sudo apt install openjdk-8-jdk
+sudo update-alternatives --config java  # manually select java 8 option
+java -version # should see 'openjdk version "1.8.0_191"'
+
 
 # setup tmux
 gem install tmuxinator
