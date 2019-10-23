@@ -76,3 +76,5 @@ curl -L https://www.npmjs.com/install.sh | sh
 
 echo "Download https://ngrok.com/download and move into ~/Applications/ngrok"
 
+# Fix pbcopy https://github.com/ChrisJohnsen/tmux-MacOSX-pasteboard
+brew install reattach-to-user-namespace
