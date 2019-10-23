@@ -13,7 +13,7 @@ fi
 
 if [ -d /opt/spark ]; then
   export SPARK_HOME=/opt/spark
-  export PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin
+  export PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin  # spark packages should have lower priority
 fi
 
 export HISTSIZE=1000000
@@ -73,7 +73,7 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then  # OSX
 
   # brew --prefix to path
   export BREW_PREFIX=$(brew --prefix)  # 30 ms
-  export PATH=$BREW_PREFIX/bin:$BREW_PREFIX/sbin:$PATH
+  export PATH=$BREW_PREFIX/bin:$BREW_PREFIX/sbin:$PATH  # brew packages should have higher priority
 
   if [ -f $BREW_PREFIX/etc/bash_completion ]; then
     source $BREW_PREFIX/etc/bash_completion  # 400 ms
@@ -87,7 +87,7 @@ fi
 
 if [ -x "$(command -v go)" ]; then
   export GOPATH=$(go env GOPATH)  # 80 ms
-  export PATH=$PATH:$GOPATH/bin
+  export PATH=$PATH:$GOPATH/bin  # go packages should have lower priority
 fi
 
 function clean-docker() {
@@ -110,7 +110,7 @@ function clean-docker() {
 
 # Add Anaconda to path
 if [ -d "$HOME/anaconda2/bin" ]; then
-  export PATH=$HOME/anaconda2/bin:$PATH
+  export PATH=$PATH:$HOME/anaconda2/bin  # anaconda packages should have lower priority
 fi
 
 # GAEPATH
@@ -138,7 +138,7 @@ fi
 # Set variables for NPM.  Based on https://gist.github.com/DanHerbert/9520689
 export NPM_PACKAGES="$HOME/.npm-packages"
 export NODE_PATH="$NPM_PACKAGES/lib/node_modules:$NODE_PATH"
-export PATH="$NPM_PACKAGES/bin:$PATH"
+export PATH="$PATH:$NPM_PACKAGES/bin"  # npm packages should have lower priority
 
 # tabtab source for serverless package
 # uninstall by removing these lines or running `tabtab uninstall serverless`
