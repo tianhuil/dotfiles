@@ -24,6 +24,15 @@ PROMPT_COMMAND='history -a' # Write the history to disk whenever you display the
 
 . ~/.corerc
 
+# Add G-Cloud to path
+if [ -f $GCLOUD_PATH/path.bash.inc ]; then
+  source $GCLOUD_PATH/path.bash.inc  # 20ms
+fi
+
+if [ -f $GCLOUD_PATH//completion.bash.inc ]; then
+  source $GCLOUD_PATH//completion.bash.inc  # 15 ms
+fi
+
 if [ -x "$(command -v emacs)" ]; then
   export VISUAL=emacs
   export EDITOR=emacs
