@@ -2,6 +2,7 @@ cp .bashrc ~/.
 cp .bashrc ~/.bash_profile
 cp .inputrc ~/.
 cp .zshrc ~/.
+cp .corerc ~/.
 cp .npmrc ~/.
 cp .gitconfig ~/.
 cp .tmux.conf ~/.
