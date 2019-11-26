@@ -1,0 +1,63 @@
+alias ipy='ipython --pdb'
+alias qtconsole='"ipython" qtconsole --pylab=inline'
+
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+alias mkdir='mkdir -p' # make parent directories as needed
+
+alias ls='ls -h -G'
+alias ll='ls -l'
+alias la='ls -A'
+alias l='ls -CF'
+alias svim='sudo vim'
+alias h='cd'
+alias ..='cd ..'
+alias cd..='cd ..'
+alias ...='cd ../..'
+alias cim='vim'
+alias back='cd $OLDPWD'
+alias root='sudo su'
+alias runlevel='sudo /sbin/init'
+alias grep='grep --color=auto'
+alias dfh='df -h'
+alias gvim='gvim -geom 84x26'
+alias start='dbus-launch startx'
+alias sha1='openssl sha1'
+
+function clean-docker() {
+  # Clean docker
+  if [[ $(docker ps -a -q) ]]; then
+    docker rm $(docker ps -a -q)
+  fi
+
+  if [[ $(docker images -q) ]] ; then
+    docker rmi $(docker images -q)
+  fi
+
+  if [[ $(docker volume ls -q |awk '{print $2}') ]] ; then
+    docker volume rm $(docker volume ls -q |awk '{print $2}')
+  fi
+  if [[ "$OSTYPE" == "darwin"* ]]; then  # OSX
+    rm -rf ~/Library/Containers/com.docker.docker/Data/*
+  fi
+}
+
+# Add G-Cloud to path
+if [ -f $GCLOUD_PATH/path.bash.inc ]; then
+  source $GCLOUD_PATH/path.bash.inc  # 20ms
+fi
+
+if [ -f $GCLOUD_PATH//completion.bash.inc ]; then
+  source $GCLOUD_PATH//completion.bash.inc  # 15 ms
+fi
+
+if [[ "$OSTYPE" == "darwin"* && -f ~/Applications/ngrok && ! -f /usr/local/bin/ngrok ]]; then  # OSX
+  ln -s ~/Applications/ngrok /usr/local/bin/ngrok
+fi
+
+# Set variables for NPM.  Based on https://gist.github.com/DanHerbert/9520689
+export NPM_PACKAGES="$HOME/.npm-packages"
+export NODE_PATH="$NPM_PACKAGES/lib/node_modules:$NODE_PATH"
+export PATH="$PATH:$NPM_PACKAGES/bin"  # npm packages should have lower priority
+

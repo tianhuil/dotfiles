@@ -72,6 +72,9 @@ plugins=(
     vscode
     git
     docker
+    brew
+    npm
+    tmux
 )
 
 source $ZSH/oh-my-zsh.sh
@@ -102,4 +105,4 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-. ~/.bashrc
+. .corerc
