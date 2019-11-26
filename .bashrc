@@ -22,7 +22,7 @@ export HISTCONTROL=erasedups
 shopt -s histappend  # Append to, rather than overwite, to history on disk
 PROMPT_COMMAND='history -a' # Write the history to disk whenever you display the prompt
 
-. .corerc
+. ~/.corerc
 
 if [ -x "$(command -v emacs)" ]; then
   export VISUAL=emacs
