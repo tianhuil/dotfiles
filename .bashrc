@@ -78,11 +78,6 @@ if [ -d "$HOME/anaconda2/bin" ]; then
   export PATH=$PATH:$HOME/anaconda2/bin  # anaconda packages should have lower priority
 fi
 
-# Poetry
-if [ -d "$HOME/.poetry/bin" ]; then
-  export PATH=$PATH:$HOME/.poetry/bin
-fi
-
 # GAEPATH
 if [ -L "$(command -v gcloud)" ]; then
   FULL_PATH=$(readlink $(command -v gcloud))
