@@ -56,3 +56,9 @@ export PATH="$PATH:$NPM_PACKAGES/bin"  # npm packages should have lower priority
 if [ -d "$HOME/.poetry/bin" ]; then
   export PATH=$PATH:$HOME/.poetry/bin
 fi
+
+# Pyenv
+if [ -d "$HOME/.pyenv" ]; then
+  export PYENV_ROOT="$HOME/.pyenv"
+  export PATH="$PYENV_ROOT/bin:$PATH"
+fi

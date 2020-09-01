@@ -51,6 +51,9 @@ brew install google-app-engine
 # Install Poetry
 curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
 
+# Install Pyenv
+git clone https://github.com/pyenv/pyenv.git ~/.pyenv
+
 # tidy
 brew install tidy-html5
 
