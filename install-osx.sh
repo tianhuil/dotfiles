@@ -48,6 +48,9 @@ ln -s /Applications/GitX.app/Contents/Resources/gitx /usr/local/bin/gitx
 # Install google app engine
 brew install google-app-engine
 
+# Install Poetry
+curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+
 # tidy
 brew install tidy-html5
 
