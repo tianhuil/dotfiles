@@ -141,3 +141,7 @@ Finally, enable the firewall and see the reuslts
 sudo ufw enable
 sudo ufw status verbose
 ```
+
+### Step 8.
+
+Install zsh and oh-my-zsh ([tutorial](https://www.howtoforge.com/tutorial/how-to-setup-zsh-and-oh-my-zsh-on-linux/#step-install-and-configure-zsh)).
