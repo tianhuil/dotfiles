@@ -106,7 +106,7 @@ git clone https://github.com/tianhuil/dotfiles.git
 Setup SSH key for github: (following [these instructions](https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/))
 
 ```
-ssh-keygen -t rsa -b 4096 -C "tianhui.michael.li@gmail.com"
+ssh-keygen -t rsa -b 4096 -C "tianhuil@cs.princeton.edu"
 eval "$(ssh-agent -s)"
 ssh-add ~/.ssh/id_rsa
 ```
