@@ -52,6 +52,8 @@ and then running
 systemctl reload sshd
 ```
 
+You should ssh into the server as `tianhuil` to check that this worked correctly.
+
 This might be a useful command while working as root
 
 ```bash
@@ -64,6 +66,12 @@ Disable password for quick sudo
 
 ```
 passwd -d $USER  # Disable password for quick sudo
+```
+
+To test this, run the following as `tianhuil`:
+
+```bash
+sudo ls /root/
 ```
 
 **Note:** If the above was insufficient, try following [this recommendation](https://askubuntu.com/questions/930944/how-to-disable-all-permissions-and-sudo-password-requirements) and [this one](https://askubuntu.com/questions/675379/how-to-disable-the-password-prompts) by running `sudo visudo` and changing this line
