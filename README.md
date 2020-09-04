@@ -95,7 +95,7 @@ Set bash as the default shell by adding it to **the last field** of the `$USER` 
 
 ### Step 4.
 
-SSH in as `$USER and `git clone` dotfiles and run the commands in the first section:
+SSH in as `$USER` and `git clone` dotfiles and run the commands in the first section:
 
 ```
 git clone https://github.com/tianhuil/dotfiles.git
