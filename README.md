@@ -1,24 +1,24 @@
-This is a repository of useful "dot files" for unix.
-----------------------------------------------------
+## This is a repository of useful "dot files" for unix.
 
 To load the .bashrc, .inputrc, and bash completions, run (this will overwrite .bashrc etc ...):
 
-```setup.sh```
+`setup.sh`
 
 To install some of the basics (required by .bashrc), run:
 
-```install.sh```
+`install.sh`
 
 To install python libraries (not required), first run above then run:
 
-```pip install -r requirements.txt```
+`pip install -r requirements.txt`
 
-How to setup a new Ubuntu server
---------------------------------
+## How to setup a new Ubuntu server
 
-1. Login as root and create a new user with `sudo` permissions.  From [these instructions](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-16-04)
+### Step 1.
 
-```
+Login as root and create a new user with `sudo` permissions. From [these instructions](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-16-04)
+
+```bash
 export USER=tianhuil
 
 mkdir -p /home/$USER/.ssh
@@ -34,18 +34,34 @@ chmod 644 /home/$USER/.ssh/authorized_keys
 
 Disable password authentication
 
-```sudo nano /etc/ssh/sshd_config```
+```bash
+sudo nano /etc/ssh/sshd_config
+```
+
 by setting
+
 ```
 PasswordAuthentication no
 PubkeyAuthentication yes
 ChallengeResponseAuthentication no
 ```
+
 and then running
 
-```systemctl reload sshd```
+```bash
+systemctl reload sshd
+```
 
-2. Disable password for quick sudo
+This might be a useful command while working as root
+
+```bash
+su - $USER
+```
+
+### Step 2.
+
+Disable password for quick sudo
+
 ```
 passwd -d $USER  # Disable password for quick sudo
 ```
@@ -64,15 +80,23 @@ to this line
 
 This disables passwords for users in the sudo group.
 
-3. Set bash as the default shell by adding it to **the last field** of the `$USER` line in `/etc/passwd`
+### Step 3.
+
+Set bash as the default shell by adding it to **the last field** of the `$USER` line in `/etc/passwd`
 (here's a sample `tianhuil:x:1000:1000::/home/tianhuil:/bin/bash`).
 
-4. SSH in as `$USER and `git clone` dotfiles and run the commands in the first section:
+### Step 4.
+
+SSH in as `$USER and `git clone` dotfiles and run the commands in the first section:
+
 ```
 git clone https://github.com/tianhuil/dotfiles.git
 ```
 
-5. Setup SSH key for github: (following [these instructions](https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/))
+### Step 5.
+
+Setup SSH key for github: (following [these instructions](https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/))
+
 ```
 ssh-keygen -t rsa -b 4096 -C "tianhui.michael.li@gmail.com"
 eval "$(ssh-agent -s)"
@@ -81,14 +105,20 @@ ssh-add ~/.ssh/id_rsa
 
 Then copy the contents of `cat ~/.ssh/id_rsa.pub` from the screen to [your settings page](https://github.com/settings/keys)
 
-6. Mount a volume from the DO dashboard.  It is mounted in `/mnt/xxx` where `xxx` is the name of the volume.
+### Step 6.
 
-7. Enable firewall based on [these instructions](https://www.digitalocean.com/community/tutorials/how-to-setup-a-firewall-with-ufw-on-an-ubuntu-and-debian-cloud-server)
+Mount a volume from the DO dashboard. It is mounted in `/mnt/xxx` where `xxx` is the name of the volume.
+
+### Step 7.
+
+Enable firewall based on [these instructions](https://www.digitalocean.com/community/tutorials/how-to-setup-a-firewall-with-ufw-on-an-ubuntu-and-debian-cloud-server)
 
 Check that the firewall is currently inactive
+
 ```bash
 sudo ufw status
 ```
+
 and then configure the wirewall to only allow incoming ssh
 
 ```bash
@@ -96,7 +126,9 @@ sudo ufw default deny incoming
 sudo ufw default allow outgoing
 sudo ufw allow ssh
 ```
+
 Finally, enable the firewall and see the reuslts
+
 ```bash
 sudo ufw enable
 sudo ufw status verbose
