@@ -2,10 +2,19 @@
 
 # run these commands as user
 sudo apt-get upgrade --fix-missing
-sudo apt-get install ruby --fix-missing
+sudo apt-get install ruby --fix-missing -y
 
-# setup python
-sudo apt-get install ipython --fix-missing
+### Basic build tools needed for installing Python
+sudo apt-get install build-essential -y
+
+### setup python
+# pyenv (already added to $PATH) https://github.com/pyenv/pyenv-installer
+curl https://pyenv.run | bash
+# Install poetry (already added to $PATH)
+curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3
+
+# install Make
+sudo apt install make
 
 # setup Spark - from https://spark.apache.org/downloads.html
 pushd /tmp/
