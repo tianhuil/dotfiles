@@ -5,7 +5,8 @@ sudo apt-get upgrade --fix-missing
 sudo apt-get install ruby --fix-missing -y
 
 ### Basic build tools needed for installing Python
-sudo apt-get install build-essential zlib1g-dev -y
+sudo apt-get install build-essential zlib1g-dev libssl-dev libbz2-dev \
+    libreadline-dev libsqlite3-dev -y
 
 ### setup python
 # pyenv (already added to $PATH) https://github.com/pyenv/pyenv-installer
