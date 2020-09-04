@@ -9,6 +9,10 @@ sudo apt install update
 sudo apt install build-essential zlib1g-dev libssl-dev libbz2-dev \
     libreadline-dev libsqlite3-dev python3 python3-dev python3-venv -y
 
+# for scientific python
+sudo apt-get install libatlas-base-dev libblas3 liblapack3 liblapack-dev \
+    libblas-dev gfortran -y
+
 # Alternatively, setup python using pyenv -- although the above is probably good enough
 # (already added to $PATH) https://github.com/pyenv/pyenv-installer
 curl https://pyenv.run | bash
