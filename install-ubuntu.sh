@@ -5,12 +5,14 @@ sudo apt-get upgrade --fix-missing
 sudo apt-get install ruby --fix-missing -y
 
 ### Basic build tools needed for installing Python
-sudo apt-get install build-essential zlib1g-dev libssl-dev libbz2-dev \
-    libreadline-dev libsqlite3-dev -y
+sudo apt install update
+sudo apt install build-essential zlib1g-dev libssl-dev libbz2-dev \
+    libreadline-dev libsqlite3-dev python3 python3-dev python3-venv -y
 
-### setup python
-# pyenv (already added to $PATH) https://github.com/pyenv/pyenv-installer
+# Alternatively, setup python using pyenv -- although the above is probably good enough
+# (already added to $PATH) https://github.com/pyenv/pyenv-installer
 curl https://pyenv.run | bash
+
 # Install poetry (already added to $PATH)
 curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3
 
