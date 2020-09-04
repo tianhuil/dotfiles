@@ -1,16 +1,4 @@
-# Set up users (https://www.cyberciti.biz/faq/how-to-disable-ssh-password-login-on-linux/)
-# run these commands as root
-useradd -m -s /bin/bash tianhuil
-usermod -aG sudo tianhuil
-cp ~/.ssh/authorized_keys /home/tianhuil/.ssh/
-
-# Then need to disable sudo password
-# https://askubuntu.com/questions/147241/execute-sudo-without-password
-
-# And follow the instructions in the original article to allow only ssh login
-
-# useful for debugging
-su - tianhuil
+# To set up a new user, see README.md
 
 # run these commands as user
 sudo apt-get upgrade --fix-missing
