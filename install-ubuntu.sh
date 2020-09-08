@@ -6,8 +6,10 @@ sudo apt-get install ruby --fix-missing -y
 
 ### Basic build tools needed for installing Python
 sudo apt install update -y
-sudo apt install build-essential zlib1g-dev libssl-dev libbz2-dev \
-    libreadline-dev libsqlite3-dev python3 python3-dev python3-venv python3-wheel -y
+sudo apt install build-essential zlib1g-dev libssl-dev openssl libbz2-dev \
+    libreadline-dev libsqlite3-dev libffi-dev \
+    python3 python3-dev python3-venv python3-wheel python-setuptools \
+    libncursesw5-dev libgdbm-dev libc6-dev -y
 
 # for scientific python
 sudo apt-get install libatlas-base-dev libblas3 liblapack3 liblapack-dev \
