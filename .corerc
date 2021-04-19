@@ -63,3 +63,21 @@ if [ -d "$HOME/.pyenv" ]; then
   export PATH="$PYENV_ROOT/bin:$PATH"
   eval "$(pyenv init -)"
 fi
+
+# Go
+if [ -x "$(command -v go)" ]; then
+  export GOPATH=$(go env GOPATH)  # 80 ms
+  export PATH=$PATH:$GOPATH/bin  # go packages should have lower priority
+fi
+
+# editor
+if [ -x "$(command -v emacs)" ]; then
+  export VISUAL=emacs
+  export EDITOR=emacs
+elif [ -x "$(command -v code)" ]; then
+  export VISUAL=code
+  export EDITOR=code
+else
+  export VISUAL=vi
+  export EDITOR=vi
+fi

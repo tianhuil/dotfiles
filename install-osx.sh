@@ -1,24 +1,23 @@
 # Install brew
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+# run the command to add it to .zprofile (which appear at the end of installaiton)
 
 # Software to download
 # Dropbox
 # 1password (password file)
 # SizeUp (license)
 # Chrome
-# Sublime
+# Vscode
+# run "shell command" from the command pallette to install 'code' shell command
 # Slack
+# node: https://nodejs.org/en/download/
 
 # tmux
 brew install tmux
 sudo gem install tmuxinator
 brew install homebrew/completions/tmuxinator-completion
 
-# setup sublime
-if [ -f "/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl" ]; then
-	ln -s "/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl" /usr/local/bin/subl
-fi
-
+# setup source tree
 if [ -f "/Applications/SourceTree.app/Contents/Resources/stree" ]; then
   ln -s /Applications/SourceTree.app/Contents/Resources/stree /usr/local/bin/stree
 fi
@@ -73,12 +72,6 @@ brew cask install mactex
 
 # Install go
 brew install go
-
-# Install node and npm from https://gist.github.com/DanHerbert/9520689
-rm -rf /usr/local/lib/node_modules
-brew uninstall node
-brew install node --without-npm
-curl -L https://www.npmjs.com/install.sh | sh
 
 echo "Download https://ngrok.com/download and move into ~/Applications/ngrok"
 
