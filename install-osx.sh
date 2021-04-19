@@ -77,3 +77,7 @@ echo "Download https://ngrok.com/download and move into ~/Applications/ngrok"
 
 # Fix pbcopy https://github.com/ChrisJohnsen/tmux-MacOSX-pasteboard
 brew install reattach-to-user-namespace
+
+# Fiddle with settings
+# Option as Meta for VSCocde: https://github.com/microsoft/vscode/issues/101136#issuecomment-674115967
+# Option as Meta for iterm2: set option key as "Esc+" in settings -> profiles -> keys (see https://iterm2.com/faq.html)
