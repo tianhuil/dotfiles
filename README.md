@@ -119,7 +119,8 @@ Mount a volume from the DO dashboard. It is mounted in `/mnt/xxx` where `xxx` is
 
 ### Step 7.
 
-Enable firewall based on [these instructions](https://www.digitalocean.com/community/tutorials/how-to-setup-a-firewall-with-ufw-on-an-ubuntu-and-debian-cloud-server)
+Setup the firewall using `ufw` using [these instructions](https://hackernoon.com/understanding-ufw-8d70d5d8f9d2).
+For more permissvie instructions, check out [these instructions](https://www.digitalocean.com/community/tutorials/how-to-setup-a-firewall-with-ufw-on-an-ubuntu-and-debian-cloud-server).
 
 Check that the firewall is currently inactive
 
@@ -127,12 +128,21 @@ Check that the firewall is currently inactive
 sudo ufw status
 ```
 
-and then configure the wirewall to only allow incoming ssh
+and then configure the wirewall to only allow basic web server access
 
 ```bash
 sudo ufw default deny incoming
-sudo ufw default allow outgoing
-sudo ufw allow ssh
+sudo ufw default deny outgoing
+sudo ufw default deny routed
+sudo ufw limit ssh
+sudo ufw allow svn
+sudo ufw allow git
+sudo ufw allow out http
+sudo ufw allow in http 
+sudo ufw allow out https
+sudo ufw allow in https
+sudo ufw allow out 53
+sudo ufw logging on
 ```
 
 Finally, enable the firewall and see the reuslts
