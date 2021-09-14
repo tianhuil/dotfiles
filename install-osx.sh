@@ -37,7 +37,7 @@ brew install scala
 brew install apache-spark
 
 # Install GCloud
-brew cask install google-cloud-sdk
+brew install --cask google-cloud-sdk
 echo "Be sure to symlink gcloud"
 echo "sudo ln -s /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/bin/gcloud /usr/local/bin/gcloud"
 
