@@ -17,6 +17,10 @@ brew install tmux
 sudo gem install tmuxinator
 brew install homebrew/completions/tmuxinator-completion
 
+# DNS security
+brew install stubby
+# follow instructions on https://gist.github.com/uraimo/c651cbf3477994f95d8dbc7c60031697
+
 # setup source tree
 if [ -f "/Applications/SourceTree.app/Contents/Resources/stree" ]; then
   ln -s /Applications/SourceTree.app/Contents/Resources/stree /usr/local/bin/stree
