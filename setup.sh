@@ -6,6 +6,7 @@ cp .corerc ~/.
 cp .npmrc ~/.
 cp .gitconfig ~/.
 cp .tmux.conf ~/.
+cp .stubby.yml ~/.
 cp git-completion.sh ~/.git-completion.sh
 cp git-prompt.sh ~/.git-prompt.sh
 cp -R .scripts ~/.
