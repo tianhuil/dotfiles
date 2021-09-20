@@ -20,6 +20,7 @@ brew install homebrew/completions/tmuxinator-completion
 # DNS security
 brew install stubby
 # follow instructions on https://gist.github.com/uraimo/c651cbf3477994f95d8dbc7c60031697
+# and run `sudo stubby -h` and `studo stubby -i` to confirm that the config file is processed properly.
 
 # setup source tree
 if [ -f "/Applications/SourceTree.app/Contents/Resources/stree" ]; then
