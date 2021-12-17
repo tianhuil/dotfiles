@@ -86,3 +86,10 @@ brew install reattach-to-user-namespace
 # Fiddle with settings
 # Option as Meta for VSCocde: https://github.com/microsoft/vscode/issues/101136#issuecomment-674115967
 # Option as Meta for iterm2: set option key as "Esc+" in settings -> profiles -> keys (see https://iterm2.com/faq.html)
+
+# nvm
+# https://github.com/nvm-sh/nvm#calling-nvm-use-automatically-in-a-directory-with-a-nvmrc-file
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+
+# install latest lts and npm
+nvm install 'lts/*' --reinstall-packages-from=default --latest-npm
