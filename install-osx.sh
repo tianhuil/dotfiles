@@ -90,6 +90,5 @@ brew install reattach-to-user-namespace
 # nvm
 # https://github.com/nvm-sh/nvm#calling-nvm-use-automatically-in-a-directory-with-a-nvmrc-file
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+nvm install --lts --latest-npm # install latest lts and npm
 
-# install latest lts and npm
-nvm install 'lts/*' --reinstall-packages-from=default --latest-npm
