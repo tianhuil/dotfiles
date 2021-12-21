@@ -29,6 +29,9 @@ alias sha1='openssl sha1'
 alias gt='git tree'
 alias gs='git status'
 
+# further npm / yarn aliases
+alias yw='yarn workspace'
+
 function clean-docker() {
   # Clean docker
   if [[ $(docker ps -a -q) ]]; then
