@@ -32,10 +32,9 @@ fi
 # http://stackoverflow.com/questions/25718021/sublime-text-no-longer-launches-from-terminal
 brew install reattach-to-user-namespace
 
-# Install java
-brew tap caskroom/cask
-brew install brew-cask
-brew cask install java
+# Install java for M1
+# https://stackoverflow.com/a/66891978/8930600
+brew install openjdk
 
 # Install spark
 brew install scala
