@@ -72,6 +72,7 @@ plugins=(
     vscode
     git
     docker
+    docker-compose
     gcloud
     npm
     tmux
