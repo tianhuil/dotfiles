@@ -24,7 +24,7 @@ brew install stubby
 
 # setup source tree
 if [ -f "/Applications/SourceTree.app/Contents/Resources/stree" ]; then
-  ln -s /Applications/SourceTree.app/Contents/Resources/stree /usr/local/bin/stree
+  sudo ln -s /Applications/SourceTree.app/Contents/Resources/stree /usr/local/bin/stree
 fi
 
 
