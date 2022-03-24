@@ -3,6 +3,7 @@
 	email = tianhuil@cs.princeton.edu
 [core]
 	excludesfile = ~/.gitignore_global
+	editor = "code --wait"
 [filter "media"]
 	clean = git-media-clean %f
 	smudge = git-media-smudge %f
