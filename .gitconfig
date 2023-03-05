@@ -27,6 +27,7 @@
 	file-size-diff = !~/.scripts/file-size-diff.sh
 [push]
 	default = matching
+	autoSetupRemote = true
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
@@ -34,3 +35,6 @@
 	process = git-lfs filter-process
 [branch]
 	autosetuprebase = always
+[mergetool "sourcetree"]
+	cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+	trustExitCode = true
