@@ -52,10 +52,10 @@ ln -s /Applications/GitX.app/Contents/Resources/gitx /usr/local/bin/gitx
 brew install google-app-engine
 
 # Install Poetry
-curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+curl -sSL https://install.python-poetry.org | python3 -
 
 # Install Pyenv
-git clone https://github.com/pyenv/pyenv.git ~/.pyenv
+brew install pyenv
 
 # tidy
 brew install tidy-html5
