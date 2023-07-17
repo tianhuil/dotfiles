@@ -32,6 +32,11 @@ alias gs='git status'
 # further npm / yarn aliases
 alias yw='yarn workspace'
 
+# homebrew
+if [ -f "/opt/homebrew/bin/brew" ]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+
 function clean-docker() {
   # Clean docker
   if [[ $(docker ps -a -q) ]]; then
@@ -102,8 +107,3 @@ fi
 # nvm 
 export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
-
-# homebrew
-if [ -f "/opt/homebrew/bin/brew" ]; then
-  eval "$(/opt/homebrew/bin/brew shellenv)"
-fi
