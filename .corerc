@@ -27,6 +27,7 @@ alias sha1='openssl sha1'
 
 # further git aliases
 alias gt='git tree'
+alias gta='git tree-all'
 alias gs='git status'
 
 # further npm / yarn aliases

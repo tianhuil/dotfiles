@@ -17,7 +17,8 @@
 	ci = commit
 	br = branch
 	hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
-	tree = log --pretty=oneline --graph --decorate --all
+	tree = log --pretty=oneline --graph --decorate
+	tree-all = log --pretty=oneline --graph --decorate --all
 	gb = !~/.scripts/git-grep-blame.sh
 	type = cat-file -t
 	dump = cat-file -p
