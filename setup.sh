@@ -11,6 +11,7 @@ cp git-completion.sh ~/.git-completion.sh
 cp git-prompt.sh ~/.git-prompt.sh
 cp -R .scripts ~/.
 cp .gitignore_global ~/.
-mkdir ~/.nvm
+# create ~/.nvm if it doesn't exist
+[ ! -d ~/.nvm ] && mkdir -p ~/.nvm
 cp .nvm.default-packages ~/.nvm/default-packages
 git config --global core.excludesfile ~/.gitignore_global
