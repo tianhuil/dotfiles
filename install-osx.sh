@@ -10,7 +10,7 @@
 # Vscode
 # run "shell command" from the command pallette to install 'code' shell command
 # Slack
-# node: https://nodejs.org/en/download/
+# Notion
 
 # tmux
 brew install tmux
