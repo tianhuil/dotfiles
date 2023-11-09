@@ -2,6 +2,7 @@ cp .bashrc ~/.
 cp .bashrc ~/.bash_profile
 cp .inputrc ~/.
 cp .zshrc ~/.
+cp .zprofile ~/.zprofile
 cp .corerc ~/.
 cp .npmrc ~/.
 cp .gitconfig ~/.
