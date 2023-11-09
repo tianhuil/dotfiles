@@ -91,3 +91,5 @@ brew install reattach-to-user-namespace
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
 nvm install --lts --latest-npm # install latest lts and npm
 
+# 1password cli
+brew install 1password-cli
