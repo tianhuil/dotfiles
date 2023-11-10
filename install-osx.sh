@@ -1,6 +1,5 @@
-# Install brew
-/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-# run the command to add it to .zprofile (which appear at the end of installaiton)
+# Partition a case-sensitive volume at /Volumes/Workspace
+# https://brianboyko.medium.com/a-case-sensitive-src-folder-for-mac-programmers-176cc82a3830
 
 # Software to download
 # Dropbox
@@ -11,6 +10,9 @@
 # run "shell command" from the command pallette to install 'code' shell command
 # Slack
 # Notion
+
+# Install brew
+/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
 # tmux
 brew install tmux
