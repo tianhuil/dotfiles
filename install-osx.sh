@@ -17,6 +17,9 @@
 # tmux
 brew install tmux
 
+# Github Cli
+brew install gh 
+
 # DNS security
 brew install stubby
 # follow instructions on https://gist.github.com/uraimo/c651cbf3477994f95d8dbc7c60031697
