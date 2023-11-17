@@ -24,10 +24,9 @@ alias dfh='df -h'
 alias gvim='gvim -geom 84x26'
 alias start='dbus-launch startx'
 alias sha1='openssl sha1'
-
-# further git aliases
 alias gt='git tree'
-alias gta='git tree-all'
+alias gtr='git tree'
+alias gtra='git tree-all'
 alias gs='git status'
 
 # further npm / yarn aliases
