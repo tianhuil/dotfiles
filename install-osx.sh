@@ -100,3 +100,34 @@ brew install parallel
 
 # tidy
 brew install tidy-html5
+
+# Add the following Keybindings to keybindings.json in VSCode
+# {
+#   "key": "alt+f",
+#   "command": "cursorWordPartRight",
+#   "when": "textInputFocus"
+# },
+# {
+#   "key": "alt+b",
+#   "command": "cursorWordPartLeft",
+#   "when": "textInputFocus"
+# },
+# {
+#   "key": "alt+f",
+#   "command": "workbench.action.terminal.sendSequence",
+#   "args": {
+#     "text": "\u001bf"
+#   },
+#   "when": "terminalFocus"
+# },
+# {
+#   "key": "alt+b",
+#   "command": "workbench.action.terminal.sendSequence",
+#   "args": {
+#     "text": "\u001bb"
+#   },
+#   "when": "terminalFocus"
+# }
+
+# Follow instructions here (https://stackoverflow.com/a/345949/8930600)
+# to set up alt+b and alt+f for word navigation in iterm2
