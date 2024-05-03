@@ -101,6 +101,12 @@ brew install parallel
 # tidy
 brew install tidy-html5
 
+# pnpm + bun
+brew install pnpm
+brew install oven-sh/bun/bun
+
+# 
+
 # Add the following Keybindings to keybindings.json in VSCode
 # {
 #   "key": "alt+f",
