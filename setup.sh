@@ -16,3 +16,5 @@ cp .gitignore_global ~/.
 [ ! -d ~/.nvm ] && mkdir -p ~/.nvm
 cp .nvm.default-packages ~/.nvm/default-packages
 git config --global core.excludesfile ~/.gitignore_global
+
+echo "Copied all dotfiles to home directory"
