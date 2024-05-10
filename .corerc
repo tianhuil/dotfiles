@@ -87,6 +87,11 @@ if [ -d "/opt/homebrew/opt/openjdk/bin" ]; then
   export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
 fi
 
+# libpq
+if [ -d "/opt/homebrew/opt/libpq/bin" ]; then
+  export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+fi
+
 # editor
 if [ -x "$(command -v emacs)" ]; then
   export VISUAL=emacs
@@ -113,3 +118,4 @@ export NVM_DIR="$HOME/.nvm"
 if command -v ngrok &>/dev/null; then
   eval "$(ngrok completion)"
 fi
+

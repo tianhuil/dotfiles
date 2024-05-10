@@ -105,6 +105,9 @@ brew install tidy-html5
 brew install pnpm
 brew install oven-sh/bun/bun
 
+# libpq
+brew install libpq
+
 # 
 
 # Add the following Keybindings to keybindings.json in VSCode
