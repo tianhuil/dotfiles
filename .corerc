@@ -29,6 +29,9 @@ alias gtr='git tree'
 alias gtra='git tree-all'
 alias gs='git status'
 
+# supabase
+alias sb='supabase'
+
 # further npm / yarn aliases
 alias yw='yarn workspace'
 
