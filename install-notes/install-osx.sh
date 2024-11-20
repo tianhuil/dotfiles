@@ -108,7 +108,8 @@ brew install oven-sh/bun/bun
 # libpq
 brew install libpq
 
-# 
+# sqlite
+brew install sqlite
 
 # Add the following Keybindings to keybindings.json in VSCode
 # {
