@@ -67,6 +67,11 @@ export NPM_PACKAGES="$HOME/.npm-packages"
 export NODE_PATH="$NPM_PACKAGES/lib/node_modules:$NODE_PATH"
 export PATH="$PATH:$NPM_PACKAGES/bin"  # npm packages should have lower priority
 
+# Bun
+if [ -d "$HOME/.bun" ]; then
+  export PATH="$HOME/.bun/bin:$PATH"
+fi
+
 # Poetry
 if [ -d "$HOME/.local/bin" ]; then
   export PATH=$PATH:$HOME/.local/bin
