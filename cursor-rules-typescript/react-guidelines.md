@@ -78,3 +78,26 @@ const Button: React.FC<ButtonProps> = (props) => {
   );
 };
 ```
+
+## Prefer `React.useState` over importing `useState` directly
+
+- Keeps all React APIs under the `React` namespace for clarity
+- Similarly for all other react hooks (e.g. `React.useEffect`, `React.useCallback` etc ...)
+
+```ts
+// ✅ Correct
+import React from "react";
+
+const Counter: React.FC = () => {
+  const [count, setCount] = React.useState<number>(0);
+  return ...;
+}
+
+// ❌ Incorrect
+import { useState } from "react";
+
+const Counter: React.FC = () => {
+  const [count, setCount] = useState<number>(0);
+  return ...;
+}
+```

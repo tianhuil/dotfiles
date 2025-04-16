@@ -217,40 +217,6 @@ const Comp = React.FC<{ isSpecial: boolean}> => <div>
 </div>
 ```
 
-## Prefer to documenting in names to documenting comments
-
-- Write self-documenting code
-- Reserve comments for complex business logic
-
-```ts
-// ✅ Correct
-// Calculate pro-rated amount based on billing cycle
-const calculateProRatedAmount = (amount: number, daysLeft: number, totalDays: number) => {
-  return (amount * daysLeft) / totalDays;
-};
-
-// ❌ Incorrect - Unnecessary comments
-// Get the user's name
-const getUserName = (user: User) => user.name;
-
-// Check if user is active
-const isUserActive = (user: User) => user.status === 'active';
-```
-
-## Prefer special environment variables to control behavior to relyign on `process.env.NODE_ENV`
-
-```ts
-// ✅ Correct
-if (process.env.RUN_MAGIC) {
-  runMagic()
-}
-
-// ❌ Incorrect
-if (process.env.NODE_ENV === 'production') {
-  runMagic()
-}
-```
-
 ## Use `Set` to check for membership
 
 ```ts
@@ -261,4 +227,40 @@ return todos.map(todo => <Todo ... done={todoSet.has(todo.id)}/>)
 // ❌ Incorrect - takes O(n^2) time
 const doneTodoIds: string[]
 return todos.map(todo => <Todo ... done={doneTodoIds.some(id === todo.id)}/>)
+```
+
+## Prefer `const` over `function` for component and utility declarations
+
+```ts
+// ✅ Correct
+const formatDate = (date: Date): string => {
+  return date.toISOString().split('T')[0];
+}
+
+// ❌ Incorrect
+function formatDate(date: Date): string {
+  return date.toISOString().split('T')[0];
+}
+```
+
+## Prefer function syntax for iterators
+
+```ts
+// ✅ Correct
+async function* streamValues(): AsyncGenerator<number, void, void> {
+  for (let i = 0; i < 3; i++) {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    yield i;
+  }
+}
+
+// ❌ Incorrect
+const streamValues = (): AsyncIterable<number> => ({
+  [Symbol.asyncIterator]: async function* (): AsyncGenerator<number, void, void> {
+    for (let i = 0; i < 3; i++) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      yield i;
+    }
+  }
+});
 ```

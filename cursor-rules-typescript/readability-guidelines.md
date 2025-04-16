@@ -106,3 +106,37 @@ function processOrders(orders: Order[]) {
   });
 }
 ```
+
+## Prefer to documenting in names to documenting comments
+
+- Write self-documenting code
+- Reserve comments for complex business logic
+
+```ts
+// ✅ Correct
+// Calculate pro-rated amount based on billing cycle
+const calculateProRatedAmount = (amount: number, daysLeft: number, totalDays: number) => {
+  return (amount * daysLeft) / totalDays;
+};
+
+// ❌ Incorrect - Unnecessary comments
+// Get the user's name
+const getUserName = (user: User) => user.name;
+
+// Check if user is active
+const isUserActive = (user: User) => user.status === 'active';
+```
+
+## Prefer special environment variables to control behavior to relyign on `process.env.NODE_ENV`
+
+```ts
+// ✅ Correct
+if (process.env.RUN_MAGIC) {
+  runMagic()
+}
+
+// ❌ Incorrect
+if (process.env.NODE_ENV === 'production') {
+  runMagic()
+}
+```
