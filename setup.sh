@@ -18,7 +18,9 @@ cp .nvm.default-packages ~/.nvm/default-packages
 git config --global core.excludesfile ~/.gitignore_global
 
 # copy cursor rules
-cp -R .cursor-rules-typescript ~/.cursor-rules-typescript
+mkdir -p ~/.local/share/dotfiles
+cp -R local-share/.cursor-rules-typescript ~/.local/share/dotfiles/.cursor-rules-typescript
+cp local-share/.vscode-settings.json ~/.local/share/dotfiles/.vscode-settings.json
 
 # copy local-bin to ~/.local/bin
 mkdir -p ~/.local/bin
