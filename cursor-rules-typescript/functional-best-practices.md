@@ -1,5 +1,9 @@
 # General Guidelines
 
+## Core Principal
+
+Prefer functional code.  When combined with strong type-safety, it greatly reduces errors.
+
 ## Prefer functional methods like `map`, `flatMap`, or `filter` to `while` or `for` loops
 
 ```ts

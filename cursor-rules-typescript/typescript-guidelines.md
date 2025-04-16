@@ -45,7 +45,22 @@ const fruitCountMap = new Map<string, number>(fruitCount);
 const fruitCountMap = Object.fromEntries(fruitCount)
 ```
 
-## Prefer `array.at(2)` to using `array[2]` for dynamic length arrays; the former is automatically can be undefined
+## Prefer typing to indicate length of array
+
+```ts
+// ✅ Correct
+const tuple: [number, number, number] = [0,1,2]
+tuple[1] // number
+tuple[9] // TS error
+
+// ❌ Incorrect
+const tupleWithArrayType: number[] = [0,1,2]
+tupleWithArrayType[1] // number | undefined
+```
+
+## Prefer `array.at(2)` to using `array[2]` for dynamic length arrays
+
+- `.at()` is automatically can be `undefined` (but not `.[]`).
 
 ```ts
 // ✅ Correct
