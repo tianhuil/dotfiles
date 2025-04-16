@@ -17,4 +17,12 @@ cp .gitignore_global ~/.
 cp .nvm.default-packages ~/.nvm/default-packages
 git config --global core.excludesfile ~/.gitignore_global
 
+# copy cursor rules
+cp -R .cursor-rules-typescript ~/.cursor-rules-typescript
+
+# copy local-bin to ~/.local/bin
+mkdir -p ~/.local/bin
+cp -R local-bin/* ~/.local/bin
+chmod +x ~/.local/bin/*
+
 echo "Copied all dotfiles to home directory"

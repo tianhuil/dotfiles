@@ -35,13 +35,10 @@ def sync_rules():
     
     try:
         # Walk through the source directory
-        for src_path in source_dir.rglob('*.md'):
+        for src_path in source_dir.glob('*.md'):
             # Calculate relative path to maintain directory structure
             rel_path = src_path.relative_to(source_dir)
             dst_path = dest_dir / rel_path
-            
-            # Create parent directories if they don't exist
-            dst_path.parent.mkdir(parents=True, exist_ok=True)
             
             # Copy the file
             shutil.copy2(src_path, dst_path)
