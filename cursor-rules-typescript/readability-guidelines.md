@@ -4,6 +4,37 @@
 
 Human readability is (almost) as important as machine-readability
 
+## Prefer `switch` to chained `if`
+
+```ts
+// ✅ Correct
+function getStatusLabel(status: string): string {
+  switch (status) {
+    case "pending":
+      return "Pending Approval";
+    case "approved":
+      return "Approved";
+    case "rejected":
+      return "Rejected";
+    default:
+      return "Unknown Status";
+  }
+}
+
+// ❌ Incorrect
+function getStatusLabel(status: string): string {
+  if (status === "pending") {
+    return "Pending Approval";
+  } else if (status === "approved") {
+    return "Approved";
+  } else if (status === "rejected") {
+    return "Rejected";
+  } else {
+    return "Unknown Status";
+  }
+}
+```
+
 ## Prefer to reduce nesting in functions
 ```ts
 // ✅ Correct
@@ -21,6 +52,7 @@ function process(data: Data) {
     return computeResult(cleaned);
   }
 }
+```
 
 ## Prefer to flatten compound conditionals
 
