@@ -2,7 +2,7 @@
 
 ## Core Principal
 
-Human readability is (almost) as important as machine-readability
+Human readability is second only to machine-readability
 
 ## Prefer `switch` to chained `if`
 
