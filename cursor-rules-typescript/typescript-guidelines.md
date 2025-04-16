@@ -4,6 +4,20 @@
 
 We prefer Strong Type Safety and Functional Code.
 
+## Use 2-space tab
+
+```ts
+// ✅ Correct
+function foo() {
+  return 2;
+}
+
+// ❌ Incorrect
+function bob() {
+    return 3;
+}
+```
+
 ## Strict typing
 
 - No `any` allowed.  Use `unknown` if we must.
