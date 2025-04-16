@@ -29,3 +29,7 @@ const in20thCentury = () => {
   return year >= 1900 || year < 2000
 }
 ```
+
+## Use `bun` testing over `jest`
+
+- Built in typescript and environment variable support

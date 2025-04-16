@@ -4,6 +4,11 @@
 
 We prefer Strong Type Safety and Functional Code.
 
+## Use `bun` for package management and to run scripts
+
+- Use instead of `npm`, `yarn`, or `pnpm`.
+- Built in `.env` flow support
+
 ## Use 2-space tab
 
 ```ts
