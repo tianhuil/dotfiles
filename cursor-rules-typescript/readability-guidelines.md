@@ -36,6 +36,7 @@ function getStatusLabel(status: string): string {
 ```
 
 ## Prefer to reduce nesting in functions
+
 ```ts
 // ✅ Correct
 function process(data: Data) {
@@ -159,7 +160,7 @@ const getUserName = (user: User) => user.name;
 const isUserActive = (user: User) => user.status === 'active';
 ```
 
-## Prefer special environment variables to control behavior to relyign on `process.env.NODE_ENV`
+## Prefer special environment variables to control behavior to relying on `process.env.NODE_ENV`
 
 ```ts
 // ✅ Correct
