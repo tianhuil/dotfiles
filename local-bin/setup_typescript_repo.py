@@ -14,6 +14,8 @@ def copy_file(src_path, dst_path):
     if not src_path.is_file():
         print(f"Error: Source file '{src_path}' not found", file=sys.stderr)
         sys.exit(1)
+
+    dst_path.parent.mkdir(parents=True, exist_ok=True)
     
     shutil.copy2(src_path, dst_path)
 
