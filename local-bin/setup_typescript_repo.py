@@ -44,7 +44,7 @@ def copy_cursor_rules():
     
     try:
         # Walk through the source directory
-        for src_path in source_dir.glob('*.md'):
+        for src_path in source_dir.glob('*.mdc'):
             # Calculate relative path to maintain directory structure
             rel_path = src_path.relative_to(source_dir)
             dst_path = dest_dir / rel_path
