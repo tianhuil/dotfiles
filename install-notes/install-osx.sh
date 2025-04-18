@@ -111,6 +111,9 @@ brew install libpq
 # sqlite
 brew install sqlite
 
+# uv
+brew install uv
+
 # Add the following Keybindings to keybindings.json in VSCode
 # {
 #   "key": "alt+f",
