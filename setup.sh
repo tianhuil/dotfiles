@@ -19,9 +19,9 @@ git config --global core.excludesfile ~/.gitignore_global
 
 # copy cursor rules
 mkdir -p ~/.local/share/dotfiles
-cp -R local-share/.cursor-rules-typescript ~/.local/share/dotfiles/.cursor-rules-typescript
-cp local-share/.vscode-settings.json ~/.local/share/dotfiles/.vscode-settings.json
-cp local-share/biome.json ~/.local/share/dotfiles/biome.json
+cp -Rf local-share/.cursor-rules-typescript ~/.local/share/dotfiles/.cursor-rules-typescript
+cp -f local-share/.vscode-settings.json ~/.local/share/dotfiles/.vscode-settings.json
+cp -f local-share/biome.json ~/.local/share/dotfiles/biome.json
 
 # copy local-bin to ~/.local/bin
 mkdir -p ~/.local/bin
