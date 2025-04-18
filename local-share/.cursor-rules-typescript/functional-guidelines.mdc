@@ -1,4 +1,15 @@
-# General Guidelines
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: "Functional Guidelines"
+globs: "*.ts,*.tsx,*.js,*.jsx"
+alwaysApply: true
+---
+
+# Functional Guidelines
 
 ## Core Principal
 

@@ -1,3 +1,14 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+description: "React Guidelines"
+globs: "*.ts,*.tsx,*.js,*.jsx"
+alwaysApply: true
+---
+
 # React Guidelines
 
 ## Prefer react components to as `const` with type explicitly typed `React.FC`

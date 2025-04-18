@@ -1,4 +1,15 @@
-# Typescript Guidelines
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+description: "Unit Testing Guidelines"
+globs: "*.ts,*.tsx,*.js,*.jsx"
+alwaysApply: true
+---
+
+# Unit Testing Guidelines
 
 ## Core Principal
 
@@ -33,3 +44,4 @@ const in20thCentury = () => {
 ## Use `bun` testing over `jest`
 
 - Built in typescript and environment variable support
+- 

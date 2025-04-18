@@ -1,3 +1,14 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+description: "Typescript Guidelines"
+globs: "*.ts,*.tsx,*.js,*.jsx"
+alwaysApply: true
+---
+
 # Typescript Guidelines
 
 ## Core Principal

@@ -1,3 +1,14 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+description: "Naming Convention Guidelines"
+globs: "*.ts,*.tsx,*.js,*.jsx"
+alwaysApply: true
+---
+
 # Naming Convention Guidelines
 
 ## Use basic naming convention
