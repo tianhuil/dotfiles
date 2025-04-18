@@ -1,9 +1,4 @@
 ---
-description: 
-globs: 
-alwaysApply: false
----
----
 description: "Readability Guidelines"
 globs: "*.ts,*.tsx,*.js,*.jsx"
 alwaysApply: true

@@ -1,9 +1,4 @@
 ---
-description: 
-globs: 
-alwaysApply: false
----
----
 description: "Unit Testing Guidelines"
 globs: "*.ts,*.tsx,*.js,*.jsx"
 alwaysApply: true
