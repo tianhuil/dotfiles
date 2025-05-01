@@ -116,6 +116,7 @@ brew install uv
 
 # rust
 brew install rust
+
 # Add the following Keybindings to keybindings.json in VSCode
 # {
 #   "key": "alt+f",
