@@ -29,6 +29,8 @@ alias gtr='git tree'
 alias gtra='git tree-all'
 alias gs='git status'
 
+alias void='/Applications/Void.app/Contents/MacOS/Electron'
+
 # supabase
 alias sb='supabase'
 
