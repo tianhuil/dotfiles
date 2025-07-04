@@ -107,6 +107,11 @@ if [ -d "/opt/homebrew/opt/sqlite/bin" ]; then
   export PATH="/opt/homebrew/opt/sqlite/bin:$PATH"
 fi
 
+# bun
+if [ -d "/Users/tianhuil/.bun/bin" ]; then
+  export PATH="/Users/tianhuil/.bun/bin:$PATH"
+fi
+
 # editor
 if [ -x "$(command -v emacs)" ]; then
   export VISUAL=emacs
