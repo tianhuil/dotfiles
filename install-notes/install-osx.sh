@@ -117,6 +117,9 @@ brew install uv
 # rust
 brew install rust
 
+# git workree
+echo "Download git worktree switcher from https://github.com/yankeexe/git-worktree-switcher"
+
 # Add the following Keybindings to keybindings.json in VSCode
 # {
 #   "key": "alt+f",
