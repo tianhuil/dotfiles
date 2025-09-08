@@ -144,3 +144,8 @@ if command -v ngrok &>/dev/null; then
   eval "$(ngrok completion)"
 fi
 
+# Create a new tab in Warp with the current directory
+warp() {
+  local target_path="${1:-.}"
+  open "warp://action/new_tab?path=$(cd "$target_path" && pwd)"
+}
