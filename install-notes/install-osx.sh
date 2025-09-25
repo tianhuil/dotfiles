@@ -117,13 +117,11 @@ brew install uv
 # rust
 brew install rust
 
-# git worktree switcher
-curl https://raw.githubusercontent.com/yankeexe/git-worktree-switcher/refs/tags/0.1.1/wt > ~/.local/bin/wt
-chmod +x ~/.local/bin/wt
-mkdir -p ~/.oh-my-zsh/custom/completions
-curl https://github.com/yankeexe/git-worktree-switcher/blob/0.1.1/completions/_wt_completion > ~/.oh-my-zsh/custom/completions/_wt_completion
+# git worktree plus
+brew install satococoa/tap/wtp
 
-
+# special install
+brew install fzf zoxide ripgrep eza fd
 
 
 # Add the following Keybindings to keybindings.json in VSCode
