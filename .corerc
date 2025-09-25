@@ -6,9 +6,16 @@ alias cp='cp -i'
 alias mv='mv -i'
 alias mkdir='mkdir -p' # make parent directories as needed
 
-alias ls='ls -h -G'
-alias ll='ls -l'
-alias la='ls -A'
+# ls aliases - use eza if available, otherwise fallback to ls
+if command -v eza &>/dev/null; then
+  alias ls='eza --icons=auto --group-directories-first --no-symlinks -x'
+  alias ll='eza -l'
+  alias la='eza -la'
+else
+  alias ls='ls -h -G'
+  alias ll='ls -l'
+  alias la='ls -A'
+fi
 alias l='ls -CF'
 alias svim='sudo vim'
 alias h='cd'
@@ -144,8 +151,19 @@ if command -v ngrok &>/dev/null; then
   eval "$(ngrok completion)"
 fi
 
+# zoxide
+if command -v zoxide &>/dev/null; then
+  eval "$(zoxide init --cmd cd zsh)"
+fi
+
+# fzf
+if command -v fzf &>/dev/null; then
+  yes | $(brew --prefix)/opt/fzf/install
+fi
+
 # Create a new tab in Warp with the current directory
 warp() {
   local target_path="${1:-.}"
   open "warp://action/new_tab?path=$(cd "$target_path" && pwd)"
 }
+
