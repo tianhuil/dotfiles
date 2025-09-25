@@ -80,6 +80,8 @@ plugins=(
 
 source $ZSH/oh-my-zsh.sh
 
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
 # User configuration
 
 # export MANPATH="/usr/local/man:$MANPATH"
