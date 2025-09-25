@@ -58,3 +58,5 @@ export GAEPATH="$GCLOUD_PATH/platform/google_appengine/"
 
 # for tmux, see: https://github.com/tmux/tmux/issues/475
 export EVENT_NOKQUEUE=1
+
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash

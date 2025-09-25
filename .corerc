@@ -158,7 +158,7 @@ fi
 
 # fzf
 if command -v fzf &>/dev/null; then
-  yes | $(brew --prefix)/opt/fzf/install
+  $(brew --prefix)/opt/fzf/install --no-bash --no-fish --completion --key-bindings --no-update-rc
 fi
 
 # Create a new tab in Warp with the current directory
