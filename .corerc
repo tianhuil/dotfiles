@@ -125,12 +125,15 @@ if [ -d "/Users/tianhuil/.pyenv/versions/3.12.0/bin/" ]; then
 fi
 
 # editor
-if [ -x "$(command -v emacs)" ]; then
-  export VISUAL=emacs
-  export EDITOR=emacs
+if [ -x "$(command -v cursor)" ]; then
+  export VISUAL=cursor
+  export EDITOR=cursor
 elif [ -x "$(command -v code)" ]; then
   export VISUAL=code
   export EDITOR=code
+elif [ -x "$(command -v emacs)" ]; then
+  export VISUAL=emacs
+  export EDITOR=emacs
 else
   export VISUAL=vi
   export EDITOR=vi
