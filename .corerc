@@ -154,11 +154,6 @@ if command -v ngrok &>/dev/null; then
   eval "$(ngrok completion)"
 fi
 
-# zoxide
-if command -v zoxide &>/dev/null; then
-  eval "$(zoxide init --cmd cd zsh)"
-fi
-
 # fzf
 if command -v fzf &>/dev/null; then
   $(brew --prefix)/opt/fzf/install --no-bash --no-fish --completion --key-bindings --no-update-rc >/dev/null 2>&1
