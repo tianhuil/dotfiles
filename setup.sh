@@ -29,4 +29,8 @@ mkdir -p ~/.local/bin
 cp -R local-bin/* ~/.local/bin
 chmod +x ~/.local/bin/*
 
+# copy cursor commands
+mkdir -p ~/.cursor/commands
+cp -f .cursor-commands/*.md ~/.cursor/commands/
+
 echo "Copied all dotfiles to home directory"
