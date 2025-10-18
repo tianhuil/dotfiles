@@ -123,6 +123,9 @@ brew install satococoa/tap/wtp
 # special install
 brew install fzf zoxide ripgrep eza fd
 
+# Github Actions CLI
+brew install act
+
 
 # Add the following Keybindings to keybindings.json in VSCode
 # {
