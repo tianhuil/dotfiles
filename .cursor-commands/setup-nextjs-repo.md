@@ -42,6 +42,7 @@ Then add the following text as `AGENTS.md`
 - Add docstring to every class and function.
 - Any function or class with more than one argument should take a single object with named parameters. Function `fooBar` takes type `FooBarParam`, which should be defined immediately before `fooBar`. If the object only has a single field (e.g. `FooBarParam = {count: number}`) , do not use the object format and pass the field to the function directly (e.g. `fooBar(count: number)`).
 - When importing, prefer using a sibling absolute import path (e.g. `import * from './package/name'`). If not possible, use an absolute import path (e.g. `import * from '@/package/name'`). Never use a relative parent import path (e.g. `import * from '../package/name'`).
+- Place `try`/`catch` only at the root calling function. Do not place `try`/`catch` in each intermediate or leaf function.
 
 ## Validation
 

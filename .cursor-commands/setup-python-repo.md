@@ -25,6 +25,7 @@ Then add the following text as `AGENTS.md`
 - Explicitly type where practicable using mypy. Look at the libraries and import and use those types; do not make up types.
 - Always avoid using type `Any` type.
 - Add docstring to every class and function.
+- Place `try`/`except` only at the root calling function. Do not place `try`/`except` in each intermediate or leaf function.
 
 ## Validation
 
