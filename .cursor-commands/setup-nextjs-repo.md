@@ -6,7 +6,7 @@ Here are the commands to run
 
 1. `git init` to create a git repo
 2. `bun init` to create a bun repo
-3. `heroui init` to create a nextjs'
+3. `heroui init -t app -p bun` to create a nextjs'
 4. Add `.vscode/setting.json` and `.vscode/extension.json` to reflect the above.
 5. Make sure `package.json` has a the following scripts:
 
