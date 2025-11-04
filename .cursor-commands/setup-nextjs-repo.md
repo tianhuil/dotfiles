@@ -35,8 +35,8 @@ Then add the following text as `AGENTS.md`
 
 ## Coding style
 
-- Prefer to write functional code. Prefer `.map`, `.filter`, and `.flatMap` with arrays rather than creating an empty array and accumulating.
-  - Instead of creating an empty array and appending, use functional primitives.
+- Prefer to write functional code. Prefer functional primitives like `.map`, `.filter`, and `.flatMap` on arrays.
+  - Instead of creating an empty array and accumulating, use functional primitives to declaratively create arrays.
   - Instead of creating an empty json object and mutation, use `Object.fromEntries` use functional primitives.
 - Prefer `const` to `let` and mutation. You can often change `let` to `const` by wrapping the complex logic in an anonymous function call (e.g. `const val = (() => { ... })()`).
 - Explicitly annotate types where practicable. Look at the libraries and import and use those types; do not make up types.
