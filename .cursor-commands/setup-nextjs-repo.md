@@ -33,7 +33,7 @@ Then add the following text as `AGENTS.md`
 
 - Use `bun` for package manager (no `npm`, no `yarn`).
 
-## Coding style
+## Coding Style
 
 - Prefer to write functional code. Prefer functional primitives like `.map`, `.filter`, and `.flatMap` on arrays.
   - Instead of creating an empty array and accumulating, use functional primitives to declaratively create arrays.
@@ -50,4 +50,5 @@ Then add the following text as `AGENTS.md`
 
 - Use `bun run typecheck && bun run check:fix` after each command and fix any errors. There may be errors in other files because another agent is working on those. Ignore those.
 - Use `bun test <test file I'm writing>` for unit testing; Only run tests affected by these changes on at the moment. Ignore all other test failures (don't try to fix them).
+- Use `git diff` and review code changes for following the rules under "Coding Style" section.
 ```

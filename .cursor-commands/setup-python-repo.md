@@ -18,7 +18,7 @@ Then add the following text as `AGENTS.md`
 
 - Use `uv` for package manager.
 
-## Coding style
+## Coding Style
 
 - Prefer to write functional code. Prefer list comprehensions for map, flatmap, and filter: `[func(x) for x in xs if condition(x)]`.
 - Prefer to not mutate variables, even though Python allows mutation (pretend variables are all using typescript `const` not `let`).
@@ -30,5 +30,6 @@ Then add the following text as `AGENTS.md`
 ## Validation
 
 Whenever you make a change, run `ruff` and `pyright` to confirm tests pass.
+Use `git diff` and review code changes for following the rules under "Coding Style" section.
 
 ```
