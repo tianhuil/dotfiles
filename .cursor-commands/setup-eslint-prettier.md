@@ -55,6 +55,7 @@ import globals from "globals";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
 const compat = new FlatCompat({
   baseDirectory: __dirname,
   recommendedConfig: js.configs.recommended,
@@ -95,7 +96,6 @@ export default defineConfig([
         "plugin:@next/next/recommended",
       ),
     ),
-
     plugins: {
       react: fixupPluginRules(react),
       "unused-imports": unusedImports,
@@ -104,7 +104,6 @@ export default defineConfig([
       "jsx-a11y": fixupPluginRules(jsxA11Y),
       prettier: fixupPluginRules(prettier),
     },
-
     languageOptions: {
       globals: {
         ...Object.fromEntries(
@@ -112,26 +111,21 @@ export default defineConfig([
         ),
         ...globals.node,
       },
-
       parser: tsParser,
       ecmaVersion: 12,
       sourceType: "module",
-
       parserOptions: {
         ecmaFeatures: {
           jsx: true,
         },
       },
     },
-
     settings: {
       react: {
         version: "detect",
       },
     },
-
     files: ["**/*.ts", "**/*.tsx"],
-
     rules: {
       "no-console": "off", // TODO: set to error before production
       "react/prop-types": "off",
@@ -144,7 +138,6 @@ export default defineConfig([
       "no-unused-vars": "off",
       "unused-imports/no-unused-vars": "off",
       "unused-imports/no-unused-imports": "warn",
-
       "@typescript-eslint/no-unused-vars": [
         "warn",
         {
@@ -153,13 +146,10 @@ export default defineConfig([
           argsIgnorePattern: "^_.*?$",
         },
       ],
-
       // Import ordering is handled by Prettier with @ianvs/prettier-plugin-sort-imports
       // to avoid conflicts between ESLint and Prettier
       "import/order": "off",
-
       "react/self-closing-comp": "warn",
-
       "react/jsx-sort-props": [
         "warn",
         {
@@ -169,7 +159,6 @@ export default defineConfig([
           reservedFirst: true,
         },
       ],
-
       "padding-line-between-statements": [
         "warn",
         {
@@ -257,7 +246,6 @@ coverage
 # Config files that should be formatted differently
 pnpm-lock.yaml
 yarn.lock
-
 cosmos.imports.ts
 ```
 
@@ -300,7 +288,6 @@ Create `.vscode/settings.json` in the project root:
     "source.fixAll.eslint": "explicit",
     "source.organizeImports": "never"
   },
-
   // Language-specific Settings
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
@@ -320,7 +307,6 @@ Create `.vscode/settings.json` in the project root:
   "[jsonc]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-
   // ESLint Settings
   "eslint.enable": true,
   "eslint.validate": [
@@ -329,11 +315,9 @@ Create `.vscode/settings.json` in the project root:
     "typescript",
     "typescriptreact"
   ],
-
   // Prettier Settings
   "prettier.enable": true,
   "prettier.requireConfig": true,
-
   // File Settings
   "files.eol": "\n",
   "files.insertFinalNewline": true,
@@ -373,6 +357,95 @@ bun run check
 bun run check:fix
 ```
 
+## Step 8: Set Up GitHub Actions CI
+
+Create a GitHub Actions workflow to automatically run checks, typecheck, and tests on push and pull requests.
+
+### Create GitHub Actions Workflow
+
+Create the directory `.github/workflows` if it doesn't exist, then create `ci.yml`:
+
+```bash
+mkdir -p .github/workflows
+```
+
+Create `.github/workflows/ci.yml` with the following content:
+
+```yaml
+name: CI
+
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    branches: [main, staging]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run check
+        run: bun run check
+
+      - name: Run typecheck
+        run: bun run typecheck
+
+      - name: Run tests
+        run: bun test
+```
+
+### Workflow Features
+
+- **Triggers**: Runs on push and pull requests to `main` and `staging` branches
+- **Bun Setup**: Uses the official `oven-sh/setup-bun@v2` action
+- **Dependency Caching**: Caches Bun's install cache and `node_modules` for faster builds
+- **Frozen Lockfile**: Uses `--frozen-lockfile` to ensure consistent installs
+- **Comprehensive Checks**: Runs `check`, `typecheck`, and `test` scripts
+
+### Add CI Badge to README
+
+Add a CI status badge to your `README.md` file to display the workflow status. Add the badge near the top of the README, typically right after the title:
+
+```markdown
+# Your Project Title
+
+![CI](https://github.com/YOUR_USERNAME/YOUR_REPO/actions/workflows/ci.yml/badge.svg)
+
+Your project description...
+```
+
+Replace `YOUR_USERNAME` and `YOUR_REPO` with your GitHub username and repository name.
+
+You can get these by running
+
+```bash
+> git remote get-url origin 2>/dev/null || echo "no-remote"
+```
+
+The badge will automatically update to show the status of your latest workflow run (passing, failing, or in progress) and will link to the workflow page when clicked.
+
 ## Features
 
 ### ESLint Configuration
@@ -397,6 +470,12 @@ bun run check:fix
 - **ESLint on save**: Automatically fixes ESLint issues when saving
 - **File settings**: Ensures consistent line endings and trailing whitespace handling
 
+### GitHub Actions CI
+
+- **Automated testing**: Runs checks, typecheck, and tests on every push and PR
+- **Dependency caching**: Speeds up workflow runs by caching Bun dependencies
+- **Status badge**: Visual indicator of CI status in README
+
 ## Troubleshooting
 
 ### ESLint not working in VS Code
@@ -416,3 +495,16 @@ bun run check:fix
 1. Ensure `@ianvs/prettier-plugin-sort-imports` is installed
 2. Verify the plugin is listed in `.prettierrc` plugins array
 3. Run `bun run format:fix` to manually format imports
+
+### GitHub Actions workflow not running
+
+1. Ensure the workflow file is in `.github/workflows/ci.yml`
+2. Check that you're pushing to or creating a PR targeting `main` or `staging` branches
+3. Verify the workflow file syntax is valid YAML
+4. Check the Actions tab in your GitHub repository for error messages
+
+### CI badge not displaying
+
+1. Ensure the badge URL uses the correct username and repository name
+2. Verify the workflow file is named `ci.yml` (or update the badge URL to match your workflow filename)
+3. Check that at least one workflow run has completed (badge won't show until first run)
