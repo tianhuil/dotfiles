@@ -5,10 +5,7 @@
       "headers": {
         "CONTEXT7_API_KEY": "ctx7sk-69a0330b-698d-4a7a-9c36-15f0acf6d0a8"
       },
-      "tools": [
-        "resolve-library-id",
-        "get-library-docs"
-      ]
+      "alwaysAllow": []
     },
     "serena": {
       "command": "uvx",
@@ -16,37 +13,7 @@
         "--from", "git+https://github.com/oraios/serena",
         "serena-mcp-server"
       ],
-      "tools": [
-        "read_file",
-        "create_text_file",
-        "list_dir",
-        "find_file",
-        "replace_content",
-        "search_for_pattern",
-        "get_symbols_overview",
-        "find_symbol",
-        "find_referencing_symbols",
-        "replace_symbol_body",
-        "insert_after_symbol",
-        "insert_before_symbol",
-        "rename_symbol",
-        "write_memory",
-        "read_memory",
-        "list_memories",
-        "delete_memory",
-        "edit_memory",
-        "execute_shell_command",
-        "activate_project",
-        "switch_modes",
-        "get_current_config",
-        "check_onboarding_performed",
-        "onboarding",
-        "think_about_collected_information",
-        "think_about_task_adherence",
-        "think_about_whether_you_are_done",
-        "prepare_for_new_conversation",
-        "initial_instructions"
-      ]
+      "alwaysAllow": []
     },
     "Sequential Thinking": {
       "command": "bunx",
@@ -54,9 +21,7 @@
         "-y",
         "@wemake.cx/sequential-thinking@latest"
       ],
-      "tools": [
-        "sequentialthinking"
-      ]
+      "alwaysAllow": []
     }
   }
 }
