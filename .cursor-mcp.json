@@ -22,6 +22,10 @@
         "@wemake.cx/sequential-thinking@latest"
       ],
       "alwaysAllow": []
+    },
+    "gh_grep": {
+      "url": "https://mcp.grep.app",
+      "alwaysAllow": []
     }
   }
 }
