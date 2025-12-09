@@ -7,7 +7,16 @@ Set up a modern Python repository with best practices using `uv` for package man
 3. Install `ruff` for linting and formatting
 4. Use `pyright` for typechecking.
 5. Add `.vscode/setting.json` and `.vscode/extension.json` to run ruff on save
-6. Create a sample file
+6. Create a sample python file
+
+Next, add poe, pytest, ruff, and pyright as dev dependencies.  Then add the following tasks to `pyproject.toml`:
+```
+[tool.poe.tasks]
+test = "pytest"
+lint = "ruff check ."
+format = "ruff format ."
+typecheck = "pyright"
+```
 
 Then add the following text as `AGENTS.md`
 
