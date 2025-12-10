@@ -6,7 +6,7 @@ Set up a modern Python repository with best practices using `uv` for package man
 2. `uv init` to create a bun repo
 3. Install `ruff` for linting and formatting
 4. Use `pyright` for typechecking.
-5. Add `.vscode/setting.json` and `.vscode/extension.json` to run ruff on save
+5. Add `.vscode/setting.json` and `.vscode/extension.json` to run ruff on save and enable pyright in the IDE.  Do not put `.vscode` in `.gitignore`.
 6. Create a sample python file
 
 Next, add poe, pytest, ruff, and pyright as dev dependencies.  Then add the following tasks to `pyproject.toml`:
