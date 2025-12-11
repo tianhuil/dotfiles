@@ -10,8 +10,11 @@
     "serena": {
       "command": "uvx",
       "args": [
-        "--from", "git+https://github.com/oraios/serena",
-        "serena-mcp-server"
+        "--from",
+        "git+https://github.com/oraios/serena",
+        "serena-mcp-server",
+        "--enable-web-dashboard",
+        "False"
       ],
       "alwaysAllow": []
     },
