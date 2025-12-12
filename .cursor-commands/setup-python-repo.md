@@ -37,6 +37,32 @@ Set up a modern Python repository with best practices using `uv` for package man
 ## IDE Setup
 
 5. Add `.vscode/settings.json` and `.vscode/extensions.json` to run ruff on save and enable pyright in the IDE. Do not put `.vscode` in `.gitignore`.
+
+   Create `.vscode/settings.json`:
+   ```json
+   {
+     "[python]": {
+       "editor.formatOnSave": true,
+       "editor.codeActionsOnSave": {
+         "source.fixAll": "explicit",
+         "source.organizeImports": "explicit"
+       },
+       "editor.defaultFormatter": "charliermarsh.ruff"
+     },
+     "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python"
+   }
+   ```
+
+   And `.vscode/extensions.json`:
+   ```json
+   {
+     "recommendations": [
+       "ms-python.python",
+       "ms-python.vscode-pylance",
+       "charliermarsh.ruff"
+     ]
+   }
+   ```
 6. Create a sample python file with proper typing and docstrings
 
 ## Project Structure
