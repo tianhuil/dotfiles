@@ -5,8 +5,9 @@ Set up a modern Python repository with best practices using `uv` for package man
 ## Initial Setup
 
 1. `git init` to create a git repo
-2. `uv init` to create a Python project
-3. Update `pyproject.toml` with proper project metadata and Python version requirement:
+2. Add `.gitignore` for Python
+3. `uv init` to create a Python project
+4. Update `pyproject.toml` with proper project metadata and Python version requirement:
    ```toml
    [project]
    readme = "README.md"
@@ -29,7 +30,7 @@ Set up a modern Python repository with best practices using `uv` for package man
    select = ["ALL"]
    ```
 
-4. Add development dependencies to get the latest version:
+5. Add development dependencies to get the latest version:
    ```bash
    uv add --dev poethepoet pyright pytest ruff
    ```
