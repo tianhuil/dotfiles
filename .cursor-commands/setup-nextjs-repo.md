@@ -2,27 +2,69 @@
 
 Set up a modern Next.js TypeScript repository with best practices.
 
-Here are the commands to run
+Here are the commands to run:
 
 1. `git init` to create a git repo
 2. `bun init` to create a bun repo
-3. `heroui init -t app -p bun` to create a nextjs'
+3. `heroui init -t app -p bun` to create a Next.js app with HeroUI
 4. Add `.vscode/setting.json` and `.vscode/extension.json` to reflect the above.
-5. Make sure `package.json` has a the following scripts:
+5. Configure the following files:
+
+## package.json scripts
+
+Make sure `package.json` has at least the following scripts:
 
 ```json
 {
-    "scripts": {
-        "typecheck": "tsc --noEmit",
-        "lint": "eslint .",
-        "lint:fix": "eslint --fix .",
-        "format": "prettier --check .",
-        "format:fix": "prettier --write .",
-        "check": "eslint && prettier --check . && tsc --noEmit",
-        "check:fix": "eslint --fix && prettier --write ."
-    }
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write .",
+    "spell": "cspell \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "check": "eslint . && prettier --check . && tsc --noEmit && cspell \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "check:fix": "eslint --fix . && prettier --write .",
+    "clean": "rm -rf .next && rm -rf dist && rm -rf build && rm -rf coverage",
+    "clobber": "bun run clean && rm -rf node_modules"
+  }
 }
 ```
+
+## .prettierrc
+
+Create `.prettierrc`:
+
+```json
+{
+  "semi": true,
+  "singleQuote": false,
+  "tabWidth": 2,
+  "trailingComma": "all",
+  "printWidth": 80,
+  "arrowParens": "always",
+  "endOfLine": "lf",
+  "plugins": ["@ianvs/prettier-plugin-sort-imports"],
+  "importOrder": [
+    "^(react/(.*)$)|^(react$)",
+    "^(next/(.*)$)|^(next$)",
+    "<BUILTIN_MODULES>",
+    "",
+    "<THIRD_PARTY_MODULES>",
+    "",
+    "^@/(.*)$",
+    "",
+    "^[./]"
+  ],
+  "importOrderParserPlugins": ["typescript", "jsx", "decorators-legacy"],
+  "importOrderTypeScriptVersion": "5.0.0",
+  "importOrderCaseSensitive": false
+}
+```
+
+## cspell.json
+
+Create a stub `cspell.json` for spell checking.
 
 Then add the following text as `AGENTS.md`
 
@@ -33,14 +75,15 @@ Then add the following text as `AGENTS.md`
 
 - Use `bun` for package manager (no `npm`, no `yarn`).
 
-## Coding Style
+## Coding style
 
 - Prefer to write functional code. Prefer functional primitives like `.map`, `.filter`, and `.flatMap` on arrays.
   - Instead of creating an empty array and accumulating, use functional primitives to declaratively create arrays.
   - Instead of creating an empty json object and mutation, use `Object.fromEntries` use functional primitives.
 - Prefer `const` to `let` and mutation. You can often change `let` to `const` by wrapping the complex logic in an anonymous function call (e.g. `const val = (() => { ... })()`).
 - Explicitly annotate types where practicable. Look at the libraries and import and use those types; do not make up types.
-- Always avoid using `as any`. Try to avoid `as unknown` if a known type can be used (research library types as needed).  Avoid typecasting in general by properly annotating function params and return values upstream.
+- Always avoid using `as any`. Try to avoid `as unknown` if a known type can be used (research library types as needed).
+- Avoid typecasting in general by properly annotating function params and return values upstream.
 - Add docstring to every class and function.
 - Any function or class with more than one argument should take a single object with named parameters. Function `fooBar` takes type `FooBarParam`, which should be defined immediately before `fooBar`. If the object only has a single field (e.g. `FooBarParam = {count: number}`) , do not use the object format and pass the field to the function directly (e.g. `fooBar(count: number)`).
 - When importing, prefer using a sibling absolute import path (e.g. `import * from './package/name'`). If not possible, use an absolute import path (e.g. `import * from '@/package/name'`). Never use a relative parent import path (e.g. `import * from '../package/name'`).
