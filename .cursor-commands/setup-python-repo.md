@@ -93,6 +93,7 @@ Add the following text as `AGENTS.md`:
 - Add docstring to every class and function.
 - Place `try`/`except` only at the root calling function. Do not place `try`/`except` in each intermediate or leaf function.
 - If a library is missing a pyright type (e.g. `requests`), add the types as a development dependency (e.g. `types-requests`).
+- For a multiline string, use `textwrap.dedent` and format nicely.
 
 ## Validation
 
