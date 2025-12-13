@@ -32,7 +32,7 @@ Set up a modern Python repository with best practices using `uv` for package man
 
 5. Add development dependencies to get the latest version:
    ```bash
-   uv add --dev poethepoet pyright pytest ruff
+   uv add --dev poethepoet pyright pytest ruff pip-audit
    ```
 
 ## IDE Setup
