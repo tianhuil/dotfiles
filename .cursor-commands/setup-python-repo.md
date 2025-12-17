@@ -28,6 +28,9 @@ Set up a modern Python repository with best practices using `uv` for package man
 
    [tool.ruff.lint]
    select = ["ALL"]
+
+   [tool.setuptools.packages.find]
+   where = ["src"]
    ```
 
 5. Add development dependencies to get the latest version:
@@ -69,7 +72,7 @@ Set up a modern Python repository with best practices using `uv` for package man
 ## Project Structure
 
 Create a basic project structure:
-- `main.py` or `your_module/__init__.py` - Main module
+- `src/main.py` as a hello world script
 - `README.md` - Project documentation
 - `AGENTS.md` - Coding guidelines (see below)
 
