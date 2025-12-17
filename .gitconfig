@@ -3,7 +3,7 @@
 	email = tianhuil@cs.princeton.edu
 [core]
 	excludesfile = ~/.gitignore_global
-	editor = "code --wait"
+	editor = "cursor --wait"
 [filter "media"]
 	clean = git-media-clean %f
 	smudge = git-media-smudge %f
@@ -40,6 +40,6 @@
 	cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
 	trustExitCode = true
 [diff]
-    tool = vscode
-[difftool "vscode"]
-    cmd = code --wait --diff $LOCAL $REMOTE
+    tool = cursor
+[difftool "cursor"]
+    cmd = cursor --wait --diff $LOCAL $REMOTE
