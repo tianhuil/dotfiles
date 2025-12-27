@@ -74,6 +74,7 @@ Then add the following text as `AGENTS.md`
 ## General
 
 - Use `bun` for package manager (no `npm`, no `yarn`).
+- Unless the code fix is trivial, search `context7` and `gh_grep` mcp tools to research relevant libraries before writing code.  Only use web search if instructed or the previous tools do not work.
 
 ## Coding style
 

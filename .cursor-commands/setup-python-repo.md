@@ -86,6 +86,7 @@ Add the following text as `AGENTS.md`:
 ## General
 
 - Use `uv` for package manager.
+- Unless the code fix is trivial, search `context7` and `gh_grep` mcp tools to research relevant libraries before writing code.  Only use web search if instructed or the previous tools do not work.
 
 ## Coding Style
 
