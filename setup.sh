@@ -9,6 +9,9 @@ cp .gitconfig ~/.
 cp .tmux.conf ~/.
 cp .stubby.yml ~/.
 cp .cursor-mcp.json ~/.cursor/mcp.json
+# create ~/.kilocode if it doesn't exist
+[ ! -d ~/.kilocode ] && mkdir -p ~/.kilocode
+cp .kilocode/config.json ~/.kilocode/config.json
 cp git-completion.sh ~/.git-completion.sh
 cp git-prompt.sh ~/.git-prompt.sh
 cp -R .scripts ~/.
