@@ -1,4 +1,38 @@
 {
+  "mcpServers": {
+    "Sequential Thinking": {
+      "command": "bunx",
+      "args": [
+        "-y",
+        "@wemake.cx/sequential-thinking@latest"
+      ],
+      "alwaysAllow": []
+    },
+    "context7": {
+      "type": "streamable-http",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "ctx7sk-69a0330b-698d-4a7a-9c36-15f0acf6d0a8"
+      },
+      "alwaysAllow": []
+    },
+    "gh_grep": {
+      "type": "streamable-http",
+      "url": "https://mcp.grep.app",
+      "alwaysAllow": []
+    },
+    "serena": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/oraios/serena",
+        "serena-mcp-server",
+        "--enable-web-dashboard",
+        "False"
+      ],
+      "alwaysAllow": []
+    }
+  },
   "language": "en",
   "modes": {
     "code": {

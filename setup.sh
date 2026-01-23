@@ -8,6 +8,7 @@ cp .npmrc ~/.
 cp .gitconfig ~/.
 cp .tmux.conf ~/.
 cp .stubby.yml ~/.
+cp .cursor-mcp.json ~/.cursor-mcp.json
 cp .cursor-mcp.json ~/.cursor/mcp.json
 # create ~/.kilocode if it doesn't exist
 [ ! -d ~/.kilocode ] && mkdir -p ~/.kilocode
