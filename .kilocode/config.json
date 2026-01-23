@@ -6,7 +6,9 @@
         "-y",
         "@wemake.cx/sequential-thinking@latest"
       ],
-      "alwaysAllow": []
+      "alwaysAllow": [
+        "sequentialthinking"
+      ]
     },
     "context7": {
       "type": "streamable-http",
@@ -14,12 +16,17 @@
       "headers": {
         "CONTEXT7_API_KEY": "ctx7sk-69a0330b-698d-4a7a-9c36-15f0acf6d0a8"
       },
-      "alwaysAllow": []
+      "alwaysAllow": [
+        "query-docs",
+        "resolve-library-id"
+      ]
     },
     "gh_grep": {
       "type": "streamable-http",
       "url": "https://mcp.grep.app",
-      "alwaysAllow": []
+      "alwaysAllow": [
+        "searchGitHub"
+      ]
     },
     "serena": {
       "command": "uvx",
@@ -30,7 +37,37 @@
         "--enable-web-dashboard",
         "False"
       ],
-      "alwaysAllow": []
+      "alwaysAllow": [
+        "activate_project",
+        "check_onboarding_performed",
+        "create_text_file",
+        "delete_memory",
+        "edit_memory",
+        "execute_shell_command",
+        "find_file",
+        "find_referencing_symbols",
+        "find_symbol",
+        "get_current_config",
+        "get_symbols_overview",
+        "initial_instructions",
+        "insert_after_symbol",
+        "insert_before_symbol",
+        "list_dir",
+        "list_memories",
+        "onboarding",
+        "prepare_for_new_conversation",
+        "read_file",
+        "read_memory",
+        "rename_symbol",
+        "replace_content",
+        "replace_symbol_body",
+        "search_for_pattern",
+        "switch_modes",
+        "think_about_collected_information",
+        "think_about_task_adherence",
+        "think_about_whether_you_are_done",
+        "write_memory"
+      ]
     }
   },
   "language": "en",
