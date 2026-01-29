@@ -13,23 +13,23 @@ Install the required ESLint and Prettier packages:
 
 ```bash
 bun add -d \
-  eslint@9.25.1 \
+  eslint@^9.25.1 \
   @eslint/compat@^1.4.1 \
   @eslint/eslintrc \
   @eslint/js \
-  @typescript-eslint/eslint-plugin@8.34.1 \
-  @typescript-eslint/parser@8.34.1 \
-  eslint-plugin-import@2.31.0 \
-  eslint-plugin-jsx-a11y@6.10.2 \
-  eslint-plugin-prettier@5.2.1 \
-  eslint-plugin-react@7.37.5 \
-  eslint-plugin-react-hooks@5.2.0 \
-  eslint-plugin-unused-imports@4.1.4 \
-  globals@16.0.0 \
-  prettier@3.5.3 \
+  @typescript-eslint/eslint-plugin@^8.34.1 \
+  @typescript-eslint/parser@^8.34.1 \
+  eslint-plugin-import@^2.31.0 \
+  eslint-plugin-jsx-a11y@^6.10.2 \
+  eslint-plugin-prettier@^5.2.1 \
+  eslint-plugin-react@^7.37.5 \
+  eslint-plugin-react-hooks@^5.2.0 \
+  eslint-plugin-unused-imports@^4.1.4 \
+  globals@^16.0.0 \
+  prettier@^3.5.3 \
   @ianvs/prettier-plugin-sort-imports@^4.7.0 \
-  eslint-config-prettier@9.1.0 \
-  @next/eslint-plugin-next@15.3.4
+  eslint-config-prettier@^9.1.0 \
+  @next/eslint-plugin-next@^15.3.4
 ```
 
 ## Step 2: Create ESLint Configuration
