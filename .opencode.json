@@ -46,5 +46,51 @@
     "serena": true,
     "sequential_thinking": true
   },
-  "plugin": ["opencode-antigravity-auth@latest"]
+  "plugin": ["opencode-gemini-auth@latest"],
+  "provider": {
+    "google": {
+      "models": {
+        "gemini-2.5-flash": {
+          "options": {
+            "thinkingConfig": {
+              "thinkingBudget": 8192,
+              "includeThoughts": true
+            }
+          }
+        },
+        "gemini-2.5-pro": {
+          "options": {
+            "thinkingConfig": {
+              "thinkingBudget": 8192,
+              "includeThoughts": true
+            }
+          }
+        },
+        "gemini-3-flash": {
+          "options": {
+            "thinkingConfig": {
+              "thinkingLevel": "high",
+              "includeThoughts": true
+            }
+          }
+        },
+        "gemini-2.5-flash-lite": {
+          "options": {
+            "thinkingConfig": {
+              "thinkingLevel": "low",
+              "includeThoughts": true
+            }
+          }
+        },
+        "gemini-3-pro-preview": {
+          "options": {
+            "thinkingConfig": {
+              "thinkingLevel": "high",
+              "includeThoughts": true
+            }
+          }
+        }
+      }
+    }
+  }
 }
