@@ -45,5 +45,6 @@
     "gh_grep": true,
     "serena": true,
     "sequential_thinking": true
-  }
+  },
+  "plugin": ["opencode-antigravity-auth@latest"]
 }
