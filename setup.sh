@@ -41,4 +41,8 @@ cp -f .cursor-commands/*.md ~/.cursor/commands/
 mkdir -p ~/.config/opencode
 cp -f .opencode.json ~/.config/opencode/opencode.json
 
+# copy opencode commands
+mkdir -p ~/.config/opencode/commands
+cp -f .opencode/commands/*.md ~/.config/opencode/commands/
+
 echo "Copied all dotfiles to home directory"

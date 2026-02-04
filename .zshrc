@@ -87,6 +87,10 @@ if command -v zoxide &>/dev/null; then
   eval "$(zoxide init zsh)"
 fi
 
+if command -v wtp &>/dev/null; then
+  eval "$(wtp shell-init zsh)"
+fi
+
 # User configuration
 
 # export MANPATH="/usr/local/man:$MANPATH"
