@@ -46,9 +46,8 @@
     "serena": true,
     "sequential_thinking": true
   },
-  "plugin": ["opencode-gemini-auth@latest"],
   "provider": {
-    "google": {
+    "google-vertex-ai": {
       "models": {
         "gemini-2.5-flash": {
           "options": {
