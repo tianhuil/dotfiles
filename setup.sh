@@ -45,4 +45,8 @@ cp -f .opencode.json ~/.config/opencode/opencode.json
 mkdir -p ~/.config/opencode/commands
 cp -f .opencode/commands/*.md ~/.config/opencode/commands/
 
+# copy opencode agents
+mkdir -p ~/.config/opencode/agents
+cp -f .opencode/agents/*.md ~/.config/opencode/agents/
+
 echo "Copied all dotfiles to home directory"
