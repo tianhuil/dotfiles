@@ -10,7 +10,7 @@ echo .gitconfig
 diff .gitconfig ~/.gitconfig
 echo .tmux.conf
 diff .tmux.conf ~/.tmux.conf
-echo git-completion.sh
-diff git-completion.sh ~/.git-completion.sh
-echo git-prompt.sh
-diff git-prompt.sh ~/.git-prompt.sh
+echo .git-completion.sh
+diff .git-completion.sh ~/.git-completion.sh
+echo .git-prompt.sh
+diff .git-prompt.sh ~/.git-prompt.sh
