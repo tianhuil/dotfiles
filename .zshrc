@@ -88,7 +88,7 @@ if command -v zoxide &>/dev/null; then
 fi
 
 if command -v wtp &>/dev/null; then
-  eval "$(wtp shell-init zsh)"
+  eval "$(wtp completion zsh)"
 fi
 
 # User configuration

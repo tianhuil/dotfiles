@@ -62,5 +62,5 @@ export EVENT_NOKQUEUE=1
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 
 if command -v wtp &>/dev/null; then
-  eval "$(wtp shell-init bash)"
+  eval "$(wtp completion bash)"
 fi
