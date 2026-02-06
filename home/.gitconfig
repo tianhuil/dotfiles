@@ -1,0 +1,45 @@
+[user]
+	name = Tianhui Michael Li
+	email = tianhuil@cs.princeton.edu
+[core]
+	excludesfile = ~/.gitignore_global
+	editor = "cursor --wait"
+[filter "media"]
+	clean = git-media-clean %f
+	smudge = git-media-smudge %f
+[pull]
+	rebase = true
+[init]
+  defaultBranch = main
+[alias]
+	co = checkout
+	st = status
+	ci = commit
+	br = branch
+	hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
+	tree = log --pretty=oneline --graph --decorate
+	tree-all = log --pretty=oneline --graph --decorate --all
+	gb = !~/.scripts/git-grep-blame.sh
+	type = cat-file -t
+	dump = cat-file -p
+	nl = log --name-only
+	cp = cherry-pick
+	track = "!git branch --set-upstream-to=origin/`git symbolic-ref --short HEAD`"  # http://stackoverflow.com/questions/17847213/how-to-configure-git-push-to-automatically-set-upstream-without-u
+	file-size-diff = !~/.scripts/file-size-diff.sh
+[push]
+	default = simple
+	autoSetupRemote = true
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	required = true
+	process = git-lfs filter-process
+[branch]
+	autosetuprebase = always
+[mergetool "sourcetree"]
+	cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+	trustExitCode = true
+[diff]
+    tool = cursor
+[difftool "cursor"]
+    cmd = cursor --wait --diff $LOCAL $REMOTE

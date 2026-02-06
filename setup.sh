@@ -1,24 +1,24 @@
-cp .bashrc ~/.
-cp .bashrc ~/.bash_profile
-cp .inputrc ~/.
-cp .zshrc ~/.
-cp .zprofile ~/.zprofile
-cp .corerc ~/.
-cp .npmrc ~/.
-cp .gitconfig ~/.
-cp .tmux.conf ~/.
-cp .stubby.yml ~/.
-cp .git-completion.sh ~/.
-cp .git-prompt.sh ~/.
-cp .gitignore_global ~/.
+cp home/.bashrc ~/.
+cp home/.bashrc ~/.bash_profile
+cp home/.inputrc ~/.
+cp home/.zshrc ~/.
+cp home/.zprofile ~/.zprofile
+cp home/.corerc ~/.
+cp home/.npmrc ~/.
+cp home/.gitconfig ~/.
+cp home/.tmux.conf ~/.
+cp home/.stubby.yml ~/.
+cp home/.git-completion.sh ~/.
+cp home/.git-prompt.sh ~/.
+cp home/.gitignore_global ~/.
 
 # Directories with perfect mapping
-cp -R .cursor/ ~/.cursor/
-cp -R .kilocode/ ~/.kilocode/
-cp -R .local/ ~/.local/
-cp -R .nvm/ ~/.nvm/
-cp -R .opencode/ ~/.config/opencode/
-cp -R .scripts/ ~/.scripts/
+cp -R home/.cursor/ ~/.cursor/
+cp -R home/.kilocode/ ~/.kilocode/
+cp -R home/.local/ ~/.local/
+cp -R home/.nvm/ ~/.nvm/
+cp -R home/.opencode/ ~/.config/opencode/
+cp -R home/.scripts/ ~/.scripts/
 
 # Git config
 git config --global core.excludesfile ~/.gitignore_global

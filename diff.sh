@@ -1,16 +1,16 @@
 echo .bashrc
-diff .bashrc ~/.bashrc
+diff home/.bashrc ~/.bashrc
 echo .inputrc
-diff .inputrc ~/.inputrc
+diff home/.inputrc ~/.inputrc
 echo .npmrc
-diff .npmrc ~/.npmrc
+diff home/.npmrc ~/.npmrc
 echo .gitignore_global
-diff .gitignore_global ~/.gitignore_global
+diff home/.gitignore_global ~/.gitignore_global
 echo .gitconfig
-diff .gitconfig ~/.gitconfig
+diff home/.gitconfig ~/.gitconfig
 echo .tmux.conf
-diff .tmux.conf ~/.tmux.conf
+diff home/.tmux.conf ~/.tmux.conf
 echo .git-completion.sh
-diff .git-completion.sh ~/.git-completion.sh
+diff home/.git-completion.sh ~/.git-completion.sh
 echo .git-prompt.sh
-diff .git-prompt.sh ~/.git-prompt.sh
+diff home/.git-prompt.sh ~/.git-prompt.sh

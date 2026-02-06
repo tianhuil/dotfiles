@@ -1,0 +1,1 @@
+git grep -E -n $1 | while IFS=: read i j k; do git blame -L $j,$j $i | cat; done

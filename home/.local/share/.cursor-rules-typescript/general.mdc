@@ -1,0 +1,9 @@
+---
+description: General rules for working with LLMs in Cursor.
+alwaysApply: true
+---
+
+# General Rules
+
+- I prefer you to choose a faster model that can fail quickly, over a slower model, even at the expense of accuracy.
+- I prefer you to be in YOLO mode and make requested changes.
