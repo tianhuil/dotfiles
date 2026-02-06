@@ -12,38 +12,39 @@ This repository follows a **perfect mapping** architecture where the directory s
 ## Directory Structure
 
 ```
-.cursor/              → ~/.cursor/              (Cursor editor configs)
-  └─ commands/        → ~/.cursor/commands/    (Cursor AI commands)
-  └─ rules/           → ~/.cursor/rules/       (Cursor rules)
-  └─ mcp.json         → ~/.cursor/mcp.json     (Cursor MCP config)
-.kilocode/            → ~/.kilocode/            (AI tool configs)
-.local/               → ~/.local/               (XDG local data)
-  ├─ bin/             → ~/.local/bin/           (Executable scripts)
-  └─ share/           → ~/.local/share/        (Shared data files)
-    └─ .cursor-rules-typescript/
-    └─ .vscode-settings.json
-    └─ biome.json
-.nvm/                 → ~/.nvm/                 (Node version manager)
-  └─ default-packages
-.opencode/            → ~/.config/opencode/     (AI agent configs)
-  ├─ agents/
-  ├─ commands/
-  ├─ opencode.json
-  └─ (package files)
-.scripts/             → ~/.scripts/             (Utility scripts)
-.git-completion.sh    → ~/.git-completion.sh    (Git bash completion)
-.git-prompt.sh        → ~/.git-prompt.sh        (Git prompt for bash)
-.gitconfig            → ~/.gitconfig            (Git global config)
-.gitignore_global     → ~/.gitignore_global     (Global git ignores)
-.inputrc              → ~/.inputrc              (Readline config)
-.tmux.conf            → ~/.tmux.conf            (Tmux config)
-.zshrc                → ~/.zshrc                (Zsh config)
-.zprofile             → ~/.zprofile             (Zsh profile)
-.bashrc               → ~/.bashrc               (Bash config)
-.bash_profile         → ~/.bash_profile         (Bash profile - same source as .bashrc)
-.corerc               → ~/.corerc               (Core AI config)
-.npmrc                → ~/.npmrc                (Npm config)
-.stubby.yml           → ~/.stubby.yml           (Stubby DNS config)
+home/
+├─ .cursor/              → ~/.cursor/              (Cursor editor configs)
+│  └─ commands/          → ~/.cursor/commands/    (Cursor AI commands)
+│  └─ rules/             → ~/.cursor/rules/       (Cursor rules)
+│  └─ mcp.json           → ~/.cursor/mcp.json     (Cursor MCP config)
+├─ .kilocode/            → ~/.kilocode/            (AI tool configs)
+├─ .local/               → ~/.local/               (XDG local data)
+│  ├─ bin/               → ~/.local/bin/           (Executable scripts)
+│  └─ share/             → ~/.local/share/        (Shared data files)
+│     └─ .cursor-rules-typescript/
+│     └─ .vscode-settings.json
+│     └─ biome.json
+├─ .nvm/                 → ~/.nvm/                 (Node version manager)
+│  └─ default-packages
+├─ .opencode/            → ~/.config/opencode/     (AI agent configs)
+│  ├─ agents/
+│  ├─ commands/
+│  ├─ opencode.json
+│  └─ (package files)
+├─ .scripts/             → ~/.scripts/             (Utility scripts)
+├─ .git-completion.sh    → ~/.git-completion.sh    (Git bash completion)
+├─ .git-prompt.sh        → ~/.git-prompt.sh        (Git prompt for bash)
+├─ .gitconfig            → ~/.gitconfig            (Git global config)
+├─ .gitignore_global     → ~/.gitignore_global     (Global git ignores)
+├─ .inputrc              → ~/.inputrc              (Readline config)
+├─ .tmux.conf            → ~/.tmux.conf            (Tmux config)
+├─ .zshrc                → ~/.zshrc                (Zsh config)
+├─ .zprofile             → ~/.zprofile             (Zsh profile)
+├─ .bashrc               → ~/.bashrc               (Bash config)
+├─ .bash_profile         → ~/.bash_profile         (Bash profile - same source as .bashrc)
+├─ .corerc               → ~/.corerc               (Core AI config)
+├─ .npmrc                → ~/.npmrc                (Npm config)
+└─ .stubby.yml           → ~/.stubby.yml           (Stubby DNS config)
 ```
 
 ## Installation
@@ -55,7 +56,7 @@ Run the setup script to copy all files to home directory:
 ```
 
 This will:
-1. Copy all top-level dotfiles to `~/`
+1. Copy all files from `home/` to `~/`
 2. Recursively copy directories to their corresponding locations
 3. Set appropriate permissions on executable files
 4. Configure git to use the global ignore file
@@ -64,7 +65,7 @@ This will:
 
 ## Viewing Changes
 
-To see differences between repository files and installed files:
+To see differences between repository files in `home/` and installed files:
 
 ```bash
 ./diff.sh
