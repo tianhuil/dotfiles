@@ -27,6 +27,7 @@ This repository follows a **perfect mapping** architecture where the directory s
 .opencode/            → ~/.config/opencode/     (AI agent configs)
   ├─ agents/
   ├─ commands/
+  ├─ opencode.json
   └─ (package files)
 .scripts/             → ~/.scripts/             (Utility scripts)
 .git-completion.sh    → ~/.git-completion.sh    (Git bash completion)
@@ -44,7 +45,6 @@ This repository follows a **perfect mapping** architecture where the directory s
 .stubby.yml           → ~/.stubby.yml           (Stubby DNS config)
 .cursor-mcp.json      → ~/.cursor-mcp.json      (Cursor MCP config)
                       → ~/.cursor/mcp.json      (Secondary copy)
-.opencode.json        → ~/.config/opencode/opencode.json (OpenCode config)
 ```
 
 ## Installation
@@ -75,5 +75,4 @@ To see differences between repository files and installed files:
 
 - `.bashrc` is also copied to `~/.bash_profile` (for macOS login shells)
 - `.cursor-mcp.json` is copied to both `~/.cursor-mcp.json` and `~/.cursor/mcp.json`
-- `.opencode.json` is copied to `~/.config/opencode/opencode.json` (not `~/.opencode.json`)
 - `.opencode/` directory is copied to `~/.config/opencode/` (not `~/.opencode/`)

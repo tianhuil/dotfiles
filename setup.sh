@@ -23,7 +23,6 @@ cp -R .scripts/ ~/.scripts/
 
 # Special cases
 cp .cursor-mcp.json ~/.cursor/mcp.json
-cp .opencode.json ~/.config/opencode/opencode.json
 
 # Git config
 git config --global core.excludesfile ~/.gitignore_global
