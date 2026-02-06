@@ -38,13 +38,25 @@
       ],
       "enabled": true,
       "timeout": 5000
+    },
+    "playwright": {
+      "type": "local",
+      "command": [
+        "uvx",
+        "--from",
+        "mcp-playwright",
+        "playwright"
+      ],
+      "enabled": true,
+      "timeout": 10000
     }
   },
   "tools": {
     "context7": true,
     "gh_grep": true,
     "serena": true,
-    "sequential_thinking": true
+    "sequential_thinking": true,
+    "playwright": true
   },
   "provider": {
     "google-vertex-ai": {
