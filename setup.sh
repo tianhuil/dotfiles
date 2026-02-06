@@ -8,7 +8,6 @@ cp .npmrc ~/.
 cp .gitconfig ~/.
 cp .tmux.conf ~/.
 cp .stubby.yml ~/.
-cp .cursor-mcp.json ~/.
 cp .git-completion.sh ~/.
 cp .git-prompt.sh ~/.
 cp .gitignore_global ~/.
@@ -20,9 +19,6 @@ cp -R .local/ ~/.local/
 cp -R .nvm/ ~/.nvm/
 cp -R .opencode/ ~/.config/opencode/
 cp -R .scripts/ ~/.scripts/
-
-# Special cases
-cp .cursor-mcp.json ~/.cursor/mcp.json
 
 # Git config
 git config --global core.excludesfile ~/.gitignore_global

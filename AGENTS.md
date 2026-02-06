@@ -15,6 +15,7 @@ This repository follows a **perfect mapping** architecture where the directory s
 .cursor/              → ~/.cursor/              (Cursor editor configs)
   └─ commands/        → ~/.cursor/commands/    (Cursor AI commands)
   └─ rules/           → ~/.cursor/rules/       (Cursor rules)
+  └─ mcp.json         → ~/.cursor/mcp.json     (Cursor MCP config)
 .kilocode/            → ~/.kilocode/            (AI tool configs)
 .local/               → ~/.local/               (XDG local data)
   ├─ bin/             → ~/.local/bin/           (Executable scripts)
@@ -43,8 +44,6 @@ This repository follows a **perfect mapping** architecture where the directory s
 .corerc               → ~/.corerc               (Core AI config)
 .npmrc                → ~/.npmrc                (Npm config)
 .stubby.yml           → ~/.stubby.yml           (Stubby DNS config)
-.cursor-mcp.json      → ~/.cursor-mcp.json      (Cursor MCP config)
-                      → ~/.cursor/mcp.json      (Secondary copy)
 ```
 
 ## Installation
@@ -74,5 +73,4 @@ To see differences between repository files and installed files:
 ## Special Cases
 
 - `.bashrc` is also copied to `~/.bash_profile` (for macOS login shells)
-- `.cursor-mcp.json` is copied to both `~/.cursor-mcp.json` and `~/.cursor/mcp.json`
 - `.opencode/` directory is copied to `~/.config/opencode/` (not `~/.opencode/`)
