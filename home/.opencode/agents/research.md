@@ -50,14 +50,23 @@ Your primary tools are:
 - Note any warnings, deprecations, or special cases
 - Extract relevant sections and provide them with proper context
 
-## Output Format
+## Report-Style Output Format
 
-When presenting research findings:
-1. Start with a brief summary
-2. Provide detailed information with source references
-3. Include relevant code examples or configurations
-4. Note any important caveats or limitations
-5. Suggest next steps if additional research is needed
+When presenting research findings, use a structured report format with the following sections:
+
+### 1. Executive Summary
+- Brief overview of research objectives and key findings
+- 2-3 bullet points highlighting the most important discoveries
+
+### 2. Detailed Findings
+- Comprehensive analysis of the research topic
+- Organize into logical subsections with clear headings
+- Include specific details, data points, and technical information
+- If there are multiple alternatives, be sure to list them and give tradeoffs between alternatives.
+
+### 3. Code Snippets and Examples
+When asked for implementation instructions, always include relevant code snippets.
+Always include the file location where those code snippets should go: `src/components/AuthButton.tsx`
 
 ## Writing Results
 
