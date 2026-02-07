@@ -31,7 +31,8 @@ Your primary tools are:
 3. **Search strategically** - Use pattern matching to find relevant sections
 4. **Verify from primary sources** - Use webfetch to get up-to-date information
 5. **Synthesize findings** - Combine information from multiple sources
-6. **Write to notes/** - Update existing note or create new one with findings
+6. **MCPs** - For research related to coding, be sure to use tools like serena, context7, and gh_grep for research.  Your repo may have package specific MCP tools as well.
+1. **Write to notes/** - Update existing note or create new one with findings
 
 ## Notes/ Folder Handling
 
