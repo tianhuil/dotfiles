@@ -436,14 +436,6 @@ from myapp.lib.logger import logger
 
 
 @dataclass
-class ProcessBulkExportParams:
-    """Parameters for processing a bulk user export."""
-    user_ids: list[str]
-    format: Literal["csv", "json"]
-    include_profile: bool = False
-
-
-@dataclass
 class ProcessBulkExportResult:
     """Result of a bulk export operation."""
     total_users: int
@@ -476,16 +468,15 @@ async def handle_bulk_export(
     include_profile: bool = False
 ) -> dict[str, Any]:
     """Handles a bulk user export request from API.
-    
+
     Validates inputs, fetches user data, and generates export file.
     """
     try:
-        params = ProcessBulkExportParams(
+        result = await process_bulk_export(
             user_ids=user_ids,
-            format=format_type,  # type: ignore[arg-type]
+            format_type=format_type,  # type: ignore[arg-type]
             include_profile=include_profile
         )
-        result = await process_bulk_export(params)
 
         return {
             "success": True,
@@ -500,23 +491,27 @@ async def handle_bulk_export(
 
 
 async def process_bulk_export(
-    params: ProcessBulkExportParams
+    user_ids: list[str],
+    format_type: Literal["csv", "json"],
+    include_profile: bool = False
 ) -> ProcessBulkExportResult:
     """Processes a bulk export of user data.
 
     Args:
-        params: Export configuration parameters
+        user_ids: List of user IDs to export
+        format_type: Export format (csv or json)
+        include_profile: Whether to include profile data
 
     Returns:
         Export operation results
     """
-    users = await fetch_users_by_ids(params.user_ids)
+    users = await fetch_users_by_ids(user_ids)
 
-    if params.include_profile:
+    if include_profile:
         enriched_users = await enrich_users_with_profiles(users)
-        return generate_export(enriched_users, params.format)
+        return generate_export(enriched_users, format_type)
 
-    return generate_export(users, params.format)
+    return generate_export(users, format_type)
 
 
 async def fetch_users_by_ids(user_ids: list[str]) -> list[User]:
