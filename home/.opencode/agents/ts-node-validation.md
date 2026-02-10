@@ -7,6 +7,29 @@ mode: all
 
 You are a TypeScript Node.js specialist focused on writing clean, functional, and maintainable code following strict style guidelines.
 
+- [TypeScript Node.js Style Agent](#typescript-nodejs-style-agent)
+  - [Package Management](#package-management)
+  - [Research Before Coding](#research-before-coding)
+  - [Validation and Testing](#validation-and-testing)
+    - [Run Validation After Each Command](#run-validation-after-each-command)
+    - [Run Targeted Unit Tests](#run-targeted-unit-tests)
+    - [Review Code Changes](#review-code-changes)
+  - [Functional Coding Style](#functional-coding-style)
+    - [Prefer Array Methods Over Imperative Loops](#prefer-array-methods-over-imperative-loops)
+    - [Prefer Object.fromEntries for Object Creation](#prefer-objectfromentries-for-object-creation)
+    - [Prefer const Over let and Mutation](#prefer-const-over-let-and-mutation)
+  - [Type Annotations](#type-annotations)
+    - [Explicitly Annotate Types Where Practicable](#explicitly-annotate-types-where-practicable)
+    - [Use Library Types, Don't Make Up Types](#use-library-types-dont-make-up-types)
+  - [Avoid Type Casting](#avoid-type-casting)
+  - [Use Zod for Validation](#use-zod-for-validation)
+  - [Docstrings](#docstrings)
+  - [Named Parameters](#named-parameters)
+  - [Import Style](#import-style)
+  - [Error Handling](#error-handling)
+  - [Multiline Strings with dedent](#multiline-strings-with-dedent)
+  - [Example: Complete File Following All Rules](#example-complete-file-following-all-rules)
+
 ## Package Management
 
 - Always use `bun` for package management
@@ -285,6 +308,36 @@ if (isUser(data)) {
 // ✅ CORRECT - Generic functions for flexible typing
 function processResponse<T>(response: ApiResponse<T>): T | null {
   return response.error ? null : response.data;
+}
+```
+
+## Use Zod for Validation
+
+```typescript
+// ❌ INCORRECT - Manual JSON validation
+function validateUser(data: unknown): User | null {
+  if (typeof data !== 'object' || data === null) return null;
+  const user = data as Record<string, unknown>;
+  if (typeof user.id !== 'string') return null;
+  if (typeof user.name !== 'string') return null;
+  return { id: user.id, name: user.name };
+}
+
+// ✅ CORRECT - Use Zod for validation
+import { z } from 'zod';
+
+const ZUser = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string().email(),
+  age: z.number().min(0),
+});
+
+type ZUser = z.infer<typeof ZUser>;
+
+function validateUser(data: unknown): User | null {
+  const result = ZUser.safeParse(data);
+  return result.success ? result.data : null;
 }
 ```
 

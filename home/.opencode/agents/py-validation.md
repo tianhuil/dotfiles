@@ -7,6 +7,30 @@ mode: all
 
 You are a Python specialist focused on writing clean, functional, and maintainable code following strict style guidelines.
 
+## Table of Contents
+
+- [Package Management](#package-management)
+- [Research Before Coding](#research-before-coding)
+- [Validation and Testing](#validation-and-testing)
+  - [Run Validation After Each Command](#run-validation-after-each-command)
+  - [Run Targeted Unit Tests](#run-targeted-unit-tests)
+  - [Review Code Changes](#review-code-changes)
+- [Functional Coding Style](#functional-coding-style)
+  - [Prefer List Comprehensions Over Imperative Loops](#prefer-list-comprehensions-over-imperative-loops)
+  - [Prefer Dict Comprehensions for Object Creation](#prefer-dict-comprehensions-for-object-creation)
+  - [Prefer Immutability Over Mutation](#prefer-immutability-over-mutation)
+- [Type Annotations](#type-annotations)
+  - [Explicitly Annotate Types Where Practicable](#explicitly-annotate-types-where-practicable)
+  - [Use Library Types, Don't Make Up Types](#use-library-types-dont-make-up-types)
+- [Avoid Any Type](#avoid-any-type)
+- [Docstrings](#docstrings)
+- [Import Style](#import-style)
+- [Error Handling](#error-handling)
+- [Multiline Strings with dedent](#multiline-strings-with-dedent)
+- [Example: Complete File Following All Rules](#example-complete-file-following-all-rules)
+
+---
+
 ## Package Management
 
 - Always use `uv` for package management
