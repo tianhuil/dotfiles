@@ -39,6 +39,53 @@ context7_query-docs(libraryId: '/colinhacks/zod', query: 'How to validate email 
 gh_grep_searchGitHub(query: 'z.string().email()', language: ['TypeScript'])
 ```
 
+## Validation and Testing
+
+### Run Validation After Each Command
+
+If the below commands are defined, run them for validation:
+
+```bash
+# Run after each non-trivial code change
+bun run typecheck && bun run check:fix
+
+# This runs:
+# - tsc --noEmit (type checking)
+# - eslint --fix . (linting with auto-fix)
+# - prettier --write . (formatting)
+
+# If there are errors in other files being worked on by another agent, ignore those.
+# Only fix errors in files you modified.
+```
+
+### Run Targeted Unit Tests
+
+```bash
+# Only run tests for the specific test file you're writing
+bun test src/utils/user.test.ts
+
+# Do not run the entire test suite
+# Ignore all other test failures (don't try to fix them)
+```
+
+### Review Code Changes
+
+```bash
+# After making changes, review your work
+git diff
+
+# Verify the changes follow all "Coding Style" rules:
+# - ✓ Uses functional primitives (.map, .filter, .flatMap)
+# - ✓ Prefers const over let
+# - ✓ Has explicit type annotations
+# - ✓ Avoids type casting
+# - ✓ Has docstrings on all classes/functions
+# - ✓ Uses named parameters for 2+ args
+# - ✓ Uses sibling absolute imports
+# - ✓ Has try/catch only at root level
+# - ✓ Uses dedent for multiline strings
+```
+
 ## Functional Coding Style
 
 ### Prefer Array Methods Over Imperative Loops
@@ -371,6 +418,21 @@ import { formatCurrency } from '@/utils/currency';
 // ❌ INCORRECT - Relative parent import path
 import { API } from '../../shared/api';
 import { formatCurrency } from '../../../utils/currency';
+
+// ✅ CORRECT - Group and order imports logically
+import React, { useState } from 'react';
+import type { NextPage } from 'next';
+
+import { Button } from '@/components/Button';
+import { Input } from '@/components/Input';
+
+import { formatCurrency } from '@/utils/currency';
+import { formatDate } from '@/utils/date';
+
+import type { User } from '@/types';
+import type { Product } from '@/types';
+
+import styles from './ProductList.module.css';
 ```
 
 ## Error Handling
@@ -459,53 +521,6 @@ const sql = `SELECT
   users.email
 FROM users
 WHERE users.active = true`;
-```
-
-## Validation and Testing
-
-### Run Validation After Each Command
-
-If the below commands are defined, run them for validation:
-
-```bash
-# Run after each non-trivial code change
-bun run typecheck && bun run check:fix
-
-# This runs:
-# - tsc --noEmit (type checking)
-# - eslint --fix . (linting with auto-fix)
-# - prettier --write . (formatting)
-
-# If there are errors in other files being worked on by another agent, ignore those.
-# Only fix errors in files you modified.
-```
-
-### Run Targeted Unit Tests
-
-```bash
-# Only run tests for the specific test file you're writing
-bun test src/utils/user.test.ts
-
-# Do not run the entire test suite
-# Ignore all other test failures (don't try to fix them)
-```
-
-### Review Code Changes
-
-```bash
-# After making changes, review your work
-git diff
-
-# Verify the changes follow all "Coding Style" rules:
-# - ✓ Uses functional primitives (.map, .filter, .flatMap)
-# - ✓ Prefers const over let
-# - ✓ Has explicit type annotations
-# - ✓ Avoids type casting
-# - ✓ Has docstrings on all classes/functions
-# - ✓ Uses named parameters for 2+ args
-# - ✓ Uses sibling absolute imports
-# - ✓ Has try/catch only at root level
-# - ✓ Uses dedent for multiline strings
 ```
 
 ## Example: Complete File Following All Rules
