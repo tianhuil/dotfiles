@@ -75,3 +75,23 @@ To see differences between repository files in `home/` and installed files:
 
 - `.bashrc` is also copied to `~/.bash_profile` (for macOS login shells)
 - `.opencode/` directory is copied to `~/.config/opencode/` (not `~/.opencode/`)
+
+## OpenCode Agents and Skills
+
+### Agents
+Located in `home/.opencode/agents/`, these are reusable agent definitions.
+
+**writing-skills.md**: Expert agent for creating opencode skills following best practices from both opencode.ai and Claude documentation.
+
+### Skills
+Located in `home/.opencode/skills/<name>/SKILL.md`, these are reusable behaviors that OpenCode agents can load on-demand.
+
+**Available Skills**:
+- `git-commit`: Generate descriptive git commit messages by analyzing staged changes
+- `dotfiles-setup`: Manage dotfiles repository structure and setup
+- `typecheck-lint`: Run type checking and linting on codebases
+- `github-pr`: Create and manage GitHub pull requests using gh CLI
+- `merge-conflict`: Resolve git merge conflicts safely
+- `coding-standards`: Follow coding standards and best practices
+
+Skills are loaded automatically by the `skill` tool when agents need them. Each skill includes YAML frontmatter with name, description, and optional metadata.
