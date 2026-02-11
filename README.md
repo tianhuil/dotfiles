@@ -4,6 +4,15 @@ To load the .bashrc, .inputrc, and bash completions, run (this will overwrite .b
 
 `setup.sh`
 
+### OpenCode Agents and Skills
+
+This repository includes OpenCode agents and skills for AI-assisted development:
+
+- **Agents**: Located in `home/.opencode/agents/`, these define specialized AI agents
+- **Skills**: Located in `home/.opencode/skills/`, these are reusable behaviors agents can load
+
+For details on the architecture and available skills, see [AGENTS.md](AGENTS.md).
+
 To install some of the basics (required by .bashrc), run:
 
 `install.sh`
