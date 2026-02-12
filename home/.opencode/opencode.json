@@ -49,6 +49,15 @@
       ],
       "enabled": true,
       "timeout": 10000
+    },
+    "webfetch_camouflage": {
+      "type": "local",
+      "command": [
+        "uvx",
+        "git+https://github.com/tianhuil/webfetch-camouflage-mcp.git"
+      ],
+      "enabled": true,
+      "timeout": 10000
     }
   },
   "tools": {
@@ -56,6 +65,7 @@
     "gh_grep": true,
     "serena": true,
     "sequential_thinking": true,
-    "playwright": true
+    "playwright": true,
+    "webfetch_camouflage": true
   }
 }
