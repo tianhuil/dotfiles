@@ -42,13 +42,12 @@
     "playwright": {
       "type": "local",
       "command": [
-        "uvx",
-        "--from",
-        "mcp-playwright",
-        "playwright"
+        "npx",
+        "-y",
+        "@executeautomation/playwright-mcp-server"
       ],
       "enabled": true,
-      "timeout": 10000
+      "timeout": 30000
     },
     "webfetch_camouflage": {
       "type": "local",
