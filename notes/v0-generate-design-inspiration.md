@@ -35,8 +35,3 @@ The `GenerateDesignInspiration` tool is described to me as follows — here is i
 - `context` (optional) — *"Optional design cues, brand adjectives, constraints."*
 
 
----
-
-That is the full extent of what I'm given about the tool. It's essentially a subagent that takes a high-level goal (e.g., "Landing page for a SaaS product") and optional context (e.g., "minimal, dark theme, tech-focused"), and returns a detailed design brief with specific visual direction — color palettes, typography choices, layout suggestions, component ideas, etc. I then **must** follow that brief when building the UI.
-
-I don't have access to the subagent's own internal system prompt or detailed instructions beyond what's shown above — that's all that's provided to me in my tool definitions.
