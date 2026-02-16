@@ -4,9 +4,23 @@ This guide covers the new features and changes in Next.js 16.
 
 ## New in Next.js 16
 
-### Middleware Changes
-- `middleware.ts` is now `proxy.js` (but backwards compatible)
-- Renamed for clarity about proxy functionality
+### Proxy Changes (formerly Middleware)
+- `middleware.ts` is now **deprecated** - rename to `proxy.ts` (still backwards compatible)
+- `proxy.ts` replaces `middleware.ts` to clarify network boundary and routing focus
+- The `middleware.ts` file is still available for Edge runtime use cases but will be removed in a future version
+- Renamed exported function from `middleware()` to `proxy()`
+
+```tsx
+// proxy.ts (new)
+export default function proxy(request: NextRequest) {
+  return NextResponse.redirect(new URL('/home', request.url))
+}
+
+// middleware.ts (deprecated)
+export default function middleware(request: NextRequest) {
+  return NextResponse.redirect(new URL('/home', request.url))
+}
+```
 
 ### Turbopack Default
 - **Turbopack is now stable** and the default bundler
@@ -91,8 +105,8 @@ revalidateTag('products', 'days')    // Cache for days
 revalidateTag('news', 'hours')       // Cache for hours
 
 // ✅ Or use an inline object with custom revalidation time (in seconds)
-revalidateTag('products', { revalidate: 3600 })  // 1 hour
-revalidateTag('dashboard', { revalidate: 300 })   // 5 minutes
+revalidateTag('products', { expire: 3600 })  // 1 hour
+revalidateTag('dashboard', { expire: 300 })   // 5 minutes
 ```
 
 ### updateTag() (New)
@@ -276,8 +290,8 @@ revalidateTag('blog-posts', 'max')  // Add cacheLife profile
 | Static content that rarely changes | Long cache | `'use cache'` + `revalidate` |
 | Content that changes periodically | Periodic refresh | `revalidateTag(tag, 'hours')` |
 | User-specific data | Tag-based | `revalidateTag(\`user-${userId}\`, 'max')` |
-| After mutations | Immediate visibility | `updateTag(tag)` (Server Actions) |
-| Real-time data | No caching | `refresh()` or no cache |
+| After mutations | Immediate visibility | `updateTag(tag)` (Server Actions only) |
+| Real-time data | No caching | `refresh()` (Server Actions only) or no cache |
 
 ### Cache Key Design
 

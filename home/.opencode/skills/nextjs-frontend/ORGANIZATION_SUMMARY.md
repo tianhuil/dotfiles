@@ -5,16 +5,9 @@ Created a comprehensive Next.js frontend development skill from the disorganized
 
 ## Key Improvements
 
-### What Was Removed
-- Generic bash commands for file deletion/moving (not front-end specific)
-- Vague capability descriptions
-- Non-front-end AI/chatbot examples
-- Repetitive tool descriptions
-- Generic alignment and refusal sections
-
 ### What Was Organized
 
-#### 1. **Core Principles** (6 points)
+#### 1. **Core Principles** (7 points)
 Clear, actionable principles including:
 - App Router default
 - shadcn/ui components
@@ -22,6 +15,19 @@ Clear, actionable principles including:
 - Mobile-first design
 - Semantic HTML and accessibility
 - Modern React patterns
+- Server Actions for mutations
+- Route Handlers for APIs
+
+#### 18. **Backend Features** (NEW)
+Full backend development capabilities:
+- Route Handlers (API routes)
+- Server Actions for mutations
+- Database integration patterns
+- Authentication flows
+- File uploads and handling
+- Webhooks and streaming
+- Cookie and header management
+- Edge runtime support
 
 #### 2. **Project Structure**
 Standard Next.js App Router layout with clear directory structure
@@ -115,10 +121,11 @@ Standard Next.js App Router layout with clear directory structure
 - Testing
 
 ## File Statistics
-- **Total lines**: 834
-- **Sections**: 18 major sections
-- **Code examples**: 50+ practical examples
-- **Checklists**: 2 comprehensive checklists
+- **Total lines**: 1,000+
+- **Sections**: 20 major sections
+- **Code examples**: 80+ practical examples
+- **Checklists**: 5 comprehensive checklists
+- **Backend features**: Full API and server-side capabilities
 
 ## Naming Convention
 - **Skill name**: `nextjs-frontend`
@@ -126,10 +133,10 @@ Standard Next.js App Router layout with clear directory structure
 - **Description**: Clear, specific, includes both what it does and when to use it
 
 ## Key Strengths
-1. **Frontend-focused**: Removed all non-front-end content
+1. **Full-stack capable**: Covers both frontend and backend development
 2. **Well-organized**: Logical flow from principles to patterns
 3. **Actionable**: Clear dos and don'ts with code examples
-4. **Modern**: Next.js 16, React 19, shadcn/ui latest features
-5. **Comprehensive**: Covers all major front-end concerns
+4. **Modern**: Next.js 16.1, React 19.2, shadcn/ui latest features
+5. **Comprehensive**: Covers all major front-end and back-end concerns
 6. **Practical**: Real code examples, not abstract descriptions
 7. **Checklist-based**: Easy to verify quality before shipping

@@ -251,7 +251,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 }
 ```
 
-## React 19 Features
+## React 19.2 Features
 
 ### useEffectEvent
 
@@ -282,6 +282,35 @@ function ChatRoom({ roomId, theme }: { roomId: string; theme: string }) {
 - When you have event handlers inside effects
 - When you want to call external APIs with current values
 
+### use() for Reading Resources
+
+The new `use()` API allows reading promises and context in render:
+
+```tsx
+'use client'
+import { use } from 'react'
+
+function Comments({ commentsPromise }: { commentsPromise: Promise<Comment[]> }) {
+  const comments = use(commentsPromise) // Suspends until promise resolves
+  return comments.map(comment => <p key={comment.id}>{comment.text}</p>)
+}
+
+function Page({ commentsPromise }) {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <Comments commentsPromise={commentsPromise} />
+    </Suspense>
+  )
+}
+
+// Can also read context conditionally
+function Heading({ children }: { children: React.ReactNode }) {
+  if (!children) return null
+  const theme = use(ThemeContext) // Works after early returns
+  return <h1 style={{ color: theme.color }}>{children}</h1>
+}
+```
+
 ### `<Activity>` Component
 
 Hide and restore the UI and internal state of its children:
@@ -308,6 +337,59 @@ function Dashboard() {
 - When you want to preserve component state when hidden
 - For toggleable panels that should remember their state
 - For improving performance by hiding instead of unmounting
+
+### Native Document Metadata
+
+React 19.2 adds native support for rendering `<title>`, `<meta>`, and `<link>` tags:
+
+```tsx
+function BlogPost({ post }: { post: Post }) {
+  return (
+    <article>
+      <title>{post.title}</title>
+      <meta name="description" content={post.excerpt} />
+      <meta name="keywords" content={post.tags.join(', ')} />
+      <link rel="canonical" href={`https://example.com/blog/${post.slug}`} />
+      <h1>{post.title}</h1>
+      <p>{post.content}</p>
+    </article>
+  )
+}
+```
+
+### Stylesheets with Precedence
+
+Control stylesheet loading order with the `precedence` prop:
+
+```tsx
+function App() {
+  return (
+    <Suspense fallback="loading...">
+      <link rel="stylesheet" href="/critical.css" precedence="high" />
+      <link rel="stylesheet" href="/styles.css" precedence="default" />
+      <article className="content">
+        {/* Content depends on both stylesheets */}
+      </article>
+    </Suspense>
+  )
+}
+```
+
+### Resource Preloading
+
+Preload resources like fonts, scripts, and stylesheets:
+
+```tsx
+import { preload, preconnect, prefetchDNS } from 'react-dom'
+
+function MyComponent() {
+  preconnect('https://fonts.googleapis.com')
+  preload('https://fonts.gstatic.com', { as: 'font' })
+  preload('/api/data', { as: 'fetch' })
+
+  return <div>Content</div>
+}
+```
 
 ## Server Actions
 
@@ -347,6 +429,90 @@ export function UserForm({ userId }: { userId: string }) {
   }
 
   return <form action={handleSubmit}>...</form>
+}
+```
+
+### useActionState
+
+Manage action state with the new React 19 hook:
+
+```tsx
+'use client'
+import { useActionState } from 'react'
+import { updateProfile } from '@/app/actions'
+
+export function ProfileForm() {
+  const [error, submitAction, isPending] = useActionState(
+    async (prevState, formData) => {
+      const name = formData.get('name') as string
+      const result = await updateProfile(name)
+      if (!result.success) {
+        return result.error
+      }
+      return null
+    },
+    null
+  )
+
+  return (
+    <form action={submitAction}>
+      <input name="name" />
+      <button type="submit" disabled={isPending}>
+        {isPending ? 'Saving...' : 'Update'}
+      </button>
+      {error && <p className="text-red-500">{error}</p>}
+    </form>
+  )
+}
+```
+
+### useFormStatus
+
+Access parent form's pending state from child components:
+
+```tsx
+'use client'
+import { useFormStatus } from 'react-dom'
+
+export function SubmitButton() {
+  const { pending } = useFormStatus()
+  return (
+    <button type="submit" disabled={pending}>
+      {pending ? 'Submitting...' : 'Submit'}
+    </button>
+  )
+}
+
+// Usage in form
+<form action={updateProfile}>
+  <SubmitButton />
+</form>
+```
+
+### useOptimistic
+
+Show optimistic updates during mutations:
+
+```tsx
+'use client'
+import { useOptimistic } from 'react'
+import { updateName } from '@/app/actions'
+
+export function NameEditor({ currentName }: { currentName: string }) {
+  const [optimisticName, setOptimisticName] = useOptimistic(currentName)
+
+  const submitAction = async (formData: FormData) => {
+    const newName = formData.get('name') as string
+    setOptimisticName(newName)
+    await updateName(newName)
+  }
+
+  return (
+    <form action={submitAction}>
+      <p>Your name: {optimisticName}</p>
+      <input name="name" defaultValue={currentName} />
+    </form>
+  )
 }
 ```
 
@@ -420,6 +586,132 @@ export const revalidate = false
 export default async function StaticPage() {
   const data = await fetch('https://api.example.com/data')
   return <div>{data.content}</div>
+}
+```
+
+## Route Handlers (API Endpoints)
+
+### Basic Route Handler
+
+```tsx
+// app/api/users/route.ts
+import { NextRequest } from 'next/server'
+
+export async function GET(request: NextRequest) {
+  const users = await db.users.findMany()
+  return Response.json(users)
+}
+
+export async function POST(request: Request) {
+  const data = await request.json()
+  const user = await db.users.create(data)
+  return Response.json(user, { status: 201 })
+}
+```
+
+### Dynamic Route Handlers
+
+```tsx
+// app/api/users/[id]/route.ts
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params
+  const user = await db.users.findUnique({ where: { id } })
+  return Response.json(user)
+}
+```
+
+### Request Handling
+
+```tsx
+// app/api/search/route.ts
+import type { NextRequest } from 'next/server'
+
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams
+  const query = searchParams.get('q')
+
+  const results = await db.users.findMany({
+    where: {
+      name: { contains: query }
+    }
+  })
+
+  return Response.json(results)
+}
+```
+
+### Streaming Responses
+
+```tsx
+// app/api/stream/route.ts
+export async function POST(req: Request) {
+  const encoder = new TextEncoder()
+
+  const stream = new ReadableStream({
+    async start(controller) {
+      for (let i = 0; i < 10; i++) {
+        const chunk = encoder.encode(`data: ${i}\n`)
+        controller.enqueue(chunk)
+        await new Promise(resolve => setTimeout(resolve, 100))
+      }
+      controller.close()
+    },
+  })
+
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/plain',
+      'Transfer-Encoding': 'chunked',
+    },
+  })
+}
+```
+
+### Cookies and Headers
+
+```tsx
+// app/api/auth/route.ts
+import { cookies } from 'next/headers'
+import { headers } from 'next/headers'
+
+export async function POST(request: Request) {
+  const cookieStore = await cookies()
+  const token = cookieStore.get('token')
+
+  const headersList = await headers()
+  const origin = headersList.get('origin')
+
+  return Response.json({ authenticated: !!token })
+}
+```
+
+### Webhooks
+
+```tsx
+// app/api/webhooks/stripe/route.ts
+import crypto from 'crypto'
+
+export async function POST(request: Request) {
+  const payload = await request.text()
+  const signature = request.headers.get('stripe-signature')
+
+  // Verify webhook signature
+  const expectedSignature = crypto
+    .createHmac('sha256', process.env.STRIPE_WEBHOOK_SECRET)
+    .update(payload)
+    .digest('hex')
+
+  if (signature !== expectedSignature) {
+    return new Response('Invalid signature', { status: 401 })
+  }
+
+  // Process webhook
+  const event = JSON.parse(payload)
+
+  return new Response('OK', { status: 200 })
 }
 ```
 

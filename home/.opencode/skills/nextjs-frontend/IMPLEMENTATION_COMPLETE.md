@@ -2,7 +2,7 @@
 
 ## Summary
 
-Successfully created a comprehensive Next.js frontend development skill from the disorganized v0.md file. The skill is well-organized, focused on front-end development, and follows opencode best practices.
+Successfully created a comprehensive Next.js frontend and backend development skill. The skill is well-organized, covers both frontend and full-stack development, and follows opencode best practices.
 
 ## File Structure
 
@@ -19,7 +19,7 @@ nextjs-frontend/
     └── performance.md                # Performance optimization (698 lines)
 ```
 
-**Total Lines**: 4,093 lines across 8 files
+**Total Lines**: 4,500+ lines across 8 files
 
 ## Key Improvements
 
@@ -30,9 +30,9 @@ nextjs-frontend/
 - **Easy navigation** - Clear sections with cross-references
 
 ### 2. Content Filtering
-- **Front-end focused** - Removed bash commands, generic capabilities
+- **Full-stack focused** - Covers both frontend and backend development
 - **Best practices only** - Kept all coding best practices
-- **Modern stack** - Next.js 16, React 19, shadcn/ui, Tailwind v4
+- **Modern stack** - Next.js 16.1, React 19.2, shadcn/ui, Tailwind v4
 - **Actionable guidance** - Concrete examples, not abstract descriptions
 
 ### 3. Main Skill File (SKILL.md - 305 lines)
@@ -78,13 +78,16 @@ nextjs-frontend/
 - Dark mode
 - Best practices checklist
 
-#### Data Fetching & State Management (650 lines)
+#### Data Fetching & State Management (700+ lines)
 - Server Components (default)
 - Client-side data with SWR
-- React 19 features (useEffectEvent, Activity)
+- React 19.2 features (useEffectEvent, use(), Activity, document metadata)
 - Server Actions for mutations
-- Caching strategies
+- Caching strategies (revalidateTag, updateTag, refresh)
 - State management patterns
+- Route Handlers (API endpoints)
+- Request handling (cookies, headers)
+- Streaming responses
 - Best practices and anti-patterns
 
 #### Accessibility (682 lines)
@@ -154,11 +157,14 @@ metadata:
 - Clear cross-references between sections
 
 ### 3. Modern and Comprehensive
-- Next.js 16 features (async params, caching APIs)
-- React 19 features (useEffectEvent, Activity)
+- Next.js 16.1 features (async params, proxy.ts, Cache Components, new caching APIs)
+- React 19.2 features (useEffectEvent, use(), Activity, document metadata, stylesheets)
+- Server Actions with React hooks (useActionState, useFormStatus, useOptimistic)
 - shadcn/ui components
 - Tailwind CSS v4 patterns
 - Turbopack and React Compiler
+- Route Handlers (API routes)
+- Request handling (cookies, headers, streaming)
 - Vercel AI SDK integration
 
 ### 4. Practical and Actionable
