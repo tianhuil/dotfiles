@@ -1,8 +1,6 @@
 ---
 name: drizzle-orm
-description: Drizzle ORM is a headless TypeScript ORM and SQL query builder with type-safety, migrations, and live queries. Supports PostgreSQL, MySQL, SQLite, MSSQL, CockroachDB, and many cloud databases. Use when setting up a database layer, creating migrations, or working with database queries in TypeScript projects.
-license: MIT
-compatibility: opencode
+description: Drizzle ORM is a headless TypeScript ORM and SQL query builder with type-safety, migrations, and live queries for PostgreSQL. Use when setting up a database layer, creating migrations, or working with database queries in TypeScript projects.
 metadata:
   audience: users
   workflow: general
@@ -22,12 +20,6 @@ npm install drizzle-orm drizzle-kit
 
 # For PostgreSQL
 npm install postgres
-
-# For MySQL
-npm install mysql2
-
-# For SQLite
-npm install better-sqlite3
 ```
 
 ### Basic setup (PostgreSQL)
@@ -90,20 +82,6 @@ const db = drizzle({
 
 ## Latest Features (v1.0.0-beta.2, Feb 2025)
 
-### New Dialect Support
-
-**MSSQL and CockroachDB**: Full support in `drizzle-orm`, `drizzle-kit`, and `drizzle-seed` packages. Relational Query Builder v2 (RQBv2) not yet supported.
-
-```typescript
-// MSSQL
-import { drizzle } from 'drizzle-orm/node-mssql';
-const db = drizzle(process.env.DATABASE_URL);
-
-// CockroachDB
-import { drizzle } from 'drizzle-orm/cockroach';
-const db = drizzle(process.env.DATABASE_URL);
-```
-
 ### Relational Query Parts
 
 Use `defineRelationsPart` to split relations config into multiple parts:
@@ -156,21 +134,6 @@ const result = db
   .select({ age: users.age.as('ageOfUser'), id: users.id.as('userId') })
   .from(users)
   .orderBy(asc(users.id.as('userId')));
-```
-
-### MySQL New Column Types
-
-Added blob types for MySQL:
-
-```typescript
-import { blob, tinyblob, mediumblob, longblob } from 'drizzle-orm/mysql-core';
-
-export const files = mysqlTable('files', {
-  data: blob('data'),
-  preview: tinyblob('preview'),
-  content: mediumblob('content'),
-  archive: longblob('archive'),
-});
 ```
 
 ### Schema Filter Updates
@@ -280,81 +243,8 @@ export const users = pgTable.withRLS('users', {
   name: text('name').notNull(),
 });
 
-// OLD syntax (deprecated)
-export const usersOld = pgTable('users', {}).enableRLS();
-```
-
-## MySQL Features (v0.32.0)
-
-### $returningId()
-
-MySQL doesn't support `RETURNING`. Use `$returningId()` to get inserted IDs:
-
-```typescript
-import { mysqlTable, int, text } from 'drizzle-orm/mysql-core';
-import { createId } from '@paralleldrive/cuid2';
-
-// Auto-increment PK
-const usersTable = mysqlTable('users', {
-  id: int('id').primaryKey(),
-  name: text('name').notNull(),
-});
-
-const result = await db.insert(usersTable)
-  .values([{ name: 'John' }, { name: 'Jane' }])
-  .$returningId();
-// Returns: { id: number }[]
-
-// Custom PK with $default
-const usersTableFn = mysqlTable('users_custom', {
-  customId: varchar('id', { length: 256 }).primaryKey().$defaultFn(createId),
-  name: text('name').notNull(),
-});
-
-const result = await db.insert(usersTableFn)
-  .values([{ name: 'John' }])
-  .$returningId();
-// Returns: { customId: string }[]
-```
-
-### Generated Columns (MySQL/SQLite)
-
-```typescript
-import { sql } from 'drizzle-orm';
-
-export const users = mysqlTable('users', {
-  id: int('id').primaryKey(),
-  name: text('name').notNull(),
-  generatedName: text('gen_name').generatedAlwaysAs(
-    () => sql`${usersTable.name} || ' hello'`,
-    { mode: 'stored' }  // or 'virtual'
-  ),
-});
-```
-
-**Limitations with `push` command**: You can't modify generated expression type in existing tables. Use `generate` for production migrations.
-
-## Live Queries (v0.31.1)
-
-Native React Hook for automatic re-querying on data changes (works with SQL-like and Drizzle Queries):
-
-```typescript
-import { useLiveQuery, drizzle } from 'drizzle-orm/expo-sqlite';
-import { openDatabaseSync } from 'expo-sqlite';
-import { users } from './schema';
-
-const expo = openDatabaseSync('db.db', { enableChangeListener: true });
-const db = drizzle(expo);
-
-const App = () => {
-  // Re-runs automatically when data changes
-  const { data } = useLiveQuery(db.select().from(users));
-  
-  // Returns data, error, updatedAt for error handling
-  const { data, error, updatedAt } = useLiveQuery(db.query.users.findFirst());
-  
-  return <Text>{JSON.stringify(data)}</Text>;
-};
+  // OLD syntax (deprecated)
+  export const usersOld = pgTable('users', {}).enableRLS();
 ```
 
 ## Query API
@@ -512,9 +402,7 @@ npx drizzle-kit up
 
 ## Cloud Database Connections
 
-Drizzle supports many cloud databases with dedicated driver packages:
-
-### PostgreSQL
+Drizzle supports PostgreSQL cloud databases with dedicated driver packages:
 
 ```bash
 npm install @neondatabase/serverless  # Neon
@@ -540,48 +428,6 @@ import { vercel } from '@vercel/postgres';
 
 const client = vercel();
 const db = drizzle({ client });
-```
-
-### MySQL
-
-```bash
-npm install @planetscale/database-js
-npm install @tidb/serverless
-```
-
-```typescript
-// PlanetScale
-import { drizzle } from 'drizzle-orm/planetscale';
-import { connect } from '@planetscale/database-js';
-
-const client = await connect({ url: process.env.DATABASE_URL });
-const db = drizzle({ client });
-```
-
-### SQLite
-
-```bash
-npm install @libsql/client
-npm install @libsql/serverless
-npm install better-sqlite3
-npm install @op-engine/op-sqlite
-npm install expo-sqlite  # React Native
-npm install @op-engine/react-native-sqlite  # React Native
-npm install @cloudflare/d1
-```
-
-```typescript
-// LibSQL
-import { drizzle } from 'drizzle-orm/libsql';
-import { createClient } from '@libsql/client';
-
-const client = createClient();
-const db = drizzle({ client });
-
-// Cloudflare D1
-import { drizzle } from 'drizzle-orm/cloudflare-d1';
-
-const db = drizzle(env.DB);
 ```
 
 ## Key Concepts
