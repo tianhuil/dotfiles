@@ -1,32 +1,14 @@
 # OpenCode Worktree (ocwt)
 
-An opencode plugin that manages git worktrees and auto-commits after each agent turn.
+A wrapper script that manages git worktrees for opencode sessions.
 
-## Research Findings
+## Overview
 
-### Plugin vs Application
+`ocwt` simplifies working with git worktrees in conjunction with opencode by:
 
-**Recommendation: Use an opencode plugin.** The opencode plugin system (`@opencode-ai/plugin`) provides:
-
-1. **Hooks for events**: The `event` hook receives all opencode events including `session.idle` which fires when the agent finishes processing and awaits user input. (see `opencode-events-research.md`).
-2. **Shell access**: Plugins receive a `$` BunShell instance for running git commands.
-3. **Worktree context**: Plugins receive `directory` and `worktree` paths automatically.
-
-### Key Plugin Features for ocwt
-
-- **`event` hook**: Receives events, including `session.idle` (type: `"session.idle"`) - this is when we auto-commit.
-- **`chat.message` hook**: Called when a new message is received, provides message details including diffs.
-- **BunShell `$`**: Can run git commands like `git worktree add`, `git commit`, etc.
-
-### Plugin Limitation
-
-The plugin system **does not support CLI arguments**. Plugins are configured via `opencode.json` and loaded automatically. We cannot pass `--worktree feature/branch` to opencode.
-
-**Solution**: Build a **wrapper application** (`ocwt`) that:
-
-1. Creates the worktree before launching opencode
-2. Sets an environment variable or writes a config file with the worktree info
-3. Launches opencode with a plugin that reads this config
+1. Creating worktrees from existing or new branches
+2. Running post-creation hooks (copy `.env`, symlink directories, run commands)
+3. Launching opencode in the worktree directory
 
 ## Architecture
 
@@ -37,16 +19,7 @@ The plugin system **does not support CLI arguments**. Plugins are configured via
 │  2. Read .ocwt.yml config                                        │
 │  3. Create worktree via git worktree add                         │
 │  4. Run post_create hooks (copy .env, symlink dirs, etc.)        │
-│  5. Write .ocwt-session.json with worktree metadata              │
-│  6. Launch opencode with --plugin pointing to ocwt-plugin.ts     │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    ocwt-plugin.ts (opencode plugin)              │
-│  1. Read .ocwt-session.json                                      │
-│  2. Hook: session.idle → git commit -am "<summary>"              │
-│  3. Hook: session.diff → extract summary for commit message      │
+│  5. Launch opencode in the worktree directory                    │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -90,7 +63,7 @@ import { Command } from "commander";
 const program = new Command();
 program
   .name("ocwt")
-  .description("OpenCode Worktree - manage git worktrees with auto-commit")
+  .description("OpenCode Worktree - manage git worktrees for opencode sessions")
   .argument("<branch>", "Branch name for the worktree")
   .argument("[opencode-args...]", "Arguments to pass to opencode")
   .option("-b, --new-branch", "Create a new branch")
@@ -100,8 +73,8 @@ program
     // 2. Resolve worktree path
     // 3. Create worktree: git worktree add <path> <branch>
     // 4. Run post_create hooks
-    // 5. Write session metadata
-    // 6. Spawn opencode with plugin
+    // 5. Launch opencode in worktree directory
+    // 6. Optionally remove worktree on exit
   });
 
 program.parse();
@@ -149,45 +122,34 @@ export async function runHooks(
 ): Promise<void>;
 ```
 
-### Phase 4: OpenCode Plugin (`src/plugin.ts`)
+### Phase 4: Config Parsing (`src/config.ts`)
 
 ```typescript
-import type { Hooks, Plugin } from "@opencode-ai/plugin";
-
-export const OcwtPlugin: Plugin = async (ctx) => {
-  // Read session metadata
-  const sessionMeta = await readSessionMeta(ctx.directory);
-
-  return {
-    event: async ({ event }) => {
-      if (event.type === "session.idle") {
-        // Auto-commit changes
-        await autoCommit(ctx.$, ctx.directory);
-      }
-    },
-  } satisfies Hooks;
-};
-
-async function autoCommit($: BunShell, directory: string): Promise<void> {
-  // 1. Check for staged/unstaged changes
-  const status = await $`git status --porcelain`.cwd(directory).quiet().text();
-
-  if (!status.trim()) return; // No changes
-
-  // 2. Generate commit message from git diff --stat
-  const diffStat = await $`git diff --stat`.cwd(directory).quiet().text();
-
-  // 3. Commit all changes
-  const message = generateCommitMessage(diffStat);
-  await $`git commit -am ${message}`.cwd(directory);
+export interface OcwtConfig {
+  version: string;
+  defaults: {
+    base_dir: string;
+  };
+  hooks: {
+    post_create: Hook[];
+  };
 }
+
+/** Load and parse .ocwt.yml config */
+export async function loadConfig(path: string): Promise<OcwtConfig>;
+
+/** Get default config values */
+export function getDefaultConfig(): Partial<OcwtConfig>;
 ```
 
 ### Phase 5: Main Entry (`src/index.ts`)
 
 ```typescript
 #!/usr/bin/env bun
-export { OcwtPlugin } from "./plugin";
+import { cli } from "./cli";
+
+// Run CLI
+await cli();
 ```
 
 ## Package Structure
@@ -198,9 +160,8 @@ ocwt/
 │   ├── cli.ts          # CLI entry point (commander)
 │   ├── worktree.ts     # Git worktree operations
 │   ├── hooks.ts        # Hook execution (copy, symlink, command)
-│   ├── plugin.ts       # OpenCode plugin for auto-commit
 │   ├── config.ts       # .ocwt.yml parsing
-│   └── index.ts        # Plugin export
+│   └── index.ts        # Main entry
 ├── package.json
 ├── tsconfig.json
 └── README.md
@@ -212,8 +173,7 @@ ocwt/
 {
   "dependencies": {
     "commander": "^14.0.0",
-    "yaml": "^2.7.0",
-    "@opencode-ai/plugin": "^1.1.65"
+    "yaml": "^2.7.0"
   },
   "devDependencies": {
     "@types/bun": "^1.2.0",
@@ -237,8 +197,45 @@ ocwt/
 # Pass additional opencode arguments
 > ocwt feature/auth --model anthropic/claude-4
 
-# Remove worktree after done
+# Remove a worktree manually
 > ocwt remove feature/auth
+
+# List all worktrees
+> ocwt list
+```
+
+## Hook Types
+
+### Copy Hook
+
+Copy files from the main worktree to the new worktree:
+
+```yaml
+- type: copy
+  from: ".env"
+  to: ".env"
+```
+
+### Symlink Hook
+
+Create symbolic links to share directories between worktrees:
+
+```yaml
+- type: symlink
+  from: ".bin"
+  to: ".bin"
+```
+
+### Command Hook
+
+Execute commands in the new worktree:
+
+```yaml
+- type: command
+  command: "bun install"
+  env:
+    NODE_ENV: "development"
+  work_dir: "."
 ```
 
 ## Tasks
@@ -247,18 +244,14 @@ ocwt/
 - [ ] Implement worktree operations (`src/worktree.ts`)
 - [ ] Implement hooks system (`src/hooks.ts`)
 - [ ] Implement config parsing (`src/config.ts`)
-- [ ] Implement auto-commit plugin (`src/plugin.ts`)
 - [ ] Add tests
 - [ ] Add shell completion (bash, zsh, fish)
+- [ ] Add `remove` subcommand
+- [ ] Add `list` subcommand
 
 ## Notes
 
 - Use `bun` for all package management and running scripts
-- Use `Bun.$` template literals for shell commands (available via plugin context)
-- Plugin will be loaded via `opencode.json` config:
-  ```json
-  {
-    "plugin": ["ocwt"]
-  }
-  ```
-- The wrapper app sets up the worktree, then opencode + plugin handles the rest
+- Worktree paths are resolved relative to the project root
+- The wrapper app handles all setup before launching opencode
+- No plugin needed - opencode runs directly in the worktree
