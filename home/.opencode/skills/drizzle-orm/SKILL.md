@@ -1,6 +1,6 @@
 ---
 name: drizzle-orm
-description: Drizzle ORM is a headless TypeScript ORM and SQL query builder with type-safety, migrations, and live queries for PostgreSQL. Use when setting up a database layer, creating migrations, or working with database queries in TypeScript projects.
+description: Drizzle ORM is a headless TypeScript ORM and SQL query builder with type-safety, migrations, and live queries for PostgreSQL and SQLite. Use when setting up a database layer, creating migrations, or working with database queries in TypeScript projects.
 metadata:
   audience: users
   workflow: general
@@ -20,6 +20,12 @@ npm install drizzle-orm drizzle-kit
 
 # For PostgreSQL
 npm install postgres
+
+# For SQLite (libsql driver - recommended)
+npm install @libsql/client
+
+# For SQLite (better-sqlite3 driver)
+npm install better-sqlite3
 ```
 
 ### Basic setup (PostgreSQL)
@@ -65,19 +71,91 @@ import * as schema from './schema';
 export const db = drizzle(process.env.DATABASE_URL!, { schema });
 ```
 
+### Basic setup (SQLite)
+
+```bash
+# Initialize config
+npx drizzle-kit init
+```
+
+```typescript
+// drizzle.config.ts
+import type { Config } from 'drizzle-kit';
+import { defineConfig } from 'drizzle-kit';
+
+export default defineConfig({
+  dialect: 'sqlite',
+  schema: './src/db/schema.ts',
+  out: './drizzle',
+  dbCredentials: {
+    url: 'file:./local.db',  // or process.env.DATABASE_URL for Turso/libsql
+  },
+});
+```
+
+```typescript
+// src/db/schema.ts
+import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+
+export const users = sqliteTable('users', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).defaultNow(),
+});
+```
+
+```typescript
+// src/db/index.ts (libsql/Turso driver)
+import { drizzle } from 'drizzle-orm/libsql';
+import { createClient } from '@libsql/client';
+import * as schema from './schema';
+
+const client = createClient({
+  url: process.env.TURSO_DATABASE_URL || 'file:local.db',
+  authToken: process.env.TURSO_AUTH_TOKEN,
+});
+
+export const db = drizzle(client, { schema });
+```
+
+```typescript
+// src/db/index.ts (better-sqlite3 driver)
+import { drizzle } from 'drizzle-orm/better-sqlite3';
+import Database from 'better-sqlite3';
+import * as schema from './schema';
+
+const sqlite = new Database('local.db');
+export const db = drizzle(sqlite, { schema });
+```
+
 ### Connecting
 
 ```typescript
-// Using connection string
+// PostgreSQL using connection string
 const db = drizzle('postgresql://user:password@localhost:5432/db');
 
-// Using connection object (supports node-postgres options)
+// PostgreSQL using connection object (supports node-postgres options)
 const db = drizzle({
   connection: {
     connectionString: process.env.DATABASE_URL,
     ssl: true,
   }
 });
+
+// SQLite with libsql (local file)
+const client = createClient({ url: 'file:local.db' });
+const db = drizzle({ client });
+
+// SQLite with libsql (Turso cloud)
+const client = createClient({
+  url: 'libsql://my-project.turso.io',
+  authToken: process.env.TURSO_AUTH_TOKEN,
+});
+const db = drizzle({ client });
+
+// SQLite with better-sqlite3
+const sqlite = new Database('local.db');
+const db = drizzle(sqlite);
 ```
 
 ## Latest Features (v1.0.0-beta.2, Feb 2025)
@@ -247,6 +325,54 @@ export const users = pgTable.withRLS('users', {
   export const usersOld = pgTable('users', {}).enableRLS();
 ```
 
+## SQLite Features
+
+### Auto-Incrementing Primary Keys
+
+```typescript
+import { sqliteTable, integer, text } from 'drizzle-orm/sqlite-core';
+
+export const users = sqliteTable('users', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull(),
+});
+```
+
+### Foreign Keys
+
+```typescript
+export const posts = sqliteTable('posts', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  title: text('title').notNull(),
+  authorId: integer('author_id').references(() => users.id),
+});
+```
+
+### Timestamps
+
+SQLite doesn't have native timestamp types, use integers with mode conversion:
+
+```typescript
+export const users = sqliteTable('users', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull(),
+  // Stores as integer Unix timestamp
+  createdAt: integer('created_at', { mode: 'timestamp' }).defaultNow(),
+  updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
+});
+```
+
+### Full-Text Search (FTS5)
+
+```typescript
+import { fts5Table } from 'drizzle-orm/sqlite-core';
+
+export const postsFts = fts5Table('posts_fts', {
+  content: text('content'),
+  title: text('title'),
+});
+```
+
 ## Query API
 
 ### Select with relations (RQBv2)
@@ -402,6 +528,8 @@ npx drizzle-kit up
 
 ## Cloud Database Connections
 
+### PostgreSQL Cloud Databases
+
 Drizzle supports PostgreSQL cloud databases with dedicated driver packages:
 
 ```bash
@@ -412,6 +540,12 @@ npm install @prisma/postgres
 npm install @supabase/postgres-js2
 npm install @xata/client
 npm install @effect/postgres
+```
+
+### SQLite Cloud Databases
+
+```bash
+npm install @libsql/client  # Turso/libsql
 ```
 
 ```typescript
@@ -428,6 +562,16 @@ import { vercel } from '@vercel/postgres';
 
 const client = vercel();
 const db = drizzle({ client });
+
+// Turso (libsql)
+import { drizzle } from 'drizzle-orm/libsql';
+import { createClient } from '@libsql/client';
+
+const client = createClient({
+  url: 'libsql://my-project.turso.io',
+  authToken: process.env.TURSO_AUTH_TOKEN,
+});
+const db = drizzle({ client });
 ```
 
 ## Key Concepts
@@ -439,6 +583,7 @@ const db = drizzle({ client });
 - **SQL-like API**: Familiar query methods (`select`, `insert`, `update`, `delete`)
 - **Relational Queries**: Powerful relation API (RQBv2) with type-safe joins
 - **Headless**: Works with any driver, no runtime magic
+- **Multi-Database**: Supports PostgreSQL and SQLite with the same API
 
 ## Common Patterns
 
