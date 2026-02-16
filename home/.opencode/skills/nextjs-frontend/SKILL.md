@@ -1,6 +1,6 @@
 ---
 name: nextjs-frontend
-description: Develops React and Next.js applications with shadcn/ui components, following modern best practices for App Router, server components, data fetching, and design systems. Use when building or modifying Next.js front-end applications.
+description: Develops React and Next.js front-end applications with shadcn/ui components, following modern best practices for App Router, server components, client-side data fetching, and design systems. Use when building or modifying Next.js front-end applications.
 license: MIT
 compatibility: opencode
 metadata:
@@ -8,7 +8,7 @@ metadata:
   workflow: application-development
 ---
 
-# Next.js Frontend & Backend Development
+# Next.js Frontend Development
 
 ## Core Principles
 
@@ -18,21 +18,16 @@ metadata:
 - **Mobile-first responsive design** - design for small screens first
 - **Semantic HTML and accessibility** - use proper elements and ARIA attributes
 - **Modern React patterns** - leverage React 19.2 features and hooks appropriately
-- **Server Actions for mutations** - use Server Actions instead of manual API routes where possible
-- **Route Handlers for APIs** - create API endpoints with Route Handlers (`route.ts`)
 
 ## Quick Reference
 
 ### Project Structure
 ```
 app/              # App Router (layout.tsx, page.tsx, globals.css)
-├─ api/           # Route Handlers (route.ts)
 components/ui/    # shadcn/ui components
 hooks/            # use-mobile, use-toast
-lib/              # Utilities, database clients, auth
+lib/              # Utilities and helpers
 ├─ utils.ts      # Utilities (cn function)
-├─ db.ts         # Database configuration
-└─ auth.ts       # Authentication setup
 scripts/          # Executable Node.js scripts
 ```
 
@@ -122,40 +117,6 @@ async function getUser(id: string) {
 }
 ```
 
-### Route Handlers (API Routes)
-```tsx
-// app/api/users/route.ts
-import { NextRequest } from 'next/server'
-
-export async function GET(request: NextRequest) {
-  const users = await db.users.findMany()
-  return Response.json(users)
-}
-
-export async function POST(request: Request) {
-  const data = await request.json()
-  const user = await db.users.create(data)
-  return Response.json(user, { status: 201 })
-}
-```
-
-### Streaming Responses
-```tsx
-// app/api/chat/route.ts
-export async function POST(req: Request) {
-  const stream = new ReadableStream({
-    async start(controller) {
-      for await (const chunk of aiStream) {
-        controller.enqueue(chunk)
-      }
-    },
-  })
-  return new Response(stream, {
-    headers: { 'Content-Type': 'text/event-stream' }
-  })
-}
-```
-
 ### Client-Side with SWR
 ```tsx
 'use client'
@@ -198,25 +159,6 @@ Load stylesheets with priority control:
 ```tsx
 <link rel="stylesheet" href="/styles.css" precedence="high" />
 <link rel="stylesheet" href="/theme.css" precedence="default" />
-```
-
-#### Server Actions
-Use Server Actions for form handling and mutations:
-```tsx
-'use server'
-import { revalidateTag } from 'next/cache'
-
-export async function updateProfile(formData: FormData) {
-  const name = formData.get('name')
-  await db.users.update({ name })
-  revalidateTag('user-profile')
-}
-
-// Client usage
-<form action={updateProfile}>
-  <input name="name" />
-  <button>Update</button>
-</form>
 ```
 
 ## shadcn/ui Components
@@ -343,11 +285,10 @@ console.log("[Component] State updated:", newState)
 
 For in-depth coverage of specific topics, see the reference guides:
 
-- **[Next.js 16.1 Features](reference/nextjs-16-features.md)** - Async params, proxy.ts, caching APIs, Cache Components, Turbopack, React Compiler
+- **[Next.js 16.1 Features](reference/nextjs-16-features.md)** - Async params, proxy.ts, Turbopack, React Compiler
 
 - **[Design System](reference/design-system.md)** - Color system, typography, Tailwind patterns, design tokens, font setup
 
-- **[Data Fetching & State](reference/data-fetching.md)** - Server components, SWR patterns, React 19.2 features, Server Actions, Route Handlers, caching strategies
 
 - **[Accessibility](reference/accessibility.md)** - Semantic HTML, ARIA attributes, screen readers, keyboard navigation, WCAG compliance
 
@@ -374,7 +315,6 @@ For in-depth coverage of specific topics, see the reference guides:
 
 ### Performance
 - [ ] Used server components where possible
-- [ ] Implemented proper caching strategies
 - [ ] Optimized images with Next.js Image
 - [ ] Lazy loaded heavy components when needed
 - [ ] Used SWR for client-side state (not useEffect)
