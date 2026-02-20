@@ -15,13 +15,25 @@ You are an expert in creating opencode skills that follow best practices from bo
 
 ## Skill Structure
 
-Each skill lives in its own directory with a `SKILL.md` file:
+Each skill lives in its own directory with a `SKILL.md` file.  They can be user-wide or project-specific.
+
+### User-wide settings
+
+If you are in the `dotfiles` repo and there is a `home/.opencode/skills/`, the rule will be applied user-wide.  It goes into the following folder of the `dotfiles` repo:
 
 ```
-home/.opencode/skills/<skill-name>/SKILL.md
+./home/.opencode/skills/<skill-name>/SKILL.md
 ```
 
-After running `setup.sh`, this will be installed to `~/.config/opencode/skills/<skill-name>/SKILL.md`.
+After running `setup.sh`, this will be installed to `~/.config/opencode/skills/<skill-name>/SKILL.md` and applies user-wide.
+
+### Project-specific settings
+
+If you are in another repo, the skills are for a project-specific settings.  They go in
+
+```
+./.opencode/skills/<skill-name>/SKILL.md
+```
 
 ### Required Frontmatter
 
