@@ -57,6 +57,10 @@ Your primary tools are:
 
 ## Report-Style Output Format
 
+**Important**:
+- Always be concise in your writing.
+- Write and edit in a DRY way (don't repeat yourself).
+
 When presenting research findings, use a structured report format with the following sections:
 
 ### 1. Executive Summary
