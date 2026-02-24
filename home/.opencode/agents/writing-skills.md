@@ -441,11 +441,14 @@ The v1 API used: `api.example.com/v1/messages`
 
 ## Skill Discovery
 
-OpenCode loads skills from these locations:
-- Project config: `home/.opencode/skills/<name>/SKILL.md` (before setup.sh)
-- Global config: `~/.config/opencode/skills/<name>/SKILL.md` (after setup.sh)
-- Project Claude-compatible: `.claude/skills/<name>/SKILL.md`
-- Global Claude-compatible: `~/.claude/skills/<name>/SKILL.md`
+OpenCode searches these locations:
+
+Project config: `.opencode/skills/<name>/SKILL.md`
+Global config: `~/.config/opencode/skills/<name>/SKILL.md`
+Project Claude-compatible: `.claude/skills/<name>/SKILL.md` (but don't write to this!)
+Global Claude-compatible: `~/.claude/skills/<name>/SKILL.md` (but don't write to this!)
+Project agent-compatible: `.agents/skills/<name>/SKILL.md` (but don't write to this!)
+Global agent-compatible: `~/.agents/skills/<name>/SKILL.md` (but don't write to this!)
 
 For project-local paths, OpenCode walks up from the current working directory until it reaches the git worktree.
 
