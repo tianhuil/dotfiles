@@ -97,6 +97,26 @@ read('components/Footer.tsx')
 - ❌ Avoid arbitrary values: `p-[16px]`, `mx-[8px]`
 - ❌ NEVER mix margin/padding with gap on same element
 
+### Tailwind Utilities
+Use `cn` utility for combining classes and conditional logic:
+
+```tsx
+import { cn } from '@/lib/utils'
+<div className={cn('p-4', isActive && 'bg-primary', !isActive && 'bg-secondary')}>
+  Content
+</div>
+```
+
+```tsx
+// lib/utils.ts
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+```
+
 ## Accessibility Essentials
 
 - Use **semantic HTML**: `main`, `header`, `nav`, `section`, `article`
@@ -300,7 +320,6 @@ For in-depth coverage of specific topics, see the reference guides:
 - **[Next.js 16.1 Features](reference/nextjs-16-features.md)** - Async params, proxy.ts, Turbopack, React Compiler
 
 - **[Design System](reference/design-system.md)** - Color system, typography, Tailwind patterns, design tokens, font setup
-
 
 - **[Accessibility](reference/accessibility.md)** - Semantic HTML, ARIA attributes, screen readers, keyboard navigation, WCAG compliance
 
