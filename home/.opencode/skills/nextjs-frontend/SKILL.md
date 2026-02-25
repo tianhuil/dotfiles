@@ -163,7 +163,17 @@ Load stylesheets with priority control:
 
 ## shadcn/ui Components
 
-For UI, we prefer to use shadcn/ui components.
+For UI, we prefer to use shadcn/ui components because unlike other libraries:
+
+1. Code is in the repo making it easier for Agentic agents to read and understand
+2. It is possible to modify them (as a last resort) if they cannot be used as-is
+
+### Only Modify shadcn/ui Components as a Last Resort
+
+Strongly prefer to use existing components and compose them together. If you find yourself needing to modify a component, ask:
+- Is there an existing component that can be composed to achieve this?
+- Can I achieve this with props or by wrapping the component?
+- If I must modify, can I do so in a way that doesn't break existing usage?
 
 ### Available Components
 Standard: `button`, `card`, `input`, `form`, `dialog`, `dropdown-menu`, `toast`, `tabs`, `table`, `select`, `checkbox`, `radio-group`, `switch`, `slider`, `progress`, `badge`, `avatar`, `alert`, `accordion`, `collapsible`, `tooltip`, `popover`, `command`, `navigation-menu`, `menubar`, `context-menu`, `scroll-area`, `separator`, `sheet`, `skeleton`, `sonner`
