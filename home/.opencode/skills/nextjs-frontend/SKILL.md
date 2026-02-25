@@ -117,11 +117,11 @@ async function getUser(id: string) {
 }
 ```
 
-### Client-Side with SWR
+### Client-Side with tRPC
 ```tsx
 'use client'
-import useSWR from 'swr'
-const { data, error, isLoading } = useSWR('/api/user', fetcher)
+import { trpc } from '@/lib/trpc'
+const { data, error, isLoading } = trpc.user.get.useQuery({ id })
 ```
 
 ### React 19.2 New Features
@@ -329,7 +329,7 @@ For in-depth coverage of specific topics, see the reference guides:
 - [ ] Used server components where possible
 - [ ] Optimized images with Next.js Image
 - [ ] Lazy loaded heavy components when needed
-- [ ] Used SWR for client-side state (not useEffect)
+- [ ] Used tRPC for fetching data from the server in client components
 
 ### Accessibility
 - [ ] Keyboard navigation works
