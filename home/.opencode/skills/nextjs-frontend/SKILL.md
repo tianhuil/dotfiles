@@ -163,6 +163,8 @@ Load stylesheets with priority control:
 
 ## shadcn/ui Components
 
+For UI, we prefer to use shadcn/ui components.
+
 ### Available Components
 Standard: `button`, `card`, `input`, `form`, `dialog`, `dropdown-menu`, `toast`, `tabs`, `table`, `select`, `checkbox`, `radio-group`, `switch`, `slider`, `progress`, `badge`, `avatar`, `alert`, `accordion`, `collapsible`, `tooltip`, `popover`, `command`, `navigation-menu`, `menubar`, `context-menu`, `scroll-area`, `separator`, `sheet`, `skeleton`, `sonner`
 
