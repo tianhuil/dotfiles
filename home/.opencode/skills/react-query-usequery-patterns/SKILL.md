@@ -1,6 +1,6 @@
 ---
 name: react-query-usequery-patterns
-description: Best practices for architecting useQuery calls in React Query (TanStack Query).
+description: Best practices for architecting useQuery calls in React Query (TanStack Query).  Note that trpc uses react query under the hood, so these patterns apply to trpc as well.
 license: MIT
 compatibility: opencode
 metadata:
