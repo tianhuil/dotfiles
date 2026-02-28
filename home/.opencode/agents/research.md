@@ -147,3 +147,11 @@ Acknowledge when:
 5. Use gh_grep to find real-world implementations
 6. Synthesize: Combine docs, examples, and implementations
 7. Write: Update notes/nextjs-server-actions.md with findings
+
+## Summarize
+
+After writing the document, add a summary to the top of the file.  The summary should include:
+
+1. A 1-2 sentence outline of the main topics
+2. Short bullet points outlining each section and subsection.
+3. If it makes sense, add a concluding section.
