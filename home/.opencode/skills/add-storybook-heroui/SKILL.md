@@ -1,6 +1,14 @@
+---
+name: add-storybook-heroui
+description: Configures Storybook for projects using HeroUI components. Use when setting up Storybook with HeroUI as a dependency to ensure proper Tailwind integration, dark mode support, and global decorators.
+license: MIT
+compatibility: opencode
+metadata:
+  audience: users
+  workflow: general
+---
 
-
-# Storybook Integration Guide
+# Storybook + HeroUI Integration Guide
 
 This document covers how HeroUI configures Storybook internally, and provides complete instructions for setting up Storybook in an external project that uses HeroUI as a dependency.
 
