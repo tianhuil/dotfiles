@@ -417,3 +417,4 @@ Run `/config` in the TUI to see the merged configuration from all sources.
 - [Agents](https://opencode.ai/docs/agents)
 - [Commands](https://opencode.ai/docs/commands)
 - [Permissions](https://opencode.ai/docs/permissions)
+- [MCP](https://opencode.ai/docs/mcp-servers/)
