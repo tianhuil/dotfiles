@@ -1,6 +1,6 @@
 ---
 name: opencode-configuration
-description: Configure OpenCode settings, providers, models, agents, and skills. Use when setting up OpenCode in a repo or globally, or when troubleshooting configuration issues.
+description: Configure OpenCode settings, providers, models, agents, mcp, and skills. Use when setting up OpenCode in a repo or globally, or when troubleshooting configuration issues.
 license: MIT
 compatibility: opencode
 metadata:
