@@ -240,18 +240,6 @@ Reference agents in `opencode.json`:
 }
 ```
 
-### Agent Directory Locations
-
-**Project-local** (walks up to git worktree):
-- `.opencode/agents/` - OpenCode agents
-- `.claude/skills/` - Claude-compatible skills
-- `.agents/skills/` - Agent-compatible skills
-
-**Global**:
-- `~/.config/opencode/agents/` - OpenCode agents
-- `~/.claude/skills/` - Claude-compatible skills
-- `~/.agents/skills/` - Agent-compatible skills
-
 ## Skills
 
 Skills are reusable configurations that provide domain-specific instructions. They can be defined in config or as markdown files.
@@ -315,18 +303,6 @@ Permission values:
 - `allow` - Load immediately
 - `deny` - Hidden from agent
 - `ask` - Prompt for approval
-
-### Skill Directory Locations
-
-**Project-local**:
-- `.opencode/skills/<name>/SKILL.md`
-- `.claude/skills/<name>/SKILL.md`
-- `.agents/skills/<name>/SKILL.md`
-
-**Global**:
-- `~/.config/opencode/skills/<name>/SKILL.md`
-- `~/.claude/skills/<name>/SKILL.md`
-- `~/.agents/skills/<name>/SKILL.md`
 
 ### Loading Skills
 
