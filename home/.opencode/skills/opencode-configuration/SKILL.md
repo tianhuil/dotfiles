@@ -159,6 +159,289 @@ Note: `disabled_providers` takes priority over `enabled_providers`.
 }
 ```
 
+## Markdown Agents
+
+Agents can be defined as markdown files in the `agents/` directory with `.md` extension. Markdown agents provide more detailed prompts and metadata.
+
+### Agent File Structure
+
+Create `agents/my-agent.md`:
+
+```markdown
+---
+name: my-agent
+description: Agent description for task matching
+agent_type: general
+tools:
+  read: true
+  edit: true
+  write: false
+  bash: true
+  glob: true
+  grep: true
+  webfetch: true
+  task: true
+---
+
+# My Agent
+
+You are an expert in domain-specific tasks.
+
+## Guidelines
+
+- Follow best practices for the specific domain
+- Consider performance and maintainability
+- Provide clear explanations
+
+## Workflow
+
+1. Understand the problem
+2. Research solutions
+3. Implement and verify
+```
+
+### Agent Frontmatter Options
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `name` | string | Unique agent identifier |
+| `description` | string | When to use this agent (shown in TUI) |
+| `agent_type` | string | `general`, `explore`, `research`, or `git` |
+| `tools` | object | Tool permissions |
+| `small_model` | string | Override small model for this agent |
+| `model` | string | Override model for this agent |
+
+### Using Agents in Config
+
+Reference agents in `opencode.json`:
+
+```json
+{
+  "agent": {
+    "writing-assistant": {
+      "description": "Helps with writing and editing tasks",
+      "prompt": "You are a writing assistant. Help with grammar, clarity, and structure.",
+      "tools": {
+        "read": true,
+        "write": true,
+        "edit": true
+      }
+    },
+    "explainer": {
+      "description": "Explains code and concepts",
+      "agent_type": "explore",
+      "tools": {
+        "read": true,
+        "grep": true,
+        "glob": true
+      }
+    }
+  }
+}
+```
+
+### Agent Directory Locations
+
+**Project-local** (walks up to git worktree):
+- `.opencode/agents/` - OpenCode agents
+- `.claude/skills/` - Claude-compatible skills
+- `.agents/skills/` - Agent-compatible skills
+
+**Global**:
+- `~/.config/opencode/agents/` - OpenCode agents
+- `~/.claude/skills/` - Claude-compatible skills
+- `~/.agents/skills/` - Agent-compatible skills
+
+## Skills
+
+Skills are reusable configurations that provide domain-specific instructions. They can be defined in config or as markdown files.
+
+### Skill File Structure
+
+Create `skills/my-skill/SKILL.md`:
+
+```markdown
+---
+name: my-skill
+description: Does X for Y use cases. Use when specific condition.
+license: MIT
+compatibility: opencode
+metadata:
+  audience: users
+  workflow: specific-task
+---
+
+# My Skill
+
+## Quick Start
+
+Brief usage example:
+
+```bash
+command-to-run
+```
+
+## Detailed Guide
+
+Full documentation here.
+```
+
+### Skill Frontmatter Options
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `name` | string | Unique skill identifier (kebab-case) |
+| `description` | string | What the skill does and when to use it |
+| `license` | string | License (e.g., MIT, Apache-2.0) |
+| `compatibility` | string | `opencode`, `claude`, or `agent` |
+| `metadata` | object | Additional metadata |
+
+### Skill Permissions in Config
+
+```json
+{
+  "permission": {
+    "skill": {
+      "*": "allow",
+      "internal-*": "deny",
+      "experimental-*": "ask",
+      "security-*": "deny"
+    }
+  }
+}
+```
+
+Permission values:
+- `allow` - Load immediately
+- `deny` - Hidden from agent
+- `ask` - Prompt for approval
+
+### Skill Directory Locations
+
+**Project-local**:
+- `.opencode/skills/<name>/SKILL.md`
+- `.claude/skills/<name>/SKILL.md`
+- `.agents/skills/<name>/SKILL.md`
+
+**Global**:
+- `~/.config/opencode/skills/<name>/SKILL.md`
+- `~/.claude/skills/<name>/SKILL.md`
+- `~/.agents/skills/<name>/SKILL.md`
+
+### Loading Skills
+
+Skills are automatically loaded when needed. Use the `skill` tool:
+
+```markdown
+Use the {name} skill to handle this task.
+```
+
+Or reference in agent config:
+
+```json
+{
+  "agent": {
+    "specialist": {
+      "skills": ["my-skill", "other-skill"]
+    }
+  }
+}
+```
+
+## Commands
+
+Commands are slash-prefixed actions in the TUI. They can be simple config entries or complex markdown files.
+
+### Simple Command Config
+
+```json
+{
+  "command": {
+    "test": {
+      "template": "Run tests and show coverage",
+      "description": "Run test suite with coverage report"
+    },
+    "lint": {
+      "template": "Run {linter} on the codebase",
+      "description": "Run linter",
+      "agent": "build"
+    },
+    "deploy": {
+      "template": "Deploy application to {environment}",
+      "description": "Deploy to staging or production",
+      "agent": "build",
+      "variables": {
+        "environment": {
+          "type": "string",
+          "options": ["staging", "production"],
+          "default": "staging"
+        }
+      }
+    }
+  }
+}
+```
+
+### Command Options
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `template` | string | Prompt template with {variables} |
+| `description` | string | Shown in TUI command list |
+| `agent` | string | Agent to use for this command |
+| `variables` | object | Variable definitions with options |
+
+### Markdown Command
+
+For complex commands, create `commands/my-command.md`:
+
+```markdown
+---
+name: my-command
+description: Complex command with detailed instructions
+agent: build
+---
+
+# My Command
+
+Run a complex workflow with specific steps:
+
+## Pre-checks
+
+- Verify prerequisites
+- Check permissions
+
+## Steps
+
+1. First action
+2. Second action
+3. Verify results
+
+## Error Handling
+
+If errors occur:
+- Check logs
+- Roll back if needed
+```
+
+### Command Directory Locations
+
+**Project-local**:
+- `.opencode/commands/` - OpenCode commands
+
+**Global**:
+- `~/.config/opencode/commands/`
+
+### Built-in Commands
+
+OpenCode provides built-in commands:
+- `/config` - View merged configuration
+- `/models` - List available models
+- `/connect` - Add provider credentials
+- `/auth` - Manage authentication
+- `/skills` - List available skills
+- `/agents` - List available agents
+
 ### Instructions, Formatters, Watcher
 ```json
 {
