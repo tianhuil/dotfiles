@@ -1,5 +1,5 @@
 ---
-description: Research markdown files and web sources, write findings to notes/ folder
+description: Research markdown files and web sources, write findings to notes/research folder
 ---
 
 ## Research Workflow
