@@ -29,5 +29,6 @@ hooks:
 Make sure that `.gitignore` has `.wtp` folder ignored
 
 ```
+# WTP Worktrees
 .wtp
 ```
