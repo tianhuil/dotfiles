@@ -1,16 +1,9 @@
 ---
-name: resolve-git-merge-conflict
-description: Resolves merge conflicts by keeping code from both branches. Use when git merge encounters conflicts that need manual resolution with a text editor.
-license: MIT
-compatibility: opencode
-metadata:
-  audience: users
-  workflow: git
+description: Resolves merge conflicts by keeping code from both branches
+agent: build
 ---
 
-# Resolve Git Merge Conflicts
-
-## Conflict markers
+## Conflict Markers
 
 ```
 <<<<<<< HEAD
@@ -20,7 +13,7 @@ Their changes
 >>>>>>> branch-name
 ```
 
-## Resolution workflow
+## Resolution Workflow
 
 1. **View conflicts**: `git status`
 2. **Edit file**: Remove markers, combine changes from both branches
@@ -31,4 +24,9 @@ Their changes
 
 - Understand what each branch changed before resolving
 - Keep code from both branches when possible
+- If the changes logically conflict (so that you cannot reasonably keep changes from both branches) then don't make any edits and report that to the user.
 - Remove all three markers: `<<<<<<<`, `=======`, `>>>>>>>`
+
+## Reporting
+
+When you are done, report back to the user what you did or why you were unable to resolve the merger conflict.
