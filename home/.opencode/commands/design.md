@@ -1,5 +1,5 @@
 ---
-description: Design a feature; writes markdown design files to notes/design folder
+description: Design a feature; writes markdown design files for a human to review and an agent to execute.  Place in `notes/design` folder.
 ---
 
 # Source #1
