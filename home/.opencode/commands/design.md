@@ -1,153 +1,133 @@
 ---
-description: Design a feature; writes markdown design files for a human to review and an agent to execute.  Place in `notes/design` folder.
+description: Design a feature; writes markdown design files for human review and agent execution. Place in `notes/design` folder.
 ---
 
-# Source #1
+# Design Document Best Practices for AI Agents
 
-Writing effective design documents for large language models (LLMs) involves clear structure, precise language, and iterative refinement to communicate complex system ideas. These docs guide development teams in building, deploying, or integrating LLM-based features.
+## Overview
 
-## Core Structure
-Use a consistent template with these sections: **Problem Statement**, Goals/Non-Goals, Proposed Solution (high-level then detailed), Alternatives Considered, Risks/Mitigations, and Implementation Plan. Start with a one-page executive summary for quick scans. Limit docs to 5-10 pages, focusing on diagrams like system architecture flows over verbose text. [teamblind](https://www.teamblind.com/post/tips-on-writing-design-docs-hgk674ms)
+Design documents for AI agents differ from traditional specs—they must be both human-readable and machine-parseable. The spec is your "source of truth" that guides the agent throughout the project lifecycle.
 
-## LLM-Friendly Practices
-Write in concise, jargon-free prose with defined terms on first use; pair concepts with runnable code snippets or prompts near explanations. Employ markdown hierarchy (H1-H3) for scannability and XML-like tags (<example>...</example>) sparingly to label key elements like prompts or outputs. Chunk content into 200-400 word sections for better LLM ingestion during reviews. [dev](https://dev.to/joshtom/optimizing-technical-documentations-for-llms-4bcd)
+## Core Principles
 
-## Drafting Workflow
-Collect team examples, then use an LLM to generate an initial draft by feeding it templates and your raw ideas (e.g., 20 bullet points). Iterate with senior reviews: share drafts, incorporate feedback, and re-prompt the LLM for revisions. Test the doc by querying an LLM about it to spot ambiguities. [developers.google](https://developers.google.com/tech-writing/two/llms)
+### 1. Start High-Level, Iterate Down
 
-## Comparison of Key Tips
+- Begin with a concise "product brief" (1 paragraph): what problem, who users, success criteria
+- Let the AI expand this into a detailed spec
+- Use Plan Mode (read-only) to draft and refine before any code is written
+- The spec becomes a living artifact that persists between sessions
 
-| Aspect          | Human-Focused                  | LLM-Optimized Addition                  |
-|-----------------|--------------------------------|-----------------------------------------|
-| **Language**   | Precise, active voice         | Plain, positive examples only  [mbleigh](https://mbleigh.dev/posts/rules-for-rules/)  |
-| **Examples**   | Few-shot in context           | 1-2 complete use cases, tagged  [mbleigh](https://mbleigh.dev/posts/rules-for-rules/) |
-| **Validation** | Peer review                   | LLM Q&A testing  [dev](https://dev.to/joshtom/optimizing-technical-documentations-for-llms-4bcd)                |
+### 2. Structure Like a Professional PRD/SRS
 
-## Common Pitfalls
-Avoid vague headings, negative phrasing (e.g., "don't do X"), or over-nesting structures, as they confuse LLMs. Always prioritize user clarity first—good human docs naturally suit LLMs. [mbleigh](https://mbleigh.dev/posts/rules-for-rules/)
+Six core areas from GitHub's analysis of 2,500+ agent configs:
 
+| Area | What to Include |
+|------|-----------------|
+| **Commands** | Executable commands with flags: `npm test`, `pytest -v` |
+| **Testing** | Framework, test file locations, coverage expectations |
+| **Project Structure** | Explicit paths: `src/`, `tests/`, `docs/` |
+| **Code Style** | One real code snippet > three paragraphs of description |
+| **Git Workflow** | Branch naming, commit format, PR requirements |
+| **Boundaries** | What the agent should never touch |
 
-# Source 2
+### 3. Use Three-Tier Boundaries
 
-Here's a synthesis of the best practices for writing design docs for LLMs, drawing from multiple sources and perspectives:
+```
+✅ Always:    Run tests before commits, follow naming conventions
+⚠️ Ask first: Database schema changes, adding dependencies  
+🚫 Never:     Commit secrets, edit node_modules/, modify CI config
+```
 
----
+### 4. Write for Chunking (LLM-Friendly)
 
-## Best Practices for Writing Design Docs for LLMs
+- Each section should be self-contained and retrievable
+- Use consistent terminology—don't mix "API key", "access token", "auth credential"
+- Include feature/product names in every relevant section
+- Format code blocks explicitly—inline code gets mangled
+- Keep heading hierarchy consistent (H1→H2→H3, never skip levels)
+- Avoid pronouns: say "Update config.yaml" not "Update it and restart"
 
-There are really two distinct concerns here — writing design docs *about* LLM features/systems (for your engineering team), and writing docs *for* LLMs to consume (so AI tools can reason about your system accurately). Both matter and often overlap. Here's a breakdown of both:
+### 5. Break Large Tasks into Modular Prompts
 
----
+- Don't dump everything in one prompt—context window limits and "curse of instructions" degrade quality
+- Split by component: "Backend API Spec" and "Frontend UI Spec" separately
+- Use extended TOC/summaries for large specs
+- Each prompt should focus on one task/section
 
-### Writing Design Docs *About* LLM Features (for Engineers)
+### 6. Include Verification & Quality Gates
 
-**Start with a spec before any code.** A proven approach is to first brainstorm a detailed specification with the AI, then outline a step-by-step plan before writing any actual code. For a new project, this process should cover requirements, architecture decisions, data models, and a testing strategy — compiled into a `spec.md` that forms the foundation for development.
+- **Self-verification**: Ask agent to confirm all requirements are met
+- **LLM-as-a-Judge**: Use a second agent to review first agent's output
+- **Conformance tests**: YAML-based tests that any implementation must pass
+- Define success metrics explicitly—what does "good" look like?
 
-**Define behavior, not just requirements.** Specifications should use domain-oriented language to describe business intent rather than tech-bound implementations. They should have a clear structure, use Given/When/Then-style scenarios, and strive for completeness while remaining concise — covering the critical path without enumerating every edge case.
+### 7. Handle LLM-Specific Concerns
 
-**Document the non-determinism explicitly.** LLMs are powerful but probabilistic — they need guardrails and audit trails. Design docs should reflect this by specifying failure modes, confidence thresholds, human-approval gates, and rollback mechanisms rather than assuming the system will always behave as intended.
+For LLM/AI features specifically:
 
-**Specify model selection criteria.** When documenting model choices, clearly identify the use case and the minimum core AI capabilities required. Benchmark scores are a useful starting point, but real-world performance on tasks relevant to your product often varies — so your design doc should explain why a specific model was chosen for your context.
+| Section | Key Question |
+|---------|--------------|
+| **Problem Statement** | What language-heavy workflow are we automating? |
+| **Data Strategy** | Where is "source of truth" (RAG, API, fine-tuning)? |
+| **Model Config** | Model name, temperature, top-p, system instructions |
+| **Evaluation** | Golden dataset, metrics (faithfulness, instruction compliance) |
+| **Failure Modes** | Fallback strategies, uncertainty signaling |
+| **Security** | Prompt injection prevention, PII handling |
 
-**Include evaluation strategy upfront.** Product managers help define functionality and connect user needs to model behavior, while ML engineers focus on prompt design, model tuning, and output evaluation. A good design doc should specify who owns evaluation, what metrics matter, and how the system will be tested before and after deployment.
+## Design Doc Template
 
----
+```markdown
+# Feature: [Name]
 
-### Writing Docs *For* LLMs to Consume (so AI tools can reason about your system)
+## Executive Summary
+[1-2 paragraphs: what, why, success criteria]
 
-**Make every section self-contained.** AI systems work with chunks — they process documentation as discrete, independent pieces rather than reading it as a continuous narrative. They lose implicit connections between sections unless explicitly stated, and cannot infer unstated information. Documentation should be explicit, self-contained, and contextually complete: the more a chunk can stand alone while maintaining clear relationships to related content, the better it can be understood.
+## User Stories
+- [User] can [action] so that [benefit]
 
-**Use consistent terminology throughout.** LLMs struggle with inconsistency and must infer whether different terms are synonyms or distinct concepts. When you use "API key," "access token," and "auth credential" interchangeably, the AI creates probabilistic guesses about their relationships, leading to incorrect responses. Pick one term and use it consistently.
+## Technical Design
 
-**Format code blocks explicitly.** Inline code without proper formatting can be parsed ambiguously by AI systems, causing commands to get merged or altered when they appear in AI-generated responses. Properly formatted code blocks ensure AI systems can provide accurate code examples.
+### Architecture
+[System diagram or description]
 
-**Never rely on visual hierarchy alone.** LLMs process text sequentially, not visually. They can't scan a page or interpret complex layouts — they ingest tokenized content linearly. Traditional documentation often relies on visual hierarchy, screenshots, and formatted PDFs that are opaque to AI systems. Structure for sequential reading and semantic understanding instead.
+### Data Model
+[Schema, types, relationships]
 
-**Keep heading hierarchy consistent.** LLMs build mental maps from heading hierarchy. Skipped levels (e.g., H1→H3) break this cognitive model, sometimes causing the AI to misunderstand content relationships and retrieve irrelevant sections when answering questions.
+### API Contracts
+[Endpoints, request/response shapes]
 
-**Avoid pronouns and vague references.** Pronouns and vague references create ambiguity that AI systems struggle with. Instead of "Update the configuration file and restart the server," write "Update the `config.yaml` file and restart the application server." Coreference resolution is challenging for LLMs.
+## Implementation Plan
 
-**Include product/feature names in every section.** AI retrieval is based on semantic similarity. If important terms aren't present in a chunk, that chunk won't be retrieved for relevant queries, even if it contains exactly the information needed. Include specific product or feature names when documenting functionality — don't rely on context from surrounding sections.
+### Phase 1: [Name]
+- [ ] Task 1
+- [ ] Task 2
 
----
+### Phase 2: [Name]
+- [ ] Task 3
 
-### Meta-principle
+## Acceptance Criteria
+- [ ] Criterion 1
+- [ ] Criterion 2
 
-LLM-friendly documentation is ultimately human-friendly documentation. The same qualities that help AI systems understand your content — clarity, structure, consistency, and examples — also benefit human readers. Investing in well-structured design docs pays dividends for both your team and the AI tools they use daily.
+## Boundaries
+- ✅ Always: [rules]
+- ⚠️ Ask first: [rules]
+- 🚫 Never: [rules]
 
-# Source 3
+## Open Questions
+- [Question 1]
+- [Question 2]
+```
 
-Writing a design document for a Large Language Model (LLM) system is distinct from traditional software design. Because LLMs are probabilistic, your document must shift from "how the code works" to "how the system's behavior is steered and measured."
+## Output Location
 
-Below are the 2026 best practices for structuring and writing these documents.
+Place design documents in: `notes/design/`
 
----
+Filename format: `[feature-name]-design.md` (kebab-case)
 
-## 1. The "System-First" Architecture
+## References
 
-Don't treat the LLM as a black box. Your design doc should explicitly map the **data pipeline** that surrounds the model.
-
-* **Orchestration Logic:** Define if you are using a linear chain, a state machine (for agents), or a Directed Acyclic Graph (DAG).
-* **The RAG Lifecycle:** If using Retrieval-Augmented Generation, document the four stages: *Ingestion* (cleaning/chunking), *Embedding* (model version), *Retrieval* (vector DB choice), and *Augmentation* (reranking strategies).
-* **Hybrid Patterns:** Note where classical ML (like a Random Forest classifier) is used to pre-filter inputs or post-validate outputs.
-
----
-
-## 2. Model Selection & Rationale
-
-In 2026, "the biggest model" is rarely the right answer. Justify your choice based on the **Three Pillars of Inference**:
-
-* **Context Window:** Why does this use case need 32k vs. 1M tokens?
-* **Reasoning Tier:** Does this require an "o1-style" reasoning model (high latency/cost) or a "Flash/Air" model for speed?
-* **Cost vs. Latency:** Provide a table comparing projected costs and P99 latency targets.
-
----
-
-## 3. The "Evaluation" Section (Non-Negotiable)
-
-Since you can't unit test a prose response, your design doc must define **what "good" looks like**.
-
-* **Golden Dataset:** Mention the curation of 50–100 "ground truth" examples used for regression testing.
-* **Metrics Selection:**
-* **Faithfulness:** Does the answer match the retrieved context?
-* **Instruction Compliance:** Did it follow the formatting rules (e.g., "Output only JSON")?
-* **LLM-as-a-Judge:** Define the prompt and model used to grade other outputs.
-
-
-* **Evaluation Loop:** Describe how often evals run (e.g., "Every PR" vs. "Weekly on production logs").
-
----
-
-## 4. Prompt & Guardrail Design
-
-Prompts are application logic and should be treated as such in documentation.
-
-* **Versioning:** How are prompts stored? (e.g., "Hardcoded in Git" vs. "Managed via a Prompt CMS").
-* **Negative Constraints:** List what the model **must not** do (e.g., "Never mention competitors" or "Do not provide financial advice").
-* **Safety Layers:** Document the specific guardrail tiers (e.g., Amazon Bedrock Guardrails, Llama Guard) and how they handle PII (Personally Identifiable Information) or Prompt Injection.
-
----
-
-## 5. Failure Modes & Defensive UX
-
-LLMs will eventually fail or hallucinate. Your design doc must account for the "Unhappy Path":
-
-* **Fallback Strategies:** If the LLM times out or returns garbage, what is the default? (e.g., "Show a canned response" or "Retry with a cheaper model").
-* **Friction by Design:** How does the UI signal uncertainty to the user? (e.g., "Sources cited," "Confidence badges," or "Human-in-the-loop triggers").
-
----
-
-## Design Doc Template Summary
-
-| Section | Key Question to Answer |
-| --- | --- |
-| **Problem Statement** | What specific language-heavy workflow are we automating? |
-| **User Intent** | What are the typical prompts and edge-case inputs? |
-| **Data Strategy** | Where is the "source of truth" coming from (RAG, API, or Fine-tuning)? |
-| **Model Config** | Model name, temperature, top-p, and system instructions. |
-| **Security** | How are we preventing prompt injection and data leakage? |
-| **Monitoring** | How do we track "drift" or "hallucinations" in production? |
-
----
-
-**Would you like me to draft a specific template for a RAG-based design document that you can use as a starting point?**
+- [Addy Osmani: How to write a good spec for AI agents](https://addyo.substack.com/p/how-to-write-a-good-spec-for-ai-agents)
+- [GitHub: Writing great agents.md](https://github.blog/ai-and-ml/github-copilot/how-to-write-a-great-agents-md-lessons-from-over-2500-repositories/)
+- [Anthropic: Effective Context Engineering](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
+- [Simon Willison: Vibe Engineering](https://simonwillison.net/2025/Oct/7/vibe-engineering/)
