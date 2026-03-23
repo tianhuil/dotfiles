@@ -26,7 +26,7 @@ git push -u origin $(git rev-parse --abbrev-ref HEAD)
 # Get latest workflow run ID for current branch
 gh run list --branch $(git rev-parse --abbrev-ref HEAD) --limit 1 --json databaseId --jq '.[0].databaseId'
 
-# Watch workflow run
+# Watch workflow run (stops when run finishes)
 gh run watch $(gh run list --branch $(git rev-parse --abbrev-ref HEAD) --limit 1 --json databaseId --jq '.[0].databaseId')
 
 # Get failed jobs
@@ -53,15 +53,6 @@ When Actions fail:
 5. **Commit and push**: Create a commit with the fix and push it
 6. **Monitor new run**: Watch the new workflow run to verify the fix
 7. **Repeat**: Continue until all Actions pass
-
-## Common Failure Types
-
-- **Syntax errors**: Missing brackets, typos in config files
-- **Dependency issues**: Missing packages, version conflicts
-- **Test failures**: Unit tests, integration tests failing
-- **Linting errors**: ESLint, Prettier, Ruff violations
-- **Environment issues**: Missing secrets, wrong OS/matrix
-- **Timeouts**: Jobs running too long
 
 ## Success Criteria
 
