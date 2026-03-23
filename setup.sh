@@ -11,6 +11,7 @@ cp home/.stubby.yml ~/.
 cp home/.git-completion.sh ~/.
 cp home/.git-prompt.sh ~/.
 cp home/.gitignore_global ~/.
+cp home/.env.local ~/.
 
 # Directories with perfect mapping
 cp -R home/.cursor/ ~/.cursor/

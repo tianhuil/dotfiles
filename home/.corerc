@@ -159,6 +159,10 @@ if command -v fzf &>/dev/null; then
   $(brew --prefix)/opt/fzf/install --no-bash --no-fish --completion --key-bindings --no-update-rc >/dev/null 2>&1
 fi
 
+if [ -f ~/.env.local ]; then
+  source ~/.env.local
+fi
+
 # Create a new tab in Warp with the current directory
 warp() {
   local target_path="${1:-.}"
