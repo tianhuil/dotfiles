@@ -44,7 +44,9 @@
       "command": [
         "npx",
         "-y",
-        "@executeautomation/playwright-mcp-server"
+        "@playwright/mcp@latest",
+        "--browser",
+        "chrome"
       ],
       "enabled": true,
       "timeout": 30000
