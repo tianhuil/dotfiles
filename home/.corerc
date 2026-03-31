@@ -75,6 +75,7 @@ fi
 export NPM_PACKAGES="$HOME/.npm-packages"
 export NODE_PATH="$NPM_PACKAGES/lib/node_modules:$NODE_PATH"
 export PATH="$PATH:$NPM_PACKAGES/bin"  # npm packages should have lower priority
+export BUN_INSTALL_CACHE_DIR=/Volumes/Workspace/.bun/cache
 
 # .local/bin
 if [ -d "$HOME/.local/bin" ]; then
