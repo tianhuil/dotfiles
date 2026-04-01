@@ -98,10 +98,18 @@
 # Most flags are on by default. Set to false to change default behavior.
 
 [post-start]
-opencode = "zellij action new-tab --name '{{ branch | sanitize }}' --cwd '{{ worktree_path }}' -- opencode"
+opencode = """
+LAYOUT=$(mktemp /tmp/wt-layout-{{ branch | sanitize }}.XXXXX.kdl) && \
+sed -e 's|__BRANCH__|{{ branch | sanitize }}|g' -e 's|__WORKTREE_PATH__|{{ worktree_path }}|g' \
+  ~/.config/worktrunk/layouts/worktree.kdl.template > "$LAYOUT" && \
+zellij action new-tab --layout "$LAYOUT" && rm "$LAYOUT"
+"""
 
 [post-remove]
 zellij = "zellij action go-to-tab-name '{{ branch | sanitize }}' && zellij action close-tab || true"
+
+[commit.generation]
+command = "opencode run -m zai-coding-plan/glm-4.7-flashx --variant fast"
 
 [merge]
 squash = true      # Squash commits into one (--no-squash to preserve history)

@@ -1,0 +1,8 @@
+layout {
+    tab name="__BRANCH__" cwd="__WORKTREE_PATH__" {
+        pane split_direction="vertical" {
+            pane size="60%" command="opencode" close_on_exit=true
+            pane
+        }
+    }
+}
