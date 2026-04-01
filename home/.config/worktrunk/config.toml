@@ -97,13 +97,13 @@
 #
 # Most flags are on by default. Set to false to change default behavior.
 #
-# [merge]
-# squash = true      # Squash commits into one (--no-squash to preserve history)
-# commit = true      # Commit uncommitted changes first (--no-commit to skip)
-# rebase = true      # Rebase onto target before merge (--no-rebase to skip)
-# remove = true      # Remove worktree after merge (--no-remove to keep)
-# verify = true      # Run project hooks (--no-verify to skip)
-# no-ff = false      # Create a merge commit even when fast-forward is possible (--no-ff)
+[merge]
+squash = true      # Squash commits into one (--no-squash to preserve history)
+commit = true      # Commit uncommitted changes first (--no-commit to skip)
+rebase = true      # Rebase onto target before merge (--no-rebase to skip)
+remove = false     # Remove worktree after merge (--no-remove to keep)
+verify = true      # Run project hooks (--no-verify to skip)
+no-ff = false      # Create a merge commit even when fast-forward is possible (--no-ff)
 #
 # ### Switch
 #
@@ -150,7 +150,6 @@
 # Override global user config for a specific project. Scalar values (like `worktree-path`) replace the global value; everything else (hooks, aliases, etc.) appends, global first.
 #
 # [projects."github.com/user/repo"]
-# worktree-path = ".worktrees/{{ branch | sanitize }}"
 # list.full = true
 # merge.squash = false
 # pre-start.env = "cp .env.example .env"
