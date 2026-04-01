@@ -1,5 +1,5 @@
 *.sublime-workspace
 *~
 TASKS.md
-home/.opencode/zai-api-key
+home/.config/opencode/zai-api-key
 home/.env.local

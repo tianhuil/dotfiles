@@ -18,7 +18,8 @@ cp -R home/.cursor/ ~/.cursor/
 cp -R home/.kilocode/ ~/.kilocode/
 cp -R home/.local/ ~/.local/
 cp -R home/.nvm/ ~/.nvm/
-cp -R home/.opencode/ ~/.config/opencode/
+cp -R home/.config/opencode/ ~/.config/opencode/
+cp -R home/.config/ ~/.config/
 cp -R home/.scripts/ ~/.scripts/
 
 # Git config
