@@ -33,7 +33,11 @@ home/.config/        → ~/.config/
 | `.config/` | `~/.config/` | XDG-compliant config dir |
 | `.local/` | `~/.local/` | XDG-compliant local data (bins, shared data) |
 
-### 4. Managed Configs
+### 4. `.corerc` — Shared Shell Init
+
+`.corerc` is a custom file that acts as a **shared initialization block** sourced by both `.zprofile` (zsh) and `.bashrc` (bash). This avoids duplicating environment setup across shell configs.  It's the single place to add cross-shell config changes.
+
+### 5. Managed Configs
 
 **Shell**: zsh (`.zshrc`, `.zprofile`), bash (`.bashrc`, `.bash_profile`), readline (`.inputrc`)
 
