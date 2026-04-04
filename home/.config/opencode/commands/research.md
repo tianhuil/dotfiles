@@ -10,7 +10,7 @@ description: Research markdown files and web sources, write findings to notes/re
 4. **Verify from sources** - Use webfetch (fallback to webfetch_camouflage if blocked)
 5. **Synthesize findings** - Combine from multiple sources
 6. **MCPs for code research** - Use serena, context7, gh_grep for coding topics
-7. **Write to notes/** - Update existing or create new note
+7. **Write to `notes/research` folder** - Update existing or create new note
 
 ## Notes/ Folder
 
@@ -58,9 +58,9 @@ description: Research markdown files and web sources, write findings to notes/re
 ## Example Workflow
 
 1. Query: "How does Next.js 14 server actions work?"
-2. Check notes/ for existing Next.js notes
+2. Check notes/research for existing Next.js notes
 3. Search repo for server actions examples
 4. Use webfetch to check Next.js official docs
 5. Use gh_grep to find real-world implementations
 6. Synthesize docs, examples, and implementations
-7. Update notes/nextjs-server-actions.md with findings
+7. Update notes/research/nextjs-server-actions.md with findings
