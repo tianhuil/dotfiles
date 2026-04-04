@@ -170,3 +170,7 @@ warp() {
   local target_path="${1:-.}"
   open "warp://action/new_tab?path=$(cd "$target_path" && pwd)"
 }
+
+# worktrunk aliases
+alias ws='wt switch --create'
+alias wso='wt switch --create --execute=opencode'
