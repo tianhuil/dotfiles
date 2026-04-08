@@ -39,18 +39,6 @@
       "enabled": true,
       "timeout": 5000
     },
-    "playwright": {
-      "type": "local",
-      "command": [
-        "bunx",
-        "-y",
-        "@playwright/mcp@latest",
-        "--browser",
-        "chrome"
-      ],
-      "enabled": true,
-      "timeout": 30000
-    },
     "webfetch_camouflage": {
       "type": "local",
       "command": [
@@ -75,7 +63,6 @@
     "gh_grep": true,
     "serena": true,
     "sequential_thinking": true,
-    "playwright": true,
     "webfetch_camouflage": true,
     "web_search_prime": true
   }

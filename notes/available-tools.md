@@ -5,9 +5,9 @@
 
 ## Executive Summary
 
-- **Total Tools**: 80+ specialized tools organized across file operations, web research, browser automation, git operations, documentation, agent management, and semantic code analysis
-- **Key Categories**: File I/O, Research & Documentation, Browser Automation, Git & Version Control, Agent Orchestration, Serena MCP (Semantic Code Analysis)
-- **Primary Use Cases**: Research agents can gather information, interact with web pages, manage code, coordinate specialized sub-agents, and perform IDE-like semantic code retrieval and editing
+- **Total Tools**: 80+ specialized tools organized across file operations, web research, git operations, documentation, agent management, and semantic code analysis
+- **Key Categories**: File I/O, Research & Documentation, Git & Version Control, Agent Orchestration, Serena MCP (Semantic Code Analysis)
+- **Primary Use Cases**: Research agents can gather information, manage code, coordinate specialized sub-agents, and perform IDE-like semantic code retrieval and editing
 
 ## Detailed Findings
 
@@ -46,51 +46,7 @@ The following sections detail each tool category. Note that tools from different
 - gh_grep searches literal code patterns, not keywords
 - Max 3 calls per question for Context7 and gh_grep
 
-### 3. Playwright Browser Automation
-
-| Tool | Description |
-|------|-------------|
-| `playwright_start_codegen_session` | Start recording Playwright actions |
-| `playwright_end_codegen_session` | Generate test file from session |
-| `playwright_get_codegen_session` | Get session info |
-| `playwright_clear_codegen_session` | Clear session without generating |
-| `playwright_playwright_navigate` | Navigate to URL |
-| `playwright_playwright_screenshot` | Take screenshot of page or element |
-| `playwright_playwright_click` | Click element |
-| `playwright_playwright_iframe_click` | Click element in iframe |
-| `playwright_playwright_fill` | Fill input field |
-| `playwright_playwright_iframe_fill` | Fill input in iframe |
-| `playwright_playwright_select` | Select from dropdown |
-| `playwright_playwright_hover` | Hover over element |
-| `playwright_playwright_upload_file` | Upload file |
-| `playwright_playwright_evaluate` | Execute JavaScript |
-| `playwright_playwright_console_logs` | Retrieve browser console logs |
-| `playwright_playwright_resize` | Resize viewport (supports 143+ device presets) |
-| `playwright_playwright_close` | Close browser |
-| `playwright_playwright_get` | HTTP GET request |
-| `playwright_playwright_post` | HTTP POST request |
-| `playwright_playwright_put` | HTTP PUT request |
-| `playwright_playwright_patch` | HTTP PATCH request |
-| `playwright_playwright_delete` | HTTP DELETE request |
-| `playwright_playwright_expect_response` | Start waiting for HTTP response |
-| `playwright_playwright_assert_response` | Assert expected HTTP response |
-| `playwright_playwright_custom_user_agent` | Set custom User-Agent |
-| `playwright_playwright_get_visible_text` | Get visible page text |
-| `playwright_playwright_get_visible_html` | Get HTML with cleaning options |
-| `playwright_playwright_go_back` | Navigate back |
-| `playwright_playwright_go_forward` | Navigate forward |
-| `playwright_playwright_drag` | Drag element to target |
-| `playwright_playwright_press_key` | Press keyboard key |
-| `playwright_playwright_save_as_pdf` | Save page as PDF |
-| `playwright_playwright_click_and_switch_tab` | Click link and switch to new tab |
-
-**Notes**:
-- Default browser: chromium (supports firefox, webkit)
-- Default viewport: 1280x720
-- Device presets: iPhone 13, iPad Pro 11, Pixel 7, Galaxy S24, Desktop Chrome, etc.
-- For dynamic content or JavaScript-heavy sites, prefer Playwright over webfetch
-
-### 4. Git & Version Control
+### 3. Git & Version Control
 
 | Tool | Description |
 |------|-------------|
@@ -117,7 +73,7 @@ The following sections detail each tool category. Note that tools from different
 3. Create branch if needed, push with -u, create PR via gh pr create
 4. Return PR URL
 
-### 5. Agent Orchestration & Skills
+### 4. Agent Orchestration & Skills
 
 | Tool | Description | Available Subagents |
 |------|-------------|---------------------|
@@ -167,7 +123,7 @@ The following sections detail each tool category. Note that tools from different
 - Trivial task (<3 steps)
 - Purely conversational or informational task
 
-### 6. Serena MCP Server (Semantic Code Analysis)
+### 5. Serena MCP Server (Semantic Code Analysis)
 
 **Overview**: Serena is a powerful coding agent toolkit that provides IDE-like semantic code retrieval and editing capabilities. It extracts code entities at the symbol level and exploits relational structure, making it highly efficient for navigating and manipulating complex codebases.
 
@@ -411,7 +367,6 @@ list_memories()
 - **Context7**: Need library ID before querying (unless provided)
 - **gh_grep**: Searches literal code, not keywords
 - **Task**: Not for simple file reads or class definitions
-- **Playwright**: 2-minute timeout by default for navigate
 - **Serena LSP tools**: May require `restart_language_server` after external code edits
 - **Serena**: Adds less value for very small projects or code written from scratch
 - **Serena JetBrains tools**: Require JetBrains plugin installation and running JetBrains IDE
