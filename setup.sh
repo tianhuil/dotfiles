@@ -15,7 +15,6 @@ cp home/.env.local ~/.
 
 # Directories with perfect mapping
 cp -R home/.cursor/ ~/.cursor/
-cp -R home/.kilocode/ ~/.kilocode/
 cp -R home/.local/ ~/.local/
 cp -R home/.nvm/ ~/.nvm/
 cp -R home/.config/ ~/.config/

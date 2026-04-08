@@ -43,7 +43,7 @@ home/.config/        → ~/.config/
 
 **Git**: `.gitconfig`, `.gitignore_global`, completion/prompt scripts
 
-**Editors/Tools**: Cursor (`.cursor/`), Kilocode (`.kilocode/`), tmux (`.tmux.conf`), OpenCode (`.config/opencode/`)
+**Editors/Tools**: Cursor (`.cursor/`), tmux (`.tmux.conf`), OpenCode (`.config/opencode/`)
 
 **Dev**: NVM (`.nvm/`), npm (`.npmrc`), stubby DNS (`.stubby.yml`), utility scripts (`.scripts/`)
 
