@@ -502,7 +502,7 @@ import * as UI from '@/components/ui'
 
 ```bash
 # Build with bundle analyzer
-npx next build --analyze
+bunx next build --analyze
 
 # Or use the plugin
 npm install @next/bundle-analyzer

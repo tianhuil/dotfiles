@@ -21,7 +21,7 @@ Replace Node.js and npm commands with Bun equivalents:
 | Run file | `node file.ts` or `ts-node` | `bun file.ts` |
 | Install deps | `npm install`, `yarn install`, `pnpm install` | `bun install` |
 | Run script | `npm run script`, `yarn run script`, `pnpm run script` | `bun run script` |
-| Execute package | `npx package cmd` | `bunx package cmd` |
+| Execute package | `bunx package cmd` | `bunx package cmd` |
 | Build | `webpack`, `esbuild`, `vite build` | `bun build file.html\|file.ts\|file.css` |
 | Test | `jest`, `vitest` | `bun test` |
 

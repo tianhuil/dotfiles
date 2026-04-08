@@ -32,7 +32,7 @@ npm install better-sqlite3
 
 ```bash
 # Initialize config
-npx drizzle-kit init
+bunx drizzle-kit init
 
 # Create drizzle.config.ts
 ```
@@ -75,7 +75,7 @@ export const db = drizzle(process.env.DATABASE_URL!, { schema });
 
 ```bash
 # Initialize config
-npx drizzle-kit init
+bunx drizzle-kit init
 ```
 
 ```typescript
@@ -374,28 +374,28 @@ import { createInsertSchema } from 'drizzle-effect-schema';
 
 ```bash
 # Generate migration from schema changes
-npx drizzle-kit generate
+bunx drizzle-kit generate
 
 # Push schema directly to database (for prototyping)
-npx drizzle-kit push
+bunx drizzle-kit push
 
 # Apply migrations
-npx drizzle-kit migrate
+bunx drizzle-kit migrate
 
 # Pull schema from database
-npx drizzle-kit pull
+bunx drizzle-kit pull
 
 # Export schema to SQL
-npx drizzle-kit export
+bunx drizzle-kit export
 
 # Check for schema drift
-npx drizzle-kit check
+bunx drizzle-kit check
 
 # Open Drizzle Studio
-npx drizzle-kit studio
+bunx drizzle-kit studio
 
 # Upgrade to new migration format (v3)
-npx drizzle-kit up
+bunx drizzle-kit up
 ```
 
 ## Database-Specific Features

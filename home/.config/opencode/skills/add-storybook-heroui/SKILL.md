@@ -471,7 +471,7 @@ This section walks through setting up Storybook from scratch in a standalone pro
 **1. Install Storybook**
 
 ```bash
-npx storybook@latest init
+bunx storybook@latest init
 ```
 
 Choose **React** as the framework. If prompted for a builder, choose **Vite**.

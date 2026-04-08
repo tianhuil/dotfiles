@@ -42,7 +42,7 @@
     "playwright": {
       "type": "local",
       "command": [
-        "npx",
+        "bunx",
         "-y",
         "@playwright/mcp@latest",
         "--browser",
