@@ -171,6 +171,11 @@ warp() {
   open "warp://action/new_tab?path=$(cd "$target_path" && pwd)"
 }
 
+# AI-powered git commit (requires llm CLI: https://llm.datasette.io/)
+if [ -f "$HOME/.config/shell/gcm.sh" ]; then
+  source "$HOME/.config/shell/gcm.sh"
+fi
+
 # worktrunk aliases
 alias ws='wt switch --create'
 alias wso='wt switch --create --execute=opencode'
