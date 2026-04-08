@@ -20,6 +20,7 @@ cp -R home/.local/ ~/.local/
 cp -R home/.nvm/ ~/.nvm/
 cp -R home/.config/ ~/.config/
 cp -R home/.scripts/ ~/.scripts/
+cp -R home/.agents/ ~/.agents/
 
 # Git config
 git config --global core.excludesfile ~/.gitignore_global
