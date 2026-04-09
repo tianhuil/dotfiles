@@ -63,7 +63,7 @@
     "gh_grep": true,
     "serena": true,
     "sequential_thinking": true,
-    "webfetch_camouflage": true,
+    "webfetch_camouflage": false,
     "web_search_prime": true
   }
 }
