@@ -177,5 +177,7 @@ if [ -f "$HOME/.config/shell/gcm.sh" ]; then
 fi
 
 # worktrunk aliases
-alias ws='wt switch --create'
-alias wso='wt switch --create --execute=opencode'
+alias ws='wt switch'
+alias wsc='wt switch --create'
+alias wso='wt switch --execute=opencode'
+alias wsco='wt switch --create --execute=opencode'
