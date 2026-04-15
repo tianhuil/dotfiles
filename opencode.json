@@ -1,8 +1,12 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "permission": {
-    "file": {
-      "~/.config/**": "read"
+  "mode": {
+    "build": {
+      "permission": {
+        "read": {
+          "~/.config/**": "allow"
+        }
+      }
     }
   }
 }
