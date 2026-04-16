@@ -58,6 +58,14 @@
       "timeout": 10000
     }
   },
+  "permission": {
+    "external_directory": {
+      "/tmp/**": "allow"
+    },
+    "edit": {
+      "/tmp/**": "allow"
+    }
+  },
   "tools": {
     "context7": true,
     "gh_grep": true,
