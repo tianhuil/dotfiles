@@ -5,19 +5,17 @@ description: Run dev servers (or any long-running processes) alongside OpenCode 
 
 This skill teaches you how to run development servers (or any long-running processes) in Zellij while using OpenCode, so you can monitor the server output in a separate pane or tab.
 
+## Key Concept: Pane IDs and Cross-Tab Operation
+
+All `zellij` commands below use `--pane-id "$ZELLIJ_PANE_ID"` to target the AI's pane specifically. This ensures commands work correctly even when the user is viewing a different tab. `$ZELLIJ_PANE_ID` is automatically set by Zellij for every pane.
+
 ## Proactive Behavior
 
 If the user wants to run a dev server (or any long-running process like `npm run dev`, `bun run dev`, `cargo run`, etc.), **proactively** run it in a Zellij pane instead of the current shell.
 
 ### Step 1: Check if a dev server is already running
 
-Before launching a new pane, check if a dev server is already running in another pane:
-
-```bash
-zellij action list-panes
-```
-
-Then inspect running processes across panes for common dev server patterns (e.g., `vite`, `next dev`, `bun run dev`, `webpack`, `node.*--watch`, `cargo run`):
+Before launching a new pane, check if a dev server is already running:
 
 ```bash
 ps aux | grep -E '(vite|next dev|bun run dev|webpack|node.*--watch|cargo run|turbo dev|npm run dev)' | grep -v grep
@@ -27,44 +25,41 @@ If a dev server is already running, **do not** launch a new one. Inform the user
 
 ### Step 2: Launch in a new pane on the AI's tab
 
-If no dev server is running, launch it as a new pane next to the AI's current pane (using `$ZELLIJ_PANE_ID` which Zellij sets per-pane). This works correctly even if the user is viewing a different tab:
+If no dev server is running, launch it as a new pane next to the AI's current pane. This works correctly even if the user is viewing a different tab:
 
 ```bash
 zellij run --pane-id "$ZELLIJ_PANE_ID" --direction right -- bun run dev
 ```
 
-Substitute the appropriate command based on the project's package manager and scripts. This keeps the server output visible in a separate pane on the AI's tab without blocking the current session.
+Substitute the appropriate command based on the project's package manager and scripts.
 
 ## Quick Commands
 
-### From Inside a Zellij Session
-
-Open a new pane with a dev server:
+### Open a new pane with a dev server
 
 ```bash
-zellij run -- bun run dev
-zellij run --direction right -- bun run dev
-zellij run --floating -- bun run dev
+zellij run --pane-id "$ZELLIJ_PANE_ID" --direction right -- bun run dev
+zellij run --pane-id "$ZELLIJ_PANE_ID" --direction down -- bun run dev
+zellij run --pane-id "$ZELLIJ_PANE_ID" --floating -- bun run dev
 ```
 
-Open a new tab with a dev server:
+### Open a new tab with a dev server
 
 ```bash
-zellij action new-tab -n "dev-server" && zellij run -t "dev-server" -- bun run dev
+zellij action new-tab -n "dev-server" && zellij run -t "dev-server" --pane-id "$ZELLIJ_PANE_ID" -- bun run dev
 ```
 
 ### Block Until Exit (for scripts)
 
 ```bash
-zellij run --block-until-exit -- bun test
-zellij run --block-until-exit-success -- bun run build
+zellij run --pane-id "$ZELLIJ_PANE_ID" --block-until-exit -- bun test
+zellij run --pane-id "$ZELLIJ_PANE_ID" --block-until-exit-success -- bun run build
 ```
 
 ### Kill the Server Pane
 
 ```bash
-zellij action close-pane
-# or Ctrl+d in the pane, or Ctrl+Shift+p then choose "Close Pane"
+zellij action close-pane --pane-id "$ZELLIJ_PANE_ID"
 ```
 
 ## Using Layouts (Recommended for Repeatable Workflows)
@@ -102,7 +97,7 @@ Launch with: `zellij --layout dev`
 
 | Approach | Use When |
 |----------|-----------|
-| `zellij run` | Quick, one-off dev server; already in a Zellij session |
+| `zellij run --pane-id` | Quick, one-off dev server; AI or user on different tab |
 | Layout file | Repeated workflow; want reproducible multi-pane setup |
 | `zellij run --floating` | Temporary server you want visible on top |
 | `zellij run --block-until-exit` | Server needed for next command (e.g., run tests after dev server starts) |
@@ -111,27 +106,27 @@ Launch with: `zellij --layout dev`
 
 ### Run Next.js dev server
 ```bash
-zellij run -- npm run dev
+zellij run --pane-id "$ZELLIJ_PANE_ID" --direction right -- npm run dev
 ```
 
 ### Run Bun dev server
 ```bash
-zellij run -- bun run dev
+zellij run --pane-id "$ZELLIJ_PANE_ID" --direction right -- bun run dev
 ```
 
 ### Run Python server
 ```bash
-zellij run -- python manage.py runserver
+zellij run --pane-id "$ZELLIJ_PANE_ID" --direction right -- python manage.py runserver
 ```
 
 ### Run Docker Compose
 ```bash
-zellij run -- docker compose up
+zellij run --pane-id "$ZELLIJ_PANE_ID" --direction right -- docker compose up
 ```
 
 ### Run with specific port
 ```bash
-zellij run -- bun run dev --port 3001
+zellij run --pane-id "$ZELLIJ_PANE_ID" --direction right -- bun run dev --port 3001
 ```
 
 ## Zellij Navigation
