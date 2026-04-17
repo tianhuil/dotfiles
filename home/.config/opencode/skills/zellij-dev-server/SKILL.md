@@ -5,6 +5,36 @@ description: Run dev servers (or any long-running processes) alongside OpenCode 
 
 This skill teaches you how to run development servers (or any long-running processes) in Zellij while using OpenCode, so you can monitor the server output in a separate pane or tab.
 
+## Proactive Behavior
+
+If the user wants to run a dev server (or any long-running process like `npm run dev`, `bun run dev`, `cargo run`, etc.), **proactively** run it in a Zellij pane instead of the current shell.
+
+### Step 1: Check if a dev server is already running
+
+Before launching a new pane, check if a dev server is already running in another pane:
+
+```bash
+zellij action list-panes
+```
+
+Then inspect running processes across panes for common dev server patterns (e.g., `vite`, `next dev`, `bun run dev`, `webpack`, `node.*--watch`, `cargo run`):
+
+```bash
+ps aux | grep -E '(vite|next dev|bun run dev|webpack|node.*--watch|cargo run|turbo dev|npm run dev)' | grep -v grep
+```
+
+If a dev server is already running, **do not** launch a new one. Inform the user that a dev server appears to already be running and offer to restart it if needed.
+
+### Step 2: Launch in a new pane on the AI's tab
+
+If no dev server is running, launch it as a new pane next to the AI's current pane (using `$ZELLIJ_PANE_ID` which Zellij sets per-pane). This works correctly even if the user is viewing a different tab:
+
+```bash
+zellij run --pane-id "$ZELLIJ_PANE_ID" --direction right -- bun run dev
+```
+
+Substitute the appropriate command based on the project's package manager and scripts. This keeps the server output visible in a separate pane on the AI's tab without blocking the current session.
+
 ## Quick Commands
 
 ### From Inside a Zellij Session
