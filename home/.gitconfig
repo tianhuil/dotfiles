@@ -42,4 +42,6 @@
 [diff]
     tool = code
 [difftool "code"]
-    cmd = code --wait --diff $LOCAL $REMOTE
+     cmd = code --wait --diff $LOCAL $REMOTE
+[url "git@github.com:"]
+	insteadOf = https://github.com/
