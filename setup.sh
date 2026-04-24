@@ -21,6 +21,13 @@ cp -R home/.config/ ~/.config/
 cp -R home/.scripts/ ~/.scripts/
 cp -R home/.agents/ ~/.agents/
 
+# SSH
+mkdir -p ~/.ssh
+cp home/.ssh/config ~/.ssh/config
+cp home/.ssh/config.local ~/.ssh/config.local 2>/dev/null || true
+cp home/.ssh/racknerd.pub ~/.ssh/racknerd.pub 2>/dev/null || true
+chmod 600 ~/.ssh/config
+
 # Git config
 git config --global core.excludesfile ~/.gitignore_global
 
