@@ -3,3 +3,4 @@
 TASKS.md
 home/.config/opencode/zai-api-key
 home/.env.local
+home/.ssh/config
