@@ -26,8 +26,8 @@
 # # worktree-path = "{{ repo_path }}/../{{ repo }}.{{ branch | sanitize }}"
 
 # Inside the repository
-# Creates: ~/code/myproject/.worktrees/feature-auth
-worktree-path = "{{ repo_path }}/.worktrees/{{ branch | sanitize }}"
+# Creates: ~/code/myproject/.worktrunk/feature-auth
+worktree-path = "{{ repo_path }}/.worktrunk/{{ branch | sanitize }}"
 
 # # Centralized worktrees directory
 # # Creates: ~/worktrees/myproject/feature-auth
