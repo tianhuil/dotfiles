@@ -60,10 +60,16 @@
   },
   "permission": {
     "external_directory": {
-      "/tmp/**": "allow"
+      "/tmp/**": "allow",
+      "~/.config/opencode/opencode.json": "allow",
+      "~/.config/opencode/AGENTS.md": "allow",
+      "~/.config/opencode/agents/**": "allow",
+      "~/.config/opencode/commands/**": "allow",
+      "~/.config/opencode/skills/**": "allow"
     },
     "edit": {
-      "/tmp/**": "allow"
+      "/tmp/**": "allow",
+      "~/.config/opencode/**": "deny"
     }
   },
   "tools": {
