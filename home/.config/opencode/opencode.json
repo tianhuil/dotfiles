@@ -5,7 +5,7 @@
       "type": "remote",
       "url": "https://mcp.context7.com/mcp",
       "headers": {
-        "CONTEXT7_API_KEY": "ctx7sk-69a0330b-698d-4a7a-9c36-15f0acf6d0a8"
+        "CONTEXT7_API_KEY": "{file:~/.config/opencode/context7-api-key}"
       },
       "enabled": true,
       "timeout": 5000
