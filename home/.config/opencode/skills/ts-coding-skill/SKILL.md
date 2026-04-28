@@ -43,6 +43,34 @@ context7_query-docs(libraryId: '/colinhacks/zod', query: 'How to validate email 
 gh_grep_searchGitHub(query: 'z.string().email()', language: ['TypeScript'])
 ```
 
+## Recommended tsconfig Settings
+
+Use these strict settings for maximum type safety:
+
+```json
+{
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "verbatimModuleSyntax": true,
+    "target": "ESNext",
+    "module": "Preserve",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "skipLibCheck": true
+  }
+}
+```
+
+Key settings explained:
+
+- `noUncheckedIndexedAccess` — `arr[0]` is `T | undefined`, forces safe access patterns
+- `noImplicitOverride` — Requires `override` keyword in subclass methods
+- `verbatimModuleSyntax` — Enforces explicit `type` keyword for type-only imports
+- `noFallthroughCasesInSwitch` — Prevents accidental fallthrough in switch statements
+
 ## Validation and Testing
 
 ### Run Validation After Each Command

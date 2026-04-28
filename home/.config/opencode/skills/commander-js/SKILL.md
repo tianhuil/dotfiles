@@ -282,6 +282,118 @@ program
 
 ---
 
+## Two-Layer CLI Architecture
+
+Separate CLI parsing from business logic for testability and reuse:
+
+```
+src/
+├── cli/           # Thin CLI parsing layer (Commander)
+│   ├── index.ts   # Program entry point, global options
+│   ├── task.ts    # Task subcommands, flag parsing, output formatting
+│   └── project.ts
+├── commands/      # Business logic layer (pure functions)
+│   ├── task.ts    # createTask(), listTask(), etc.
+│   └── project.ts
+├── output/        # Presentation layer
+│   ├── json.ts    # formatJson()
+│   └── table.ts   # formatTable(), formatKeyValue()
+└── db/            # Data access
+    ├── schema.ts
+    └── client.ts
+```
+
+### CLI Layer (`src/cli/`)
+
+Registers Commander subcommands, extracts flags, calls command functions, formats output. No business logic:
+
+```typescript
+import type { Command } from "commander";
+import { createTask } from "../commands/task";
+import { formatJson, formatTable, formatKeyValue } from "../output";
+
+export function registerTaskCommands(program: Command) {
+  program
+    .command("create")
+    .requiredOption("--title <title>")
+    .option("--project <projectId>")
+    .action(async (opts) => {
+      const db = getDb();
+      const result = await createTask(db, opts);
+      const format = program.opts().format;
+      if (format === "json") {
+        console.log(formatJson(result));
+      } else {
+        console.log(formatKeyValue(result));
+      }
+    });
+}
+```
+
+### Command Layer (`src/commands/`)
+
+Pure functions that accept a DB instance and typed parameters. No CLI awareness:
+
+```typescript
+export async function createTask(
+  db: NodePgDatabase,
+  params: { title: string; description?: string; projectId?: string }
+): Promise<Task> {
+  const [created] = await db.insert(tasks).values({ ... }).returning();
+  return created!;
+}
+```
+
+### Output Layer (`src/output/`)
+
+Separate formatters for JSON and table display:
+
+```typescript
+export function formatJson<T>(data: T): string {
+  return JSON.stringify(data, null, 2);
+}
+
+export function formatKeyValue(record: Record<string, unknown>): string {
+  return Object.entries(record)
+    .map(([key, value]) => `  ${key}: ${value ?? "\u2014"}`)
+    .join("\n");
+}
+```
+
+### Global Format Option
+
+Add `--format` to the root program, access via `cmd.parent!.opts().format` in subcommands:
+
+```typescript
+program.option("--format <type>", "output format", "table");
+```
+
+### Confirmation Prompts for Destructive Operations
+
+Use `node:readline/promises` with `--yes/-y` flag to skip:
+
+```typescript
+import * as readline from "node:readline/promises";
+
+async function confirm(message: string): Promise<boolean> {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  const answer = await rl.question(`${message} (y/N) `);
+  rl.close();
+  return answer.toLowerCase() === "y";
+}
+
+program
+  .command("delete <id>")
+  .option("--yes, -y", "skip confirmation")
+  .action(async (id, opts) => {
+    if (!opts.yes) {
+      const ok = await confirm(`Delete task ${id}?`);
+      if (!ok) return;
+    }
+    await deleteTask(db, id);
+  });
+```
+
 ## Structure: Separate Definition from Execution
 
 Keep option/command definitions separate from business logic for testability:

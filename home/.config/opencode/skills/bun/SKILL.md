@@ -125,6 +125,83 @@ root.render(<Frontend />);
 bun --hot ./index.ts
 ```
 
+## Database Testing with PGLite
+
+Use `@electric-sql/pglite` for in-memory PostgreSQL in tests. No external DB needed.
+
+### Setup
+
+```bash
+bun add -d @electric-sql/pglite
+```
+
+### Test Helper
+
+```typescript
+// tests/e2e/helpers.ts
+import { PGlite } from "@electric-sql/pglite";
+import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
+import * as schema from "../../src/db/schema";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
+export async function setupTestDb(): Promise<NodePgDatabase<typeof schema>> {
+  const pglite = new PGlite();
+  const sql = readFileSync(
+    join(__dirname, "../../src/db/migrations/0000_migration.sql"),
+    "utf-8"
+  )
+    .replace(/^-->.*$/gm, "")
+    .replace(/^--.*$/gm, "");
+  await pglite.exec(sql);
+  return drizzle(pglite) as NodePgDatabase<typeof schema>;
+}
+
+export async function teardownTestDb(pglite: PGlite): Promise<void> {
+  await pglite.close();
+}
+```
+
+### Test Pattern
+
+Fresh DB instance per `describe` block for isolation. Import command functions directly, don't spawn CLI process:
+
+```typescript
+import { test, expect, describe, beforeEach, afterEach } from "bun:test";
+import { setupTestDb, teardownTestDb } from "./helpers";
+import { createTask } from "../../src/commands/task";
+import type { NodePgDatabase } from "drizzle-orm/node-postgres";
+
+describe("task CRUD", () => {
+  let db: NodePgDatabase;
+
+  beforeEach(async () => {
+    db = await setupTestDb();
+  });
+
+  afterEach(async () => {
+    await teardownTestDb((db as any).$client);
+  });
+
+  test("creates a task with all options", async () => {
+    const task = await createTask(db, {
+      title: "Test task",
+      description: "A description",
+      projectId: project.id,
+    });
+    expect(task.title).toBe("Test task");
+  });
+});
+```
+
+### Run Targeted Tests
+
+Only run tests for the specific file being worked on:
+
+```bash
+bun test tests/e2e/task.test.ts
+```
+
 ## API documentation
 
 For detailed API documentation, refer to `node_modules/bun-types/docs/**/*.mdx` after installing bun-types.

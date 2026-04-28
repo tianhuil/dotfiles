@@ -404,6 +404,107 @@ bunx drizzle-kit up
 
 **SQLite**: See [sqlite.md](sqlite.md) for auto-increment keys, timestamps, full-text search, and cloud connections.
 
+## Practical Patterns
+
+### Type Inference from Schema
+
+Derive types from Drizzle schema instead of hand-writing them:
+
+```typescript
+import { InferSelectModel, InferInsertModel } from "drizzle-orm";
+import { tasks } from "./schema";
+
+type Task = InferSelectModel<typeof tasks>;
+type NewTask = InferInsertModel<typeof tasks>;
+```
+
+### Dynamic WHERE Clauses
+
+Build conditions array for optional filters:
+
+```typescript
+import { and, eq, isNull } from "drizzle-orm";
+
+const conditions = [];
+if (filters.projectId) conditions.push(eq(tasks.projectId, filters.projectId));
+if (!filters.includeCompleted) conditions.push(isNull(tasks.completedAt));
+
+const results = await db
+  .select()
+  .from(tasks)
+  .where(and(...conditions));
+```
+
+### Server-Side Expressions with `sql`
+
+Use `sql` template literals for DB-side computations:
+
+```typescript
+import { sql } from "drizzle-orm";
+
+await db
+  .update(tasks)
+  .set({ completedAt: sql`now()` })
+  .where(eq(tasks.id, id));
+```
+
+### Soft Deletes vs Hard Deletes
+
+Choose based on entity semantics:
+
+```typescript
+// Soft delete: use is_deleted flag
+await db.update(tasks).set({ isDeleted: true }).where(eq(tasks.id, id));
+
+// Hard delete: for simple reference data like labels
+await db.delete(labels).where(eq(labels.id, id));
+```
+
+### Self-Referencing Foreign Keys
+
+Use `@ts-expect-error` for circular type inference on self-referencing FKs:
+
+```typescript
+// @ts-expect-error -- circular reference between tasks.parentId and tasks.id
+parentId: text("parent_id").references(() => tasks.id),
+```
+
+### Inline Type Literals for Command Parameters
+
+Use inline object types for function params instead of separate interfaces:
+
+```typescript
+async function createTask(
+  db: NodePgDatabase,
+  params: { title: string; description?: string; projectId: string }
+): Promise<Task> {
+  // ...
+}
+```
+
+### Auto-Resolve References
+
+Create related records on-the-fly when they don't exist:
+
+```typescript
+async function resolveLabel(db: NodePgDatabase, name: string): Promise<string> {
+  const existing = await db.select().from(labels).where(eq(labels.name, name));
+  if (existing.length > 0) return existing[0]!.id;
+  const [created] = await db.insert(labels).values({ name }).returning();
+  return created!.id;
+}
+```
+
+### Non-Null Assertions with `.returning()`
+
+When using `.returning()`, assert the first element:
+
+```typescript
+const [created] = await db.insert(tasks).values(data).returning();
+// created is Task | undefined, but we know it exists after insert
+return created!;
+```
+
 ## Key Concepts
 
 - **Type Safety**: Full TypeScript support with inferred types from schema
