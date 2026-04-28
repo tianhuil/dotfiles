@@ -337,19 +337,51 @@ const result = await union(
 
 ## Validation
 
-### Zod Schema Validation
+### Zod Schema Validation with drizzle-zod
+
+Generate Zod schemas directly from Drizzle table definitions:
+
+```bash
+bun add drizzle-zod
+```
 
 ```typescript
-import { z } from 'zod';
-import { createInsertSchema } from 'drizzle-zod';
-import { users } from './schema';
+import { z } from "zod";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { tasks } from "./schema";
 
-export const insertUserSchema = createInsertSchema(users, z.object({
-  name: z.string().min(1),
-}));
+export const insertTaskSchema = createInsertSchema(tasks, {
+  title: z.string().min(1, "Title is required"),
+  description: z.string().optional(),
+});
 
-// Validates on insert
-await db.insert(users).values(insertUserSchema.parse({ name: 'John' }));
+export const selectTaskSchema = createSelectSchema(tasks);
+
+type InsertTask = z.infer<typeof insertTaskSchema>;
+type SelectTask = z.infer<typeof selectTaskSchema>;
+```
+
+Override specific fields for stricter validation:
+
+```typescript
+export const insertTaskSchema = createInsertSchema(tasks, {
+  title: z.string().min(1).max(200),
+  priority: z.enum(["low", "medium", "high"]).default("medium"),
+  duration: z.string().transform((val) => parseDuration(val)),
+});
+```
+
+Validate CLI input before passing to command functions:
+
+```typescript
+program.command("create").action(async (opts) => {
+  const parsed = insertTaskSchema.safeParse(opts);
+  if (!parsed.success) {
+    console.error(z.prettifyError(parsed.error));
+    process.exit(1);
+  }
+  await createTask(db, parsed.data);
+});
 ```
 
 ### Other Validators

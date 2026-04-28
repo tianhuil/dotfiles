@@ -45,50 +45,6 @@ This provides formatted, readable error output instead of raw error objects.
 
 See [Zod error formatting](https://zod.dev/error-formatting#zprettifyerror) for details.
 
-## Drizzle-Zod Integration
-
-Generate Zod schemas from Drizzle table definitions:
-
-```typescript
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { tasks } from "./schema";
-
-export const insertTaskSchema = createInsertSchema(tasks, {
-  title: z.string().min(1, "Title is required"),
-  description: z.string().optional(),
-});
-
-export const selectTaskSchema = createSelectSchema(tasks);
-
-type InsertTask = z.infer<typeof insertTaskSchema>;
-type SelectTask = z.infer<typeof selectTaskSchema>;
-```
-
-Override specific fields for stricter validation:
-
-```typescript
-export const insertTaskSchema = createInsertSchema(tasks, {
-  // Override auto-generated defaults
-  title: z.string().min(1).max(200),
-  priority: z.enum(["low", "medium", "high"]).default("medium"),
-  // Add custom validation for CLI-specific fields
-  duration: z.string().transform((val) => parseDuration(val)),
-});
-```
-
-Use in CLI layer to validate user input before passing to command functions:
-
-```typescript
-program.command("create").action(async (opts) => {
-  const parsed = insertTaskSchema.safeParse(opts);
-  if (!parsed.success) {
-    console.error(z.prettifyError(parsed.error));
-    process.exit(1);
-  }
-  await createTask(db, parsed.data);
-});
-```
-
 ## References
 
 - [Zod documentation](https://zod.dev/)
