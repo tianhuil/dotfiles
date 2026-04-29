@@ -55,12 +55,11 @@ Use the **Task tool** (sub-agent) for Phases 1, 2, and 5 (the phases that need c
 
 Run validation steps locally before pushing. Discover what validation exists by checking, in order of preference:
 
-1. **AGENTS.md** — look for test/lint commands documented there
-2. **package.json** — look for `test`, `lint`, `typecheck`, `check`, `validate` scripts
-3. **Makefile** — look for `test`, `lint`, `check` targets
+1. **.github/workflows/** — read CI workflows to understand what runs and try to replicate locally
+
+3. **package.json** — look for `test`, `lint`, `typecheck`, `check`, `validate`, and `format` scripts
 4. **pyproject.toml** / **setup.cfg** — look for test/lint commands
-5. **scripts/** directory — look for CI-related scripts (test, lint, check)
-6. **.github/workflows/** — read CI workflows to understand what runs and try to replicate locally
+2. **AGENTS.md** — look for test/lint commands documented there
 
 Run each discovered validation command in the worktree. If any fail, fix the issues, commit, and re-run validation until all pass.
 
