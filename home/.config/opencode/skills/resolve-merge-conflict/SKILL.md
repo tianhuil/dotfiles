@@ -1,7 +1,12 @@
 ---
-description: Resolves merge conflicts by keeping code from both branches
-agent: build
+name: resolve-merge-conflict
+description: Resolves merge conflicts by keeping code from both branches. Use when git merge encounters conflicts that need manual resolution with a text editor.
+metadata:
+  audience: developers
+  workflow: git
 ---
+
+# Resolve Merge Conflicts
 
 ## Conflict Markers
 
