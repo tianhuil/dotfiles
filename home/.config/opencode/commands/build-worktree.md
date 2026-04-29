@@ -105,9 +105,9 @@ Run each discovered validation command in the worktree. If any fail, fix the iss
    gh run view $RUN_ID --log-failed
    ```
 3. **Analyze and fix**: Read the logs, understand what failed, and fix the issues in the worktree.
-4. **Commit and push** using worktrunk:
+4. **Commit and push**: Stage all changes and commit with a descriptive message:
    ```bash
-   wt step commit && git push
+   git add -A && git commit -m "feat: <descriptive message based on the task>"
    ```
 5. **Return to Phase 4**: Wait for the new CI run and check again.
 6. **Max iterations**: If CI fails 5 times in a row, stop and report all failures to the user.
@@ -118,8 +118,8 @@ Do NOT remove the worktree when done. The user can clean it up later with `wt re
 
 ## Error Cases
 
-- **No remote**: Stop — no PR possible. Worktree remains for local work.
-- **Branch already exists**: Use a unique suffix (e.g., append `-2`)
+- **No remote**: Stop before Step 3 — no PR possible. Worktree remains for local work.
+- **Branch already exists**: Use a unique suffix (e.g., append `-v2`)
 - **Worktree creation fails**: Report the error and stop
 - **Push fails**: Report the error (likely need to rebase on base branch)
 - **PR creation fails**: Report the error
