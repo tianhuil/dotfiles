@@ -64,3 +64,7 @@ export EVENT_NOKQUEUE=1
 if command -v wtp &>/dev/null; then
   eval "$(wtp completion bash)"
 fi
+
+if command -v wt &>/dev/null; then
+  eval "$(wt config shell init bash)"
+fi

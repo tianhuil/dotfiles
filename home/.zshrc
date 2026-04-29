@@ -93,6 +93,10 @@ if command -v wtp &>/dev/null; then
   eval "$(wtp completion zsh)"
 fi
 
+if command -v wt &>/dev/null; then
+  eval "$(wt config shell init zsh)"
+fi
+
 # User configuration
 
 # export MANPATH="/usr/local/man:$MANPATH"
