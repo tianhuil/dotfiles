@@ -30,12 +30,13 @@ Complete this task in an isolated git worktree, validate it, push a PR, and iter
 
 3. **Determine base branch**: Get the default branch with `git symbolic-ref refs/remotes/origin/HEAD --short | sed 's@origin/@@'`. Fall back to `main`.
 
-4. **Create worktree**: Create a new branch from the base and add a worktree:
+4. **Create worktree** using worktrunk (`wt`):
    ```bash
-   git fetch origin $BASE_BRANCH
-   git worktree add .wtp/$BRANCH_NAME -b $BRANCH_NAME origin/$BASE_BRANCH
+   git fetch origin
+   wt switch -c $BRANCH_NAME --base $BASE_BRANCH --no-cd
    ```
-   All subsequent work happens in the `.wtp/$BRANCH_NAME` directory.
+   This creates a new branch from `origin/$BASE_BRANCH` and a worktree at the path defined in `~/.config/worktrunk/config.toml`.
+   Parse the worktree path from the output — all subsequent work happens there.
 
 ## Phase 1: Execute the Task
 
@@ -61,12 +62,12 @@ Run each discovered validation command in the worktree. If any fail, fix the iss
 
 ## Phase 3: Push PR
 
-1. **Check for remote**: Run `git remote get-url origin`. If it fails, output "No remote repository found. Cannot create a PR. Worktree is ready at `.wtp/$BRANCH_NAME`." and **STOP**.
+1. **Check for remote**: Run `git remote get-url origin`. If it fails, output "No remote repository found. Cannot create a PR. Worktree is ready." and **STOP**.
 2. **Push the branch**:
    ```bash
    git push -u origin $BRANCH_NAME
    ```
-2. **Create PR**:
+3. **Create PR**:
    ```bash
    gh pr create --title "<descriptive title>" --body "$(cat <<'EOF'
    ## Summary
@@ -101,20 +102,20 @@ Run each discovered validation command in the worktree. If any fail, fix the iss
    gh run view $RUN_ID --log-failed
    ```
 3. **Analyze and fix**: Read the logs, understand what failed, and fix the issues in the worktree.
-4. **Commit and push**:
+4. **Commit and push** using worktrunk:
    ```bash
-   git add -A && git commit -m "fix: resolve CI failure - <brief description>" && git push
+   wt step commit && git push
    ```
 5. **Return to Phase 4**: Wait for the new CI run and check again.
 6. **Max iterations**: If CI fails 5 times in a row, stop and report all failures to the user.
 
 ## Cleanup
 
-Do NOT remove the worktree when done. The user can clean it up later with the `/close-merged-worktrees` command.
+Do NOT remove the worktree when done. The user can clean it up later with `wt remove $BRANCH_NAME`.
 
 ## Error Cases
 
-- **No remote**: Stop immediately — no PR possible
+- **No remote**: Stop — no PR possible. Worktree remains for local work.
 - **Branch already exists**: Use a unique suffix (e.g., append `-2`)
 - **Worktree creation fails**: Report the error and stop
 - **Push fails**: Report the error (likely need to rebase on base branch)
