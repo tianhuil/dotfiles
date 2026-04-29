@@ -10,6 +10,10 @@ You are given a task:
 
 Complete this task in an isolated git worktree, validate it, push a PR, and iterate until CI passes.
 
+## Execution Model
+
+Use the **Task tool** (sub-agent) for Phases 1, 2, and 5 (the phases that need code understanding). Run Phases 0, 3, and 4 directly (bash-only). Pass relevant context (branch name, worktree path, PR number, CI logs) to each sub-agent.  Phase 1 may need to be multiple steps executed by multiple sub-agents if either the task instructions ask for it or if it is complex and you judge it to be.
+
 ## Phase 0: Setup
 
 1. **Determine prefix**: Infer a branch prefix from the task description. Match on keywords in `$ARGUMENTS`:
