@@ -4,15 +4,32 @@ description: Build a feature in a git worktree, validate locally, push a PR, and
 
 # Build PR
 
-You are given a task: **$ARGUMENTS**
+You are given a task:
+
+**$ARGUMENTS**
 
 Complete this task in an isolated git worktree, validate it, push a PR, and iterate until CI passes.
 
 ## Phase 0: Setup
 
-1. **Sanitize branch name**: Derive a branch name from the argument. Slugify it: lowercase, replace spaces with hyphens, strip special characters, max 50 chars. Prefix with `feat/`. Example: "Add user login" → `feat/add-user-login`
-2. **Check for remote**: Run `git remote get-url origin`. If it fails, output "No remote repository found. Cannot create a PR." and **STOP**.
+1. **Determine prefix**: Infer a branch prefix from the task description. Match on keywords in `$ARGUMENTS`:
+   - `feat/` — new feature (default if no match)
+   - `fix/` — bug fix, crash, error, regression
+   - `chore/` — maintenance, deps, dependencies, upgrade, tooling
+   - `refactor/` — restructure, reorganize, rewrite, cleanup (no behavior change)
+   - `docs/` — documentation, readme, comments
+   - `test/` — tests, coverage, spec, testing
+   - `perf/` — performance, speed, optimize, slow
+   - `ci/` — CI/CD, pipeline, workflow, github actions
+   - `style/` — formatting, lint, prettier (no logic change)
+   - `build/` — build system, bundler, compile
+   - `design/` — exploratory, prototype, spike
+   - `research/` — investigate, research, explore, POC
+
+2. **Sanitize branch name**: Derive the branch slug from the argument — lowercase, replace spaces with hyphens, strip special characters, max 50 chars. Combine: `$PREFIX/$SLUG`. Example: "Add user login" → `feat/add-user-login`
+
 3. **Determine base branch**: Get the default branch with `git symbolic-ref refs/remotes/origin/HEAD --short | sed 's@origin/@@'`. Fall back to `main`.
+
 4. **Create worktree**: Create a new branch from the base and add a worktree:
    ```bash
    git fetch origin $BASE_BRANCH
@@ -44,7 +61,8 @@ Run each discovered validation command in the worktree. If any fail, fix the iss
 
 ## Phase 3: Push PR
 
-1. **Push the branch**:
+1. **Check for remote**: Run `git remote get-url origin`. If it fails, output "No remote repository found. Cannot create a PR. Worktree is ready at `.wtp/$BRANCH_NAME`." and **STOP**.
+2. **Push the branch**:
    ```bash
    git push -u origin $BRANCH_NAME
    ```
