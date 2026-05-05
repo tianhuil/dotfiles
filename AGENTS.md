@@ -31,8 +31,22 @@ Located in `home/.opencode/agents/`, these are reusable agent definitions.
 **writing-skills.md**: Expert agent for creating opencode skills following best practices from both opencode.ai and Claude documentation
 
 ### Skills
-Located in `home/.opencode/skills/<name>/SKILL.md`, these are globally installed to `~/.config/opencode/skills/<name>/SKILL.md` and available across all projects via `./setup.sh`.
+Located in two directories (to be consolidated):
 
-**Important:** Edit the skills in `home/.opencode/skills/<name>/SKILL.md`, not `~/config/`.  They will be copied over to ~/config/.
+- **`home/.opencode/skills/<name>/SKILL.md`** — Original opencode-native skills. Globally installed to `~/.config/opencode/skills/<name>/SKILL.md` via `./setup.sh`.
+
+- **`home/.agents/skills/<name>/SKILL.md`** — Ported skills from [anthropics/skills](https://github.com/anthropics/skills), adapted for opencode. These include `docx`, `pdf`, `pptx`, `xlsx`, `webapp-testing`, `theme-factory`, and `frontend-design`.
+
+**Important:** Edit the skills in their `home/` source location, not `~/.config/`. They will be copied over by `./setup.sh`.
 
 Skills are loaded automatically by the `skill` tool when agents need them. Each skill includes YAML frontmatter with name, description, and optional metadata.
+
+### Shared Scripts (Git Submodule)
+
+Skills with Python scripts (docx, pdf, pptx, xlsx, webapp-testing) reference shared office tooling via a git submodule at `home/.agents/skills/_shared/anthropics-skills/`. The scripts are symlinked from each skill directory into the submodule.
+
+To update the ported skills from upstream:
+
+```bash
+cd home/.agents/skills/_shared/anthropics-skills && git pull
+```
