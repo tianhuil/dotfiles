@@ -17,7 +17,9 @@ cp home/.env.local ~/.
 cp -R home/.cursor/ ~/.cursor/
 cp -R home/.local/ ~/.local/
 cp -R home/.nvm/ ~/.nvm/
-cp -R home/.config/ ~/.config/
+cp -R home/.config/opencode ~/.config/opencode
+cp -R home/.config/worktrunk ~/.config/worktrunk
+cp -R home/.config/shell ~/.config/shell
 cp -R home/.scripts/ ~/.scripts/
 cp -R home/.agents/ ~/.agents/
 
