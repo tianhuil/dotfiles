@@ -1,5 +1,11 @@
 ---
 description: Design a feature; writes markdown design files for human review and agent execution. Place in `notes/design` folder.
+mode: subagent
+permission:
+  read: allow
+  write: allow
+  glob: allow
+  grep: allow
 ---
 
 # Design Document Best Practices for AI Agents

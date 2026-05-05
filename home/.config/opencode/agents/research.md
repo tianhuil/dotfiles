@@ -1,6 +1,15 @@
 ---
 description: Research markdown files and web sources, write findings to notes/research folder
+mode: subagent
+permission:
+  read: allow
+  write: allow
+  glob: allow
+  grep: allow
+  webfetch: allow
 ---
+
+# Research Agent
 
 ## Research Workflow
 
