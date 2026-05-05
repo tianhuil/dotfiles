@@ -29,6 +29,12 @@ The `home/.agents/skills/` directory contains these skills:
 
 Skills with Python scripts reference shared office tooling via a git submodule at `home/.agents/skills/_shared/anthropics-skills/`.
 
+To update the ported skills from upstream:
+
+```bash
+cd home/.agents/skills/_shared/anthropics-skills && git pull
+```
+
 For details on the architecture and available skills, see [AGENTS.md](AGENTS.md).
 
 To install some of the basics (required by .bashrc), run:
