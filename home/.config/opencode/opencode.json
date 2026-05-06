@@ -11,15 +11,6 @@
       "enabled": true,
       "timeout": 5000
     },
-    "webfetch_camouflage": {
-      "type": "local",
-      "command": [
-        "uvx",
-        "git+https://github.com/tianhuil/webfetch-camouflage-mcp.git"
-      ],
-      "enabled": true,
-      "timeout": 10000
-    },
     "web-search-prime": {
       "type": "remote",
       "url": "https://api.z.ai/api/mcp/web_search_prime/mcp",
@@ -47,7 +38,6 @@
   "tools": {
     "context7": true,
     "sequential_thinking": true,
-    "webfetch_camouflage": false,
     "web_search_prime": true
   }
 }
