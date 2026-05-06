@@ -7,19 +7,7 @@
       "enabled": true,
       "timeout": 5000
     },
-    "serena": {
-      "type": "local",
-      "command": [
-        "uvx",
-        "--from",
-        "git+https://github.com/oraios/serena",
-        "serena-mcp-server",
-        "--enable-web-dashboard",
-        "False"
-      ],
-      "enabled": true,
-      "timeout": 5000
-    },
+
     "sequential_thinking": {
       "type": "local",
       "command": [
@@ -66,7 +54,6 @@
   "tools": {
     "context7": true,
     "gh_grep": true,
-    "serena": true,
     "sequential_thinking": true,
     "webfetch_camouflage": false,
     "web_search_prime": true
