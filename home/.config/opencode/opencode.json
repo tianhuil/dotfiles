@@ -29,31 +29,13 @@
       "enabled": true,
       "timeout": 5000
     },
-    "sequential_thinking": {
-      "type": "local",
-      "command": [
-        "bunx",
-        "-y",
-        "@wemake.cx/sequential-thinking@latest"
-      ],
-      "enabled": true,
-      "timeout": 5000
-    },
+
     "webfetch_camouflage": {
       "type": "local",
       "command": [
         "uvx",
         "git+https://github.com/tianhuil/webfetch-camouflage-mcp.git"
       ],
-      "enabled": true,
-      "timeout": 10000
-    },
-    "web-search-prime": {
-      "type": "remote",
-      "url": "https://api.z.ai/api/mcp/web_search_prime/mcp",
-      "headers": {
-        "Authorization": "Bearer {file:~/.config/opencode/zai-api-key}"
-      },
       "enabled": true,
       "timeout": 10000
     }
@@ -76,8 +58,6 @@
     "context7": true,
     "gh_grep": true,
     "serena": true,
-    "sequential_thinking": true,
-    "webfetch_camouflage": false,
-    "web_search_prime": true
+    "webfetch_camouflage": false
   }
 }
