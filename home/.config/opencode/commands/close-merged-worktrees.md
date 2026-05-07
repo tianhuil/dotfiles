@@ -12,8 +12,9 @@ This command finds all git worktrees, checks which ones have been merged (via PR
 2. **Check for PRs**: For each worktree branch, check if there's a merged PR using `gh`
 3. **Check git merge status**: Verify if branch is merged into main/master
 4. **Identify merged worktrees**: Mark worktrees that are merged via PR or git history
-5. **Remove safely**: Delete worktrees. **NEVER** using force and **NEVER** delete the git branch.
-6. **Report**: Summarize what was removed
+5. **Check for uncommitted changes**: Run `git status` in the worktree. If the only changes are `.gitignore`d files (e.g. `node_modules`, `.next`, `venv`, `.venv`), it is safe to remove — there are no uncommitted changes to tracked source code. Skip worktrees that have uncommitted changes to tracked files.
+6. **Remove safely**: Delete worktrees. **NEVER** using force and **NEVER** delete the git branch.
+7. **Report**: Summarize what was removed
 
 ## Commands to Use
 
@@ -32,6 +33,9 @@ git branch --merged main | grep branch-name
 
 # Check if branch exists on remote
 git ls-remote --heads origin branch-name
+
+# Check if worktree has uncommitted changes to tracked files
+git -C /path/to/worktree status --porcelain
 
 # Remove worktree (never use force)
 git worktree remove /path/to/worktree
@@ -70,10 +74,10 @@ Found 5 worktrees:
 - /repo/debug (debug) - [ACTIVE - no PR]
 
 Removing merged worktrees...
+✓ Cleaned node_modules from feature-auth
 ✓ Removed worktree: /repo/feature-auth
-✓ Removed branch: feature-auth
+✓ Cleaned .venv from feature-ui
 ✓ Removed worktree: /repo/feature-ui
-✗ Skipped branch deletion for feature-ui (not fully merged locally)
 
 Summary:
 - 2 worktrees removed
