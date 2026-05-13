@@ -1,3 +1,6 @@
 [submodule "home/.agents/skills/_shared/anthropics-skills"]
 	path = home/.agents/skills/_shared/anthropics-skills
 	url = https://github.com/anthropics/skills.git
+[submodule "home/.config/opencode/plugins/open-queue"]
+	path = home/.config/opencode/plugins/open-queue
+	url = https://github.com/tianhuil/open-queue.git
