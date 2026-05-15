@@ -34,4 +34,9 @@ git config --global core.excludesfile ~/.gitignore_global
 # Permissions
 chmod +x ~/.local/bin/*
 
+# Build local plugins
+if [ -d ~/.config/opencode/plugins/open-queue ]; then
+  cd ~/.config/opencode/plugins/open-queue && bun install && bun run build
+fi
+
 echo "Copied all dotfiles to home directory"
