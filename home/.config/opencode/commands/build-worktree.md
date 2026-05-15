@@ -109,6 +109,8 @@ Spawn a **`build` subagent** via the Task tool to verify the task was actually a
    EOF
    )"
    ```
+
+   In the PR summary, you must include a link to the design doc if there was one included in the original task.
 3. **Capture the PR number** from the output.
 
 ## Phase 4: Monitor CI
