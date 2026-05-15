@@ -12,13 +12,13 @@ Complete this task in an isolated git worktree, validate it, push a PR, and iter
 
 ## Execution Model
 
-This is an **orchestrator command** — it takes `$ARGUMENTS` from the user, coordinates bash operations and subagents, and manages the full PR lifecycle.
+This is an **orchestrator command** — it takes the task from the user, coordinates bash operations and subagents, and manages the full PR lifecycle.
 
 Use the **Task tool** (sub-agent) for Phases 1, 2, 2.5, and 5 (the phases that need code understanding). Run Phases 0, 3, and 4 directly (bash-only). Pass relevant context (worktree path, task description, CI logs) to each sub-agent. Phase 1 may need to be multiple steps executed by multiple sub-agents if either the task instructions ask for it or if it is complex and you judge it to be.
 
 ## Phase 0: Setup
 
-1. **Determine prefix**: Infer a branch prefix from the task description. Match on keywords in `$ARGUMENTS`:
+1. **Determine prefix**: Infer a branch prefix from the task. Match on keywords from the task:
    - `feat/` — new feature (default if no match)
    - `fix/` — bug fix, crash, error, regression
    - `chore/` — maintenance, deps, dependencies, upgrade, tooling
@@ -49,10 +49,10 @@ Use the **Task tool** (sub-agent) for Phases 1, 2, 2.5, and 5 (the phases that n
 Spawn a **`build` subagent** via the Task tool to implement the task. Pass it the following context in the prompt:
 
 - **Worktree path**: the directory created in Phase 0
-- **Task description**: the full `$ARGUMENTS`
+- **Task description**: the full task text
 - **Instructions**: The subagent should:
   1. Read AGENTS.md, README, package.json (or equivalent), and explore the project structure — all within the worktree directory.
-  2. Implement the work described in `$ARGUMENTS`. Follow existing code conventions, patterns, and styles.
+  2. Implement the work described in the task. Follow existing code conventions, patterns, and styles.
   3. Do NOT commit — the orchestrator will handle commits after validation.
 
 After the subagent completes, stage and commit:
@@ -76,14 +76,14 @@ Run each discovered validation command in the worktree. If any fail, fix the iss
 
 ## Phase 2.5: Task Review
 
-Spawn a **`build` subagent** via the Task tool to verify that `$ARGUMENTS` was actually accomplished. Pass it:
+Spawn a **`build` subagent** via the Task tool to verify the task was actually accomplished. Pass it:
 
 - **Worktree path**: the worktree directory
-- **Task description**: the full `$ARGUMENTS`
+- **Task description**: the full task text
 - **Instructions**: The subagent should:
   1. Read the changes made (git diff, modified files) in the worktree.
-  2. Re-read the task description in `$ARGUMENTS`.
-  3. Verify that each requirement from `$ARGUMENTS` is addressed by the implementation.
+  2. Re-read the task description.
+  3. Verify that each requirement from the task is addressed by the implementation.
   4. Check for obvious gaps: missing edge cases, incomplete features, placeholder code.
   5. Return a structured assessment: for each requirement, state whether it is MET or UNMET with a brief explanation.
 
