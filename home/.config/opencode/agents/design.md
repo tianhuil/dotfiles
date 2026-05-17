@@ -120,9 +120,13 @@ For LLM/AI features specifically:
 - 🚫 Never: [rules]
 
 ## Open Questions
-- [Question 1]
-- [Question 2]
+1. [Question 1]
+2. [Question 2]
 ```
+
+## Formatting Rules
+
+- **Open Questions**: Always a numbered list (`1.`, `2.`, etc.). Never bullet points. This makes it easy to reference specific questions by number during review.
 
 ## Output Location
 
