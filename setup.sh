@@ -1,38 +1,42 @@
-cp home/.bashrc ~/.
-cp home/.bashrc ~/.bash_profile
-cp home/.inputrc ~/.
-cp home/.zshrc ~/.
-cp home/.zprofile ~/.zprofile
-cp home/.corerc ~/.
-cp home/.npmrc ~/.
-cp home/.gitconfig ~/.
-cp home/.tmux.conf ~/.
-cp home/.stubby.yml ~/.
-cp home/.git-completion.sh ~/.
-cp home/.git-prompt.sh ~/.
-cp home/.gitignore_global ~/.
-cp home/.env.local ~/.
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-# Directories with perfect mapping
-cp -R home/.cursor/* ~/.cursor/
-cp -R home/.local/* ~/.local/
-cp -R home/.nvm/* ~/.nvm/
-cp -R home/.config/* ~/.config
-cp -R home/.scripts/* ~/.scripts
-cp -R home/.agents/* ~/.agents
+cp "$SCRIPT_DIR/home/.bashrc" ~/.
+cp "$SCRIPT_DIR/home/.bashrc" ~/.bash_profile
+cp "$SCRIPT_DIR/home/.inputrc" ~/.
+cp "$SCRIPT_DIR/home/.zshrc" ~/.
+cp "$SCRIPT_DIR/home/.zprofile" ~/.zprofile
+cp "$SCRIPT_DIR/home/.corerc" ~/.
+cp "$SCRIPT_DIR/home/.npmrc" ~/.
+cp "$SCRIPT_DIR/home/.gitconfig" ~/.
+cp "$SCRIPT_DIR/home/.tmux.conf" ~/.
+cp "$SCRIPT_DIR/home/.stubby.yml" ~/.
+cp "$SCRIPT_DIR/home/.git-completion.sh" ~/.
+cp "$SCRIPT_DIR/home/.git-prompt.sh" ~/.
+cp "$SCRIPT_DIR/home/.gitignore_global" ~/.
+cp "$SCRIPT_DIR/home/.env.local" ~/. 2>/dev/null || true
+
+mkdir -p ~/.cursor ~/.local ~/.nvm ~/.config ~/.scripts ~/.agents
+
+for dir in .cursor .local .nvm .config .scripts .agents; do
+  if [ -d "$SCRIPT_DIR/home/$dir" ] && ls "$SCRIPT_DIR/home/$dir"/* >/dev/null 2>&1; then
+    cp -R "$SCRIPT_DIR/home/$dir"/* ~/$dir/
+  fi
+done
 
 # SSH
 mkdir -p ~/.ssh
-cp home/.ssh/config ~/.ssh/config
-cp home/.ssh/config.local ~/.ssh/config.local 2>/dev/null || true
-cp home/.ssh/racknerd.pub ~/.ssh/racknerd.pub 2>/dev/null || true
+cp "$SCRIPT_DIR/home/.ssh/config" ~/.ssh/config
+cp "$SCRIPT_DIR/home/.ssh/config.local" ~/.ssh/config.local 2>/dev/null || true
+cp "$SCRIPT_DIR/home/.ssh/racknerd.pub" ~/.ssh/racknerd.pub 2>/dev/null || true
 chmod 600 ~/.ssh/config
 
 # Git config
 git config --global core.excludesfile ~/.gitignore_global
 
 # Permissions
-chmod +x ~/.local/bin/*
+if ls ~/.local/bin/* >/dev/null 2>&1; then
+  chmod +x ~/.local/bin/*
+fi
 
 # Build local plugins
 if [ -d ~/.config/opencode/plugins/open-queue ]; then
