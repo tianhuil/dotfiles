@@ -33,7 +33,7 @@ Or reference them by their install path at `~/.config/opencode/skills/build-work
 
 ## Execution Model
 
-This is an **orchestrator** — it coordinates bash scripts and subagents. Use the **Task tool** for AI phases (1, 2.5, 5). Use the helper scripts for mechanical phases (0, 2, 3, 4).
+This is an **orchestrator** — it coordinates bash scripts and subagents. Use the **Task tool** for AI phases (1, 2.5, 5). Use the helper scripts for mechanical phases (0, 2, 3, 4). The default subagent type is `build`, but the user may specify a different agent type — use it if provided.
 
 ## Phase 0: Setup
 
@@ -62,7 +62,7 @@ Parse the output for `BRANCH_NAME` (may have `-v2` suffix if branch existed), `B
 
 ## Phase 1: Execute the Task
 
-Spawn a **`build` subagent** via the Task tool. Pass it:
+Spawn a subagent (default: **`build`**) via the Task tool. Pass it:
 - **Worktree path**: from Phase 0
 - **Task description**: the full task text
 - **Instructions**: Read AGENTS.md, README, package.json; implement the task; do NOT commit
@@ -87,11 +87,11 @@ Then run all discovered commands in one call:
 bash ~/.config/opencode/skills/build-worktree/validate.sh "$WORKTREE_PATH" "npm test" "npm run lint" "npm run typecheck"
 ```
 
-If it exits non-zero, spawn a `build` subagent to fix the failures, commit, and re-run. Repeat until all pass.
+If it exits non-zero, spawn a subagent to fix the failures, commit, and re-run. Repeat until all pass.
 
 ## Phase 2.5: Task Review (optional)
 
-Spawn a **`build` subagent** to verify the task was accomplished. Pass it:
+Spawn a subagent to verify the task was accomplished. Pass it:
 - **Worktree path**, **Task description**
 - **Instructions**: Read the git diff, verify each requirement is MET or UNMET, check for gaps
 
@@ -143,7 +143,7 @@ gh run view $RUN_ID --json jobs --jq '.jobs[] | select(.conclusion != "success")
 gh run view $RUN_ID --log-failed
 ```
 
-Spawn a **`build` subagent** to analyze logs and fix issues in the worktree. Commit and push:
+Spawn a subagent to analyze logs and fix issues in the worktree. Commit and push:
 ```bash
 cd $WORKTREE_PATH && git add -A && git commit -m "fix: <descriptive message>" && git push
 ```
