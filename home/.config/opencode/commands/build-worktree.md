@@ -116,13 +116,33 @@ Spawn a **`build` subagent** via the Task tool to verify the task was actually a
 ## Phase 4: Monitor CI
 
 1. **Wait for CI to start**: Poll `gh run list --branch $BRANCH_NAME --limit 1 --json databaseId,status --jq '.[0]'` every 10 seconds until a run appears with status `in_progress` or `completed`.
-2. **Poll until completion**: Every 10 seconds, check:
-   ```bash
-   gh run list --branch $BRANCH_NAME --limit 1 --json status,conclusion --jq '.[0] | {status, conclusion}'
-   ```
-   - If `status` is `in_progress` or `queued`: sleep 10 and poll again
-   - If `status` is `completed` and `conclusion` is `success`: **CI PASSED** — report success and stop
-   - If `status` is `completed` and `conclusion` is not `success`: proceed to Phase 5
+2. **Poll until completion**: Every 10 seconds, check CI status and mergeability:
+    ```bash
+    gh run list --branch $BRANCH_NAME --limit 1 --json status,conclusion --jq '.[0] | {status, conclusion}'
+    ```
+    ```bash
+    gh pr view $PR_NUMBER --json mergeable,mergeStateStatus --jq '{mergeable, mergeStateStatus}'
+    ```
+    - If `mergeable` is `CONFLICTING` or `mergeStateStatus` is `DIRTY`: **MERGE CONFLICT** — proceed to Phase 4.5
+    - If CI `status` is `in_progress` or `queued`: sleep 10 and poll again
+    - If CI `status` is `completed` and `conclusion` is `success`: **CI PASSED** — report success and stop
+    - If CI `status` is `completed` and `conclusion` is not `success`: proceed to Phase 5
+    - If no CI run exists yet and no merge conflict: sleep 10 and poll again
+
+## Phase 4.5: Resolve Merge Conflicts
+
+Use the **merge-conflict** skill. Rebase on the base branch and follow the skill's guidance to resolve conflicts:
+
+```bash
+git fetch origin $BASE_BRANCH
+git rebase origin/$BASE_BRANCH
+```
+
+After resolving, force push and return to Phase 4:
+
+```bash
+git push --force-with-lease origin $BRANCH_NAME
+```
 
 ## Phase 5: Fix CI Failures (Loop)
 
@@ -153,6 +173,7 @@ Do NOT remove the worktree when done. The user can clean it up later with `wt re
 - **Worktree creation fails**: Report the error and stop
 - **Push fails**: Report the error (likely need to rebase on base branch)
 - **PR creation fails**: Report the error
+- **Merge conflict detected**: Resolve via rebase (Phase 4.5), force push, and re-monitor
 - **Max CI retries reached**: Report all accumulated failures and stop
 
 ## Reporting
