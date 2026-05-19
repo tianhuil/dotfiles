@@ -5,6 +5,9 @@
 
 set -e
 
+# Don't rewrite HTTPS to SSH (servers don't have GitHub SSH keys)
+git config --global --unset url.git@github.com:.insteadof 2>/dev/null || true
+
 git clone https://github.com/tianhuil/dotfiles.git
 
 (cd $HOME/dotfiles && bash setup.sh)
