@@ -27,8 +27,8 @@ Or reference them by their install path at `~/.config/opencode/skills/build-work
 | Script | Phase | Purpose |
 |--------|-------|---------|
 | `setup.sh "<branch>"` | 0 | Create worktree for branch. Outputs `BRANCH_NAME`, `BASE_BRANCH`, `WORKTREE_PATH` |
-| `validate.sh "<worktree>"` | 2 | Discover and run test/lint/typecheck commands. Exits 0 on pass, 1 on failure |
-| `push-pr.sh "<branch>" "<title>" "[body]"` | 3 | Push branch + create PR. Outputs PR URL and `PR_NUMBER` |
+| `validate.sh "<worktree>" <cmd...>` | 2 | Run validation commands in worktree. Exits 0 on pass, 1 on failure |
+| `push-pr.sh "<branch>" "<title>" "<body>"` | 3 | Push branch + create PR. Outputs PR URL and `PR_NUMBER` |
 | `monitor-ci.sh "<branch>" "[pr_number]"` | 4 | Wait for CI via `gh run watch`, check mergeability. Outputs `CONCLUSION`, `MERGEABLE`, `RUN_ID` |
 
 ## Execution Model
@@ -76,8 +76,15 @@ For complex tasks, spawn multiple subagents sequentially with commits after each
 
 ## Phase 2: Local Validation
 
+Discover what validation exists by checking, in order of preference:
+1. **.github/workflows/** — read CI workflows to understand what runs and try to replicate locally
+2. **package.json** — look for `test`, `lint`, `typecheck`, `check`, `validate`, and `format` scripts
+3. **pyproject.toml** / **setup.cfg** — look for test/lint commands
+4. **AGENTS.md** — look for test/lint commands documented there
+
+Then run all discovered commands in one call:
 ```bash
-bash ~/.config/opencode/skills/build-worktree/validate.sh "$WORKTREE_PATH"
+bash ~/.config/opencode/skills/build-worktree/validate.sh "$WORKTREE_PATH" "npm test" "npm run lint" "npm run typecheck"
 ```
 
 If it exits non-zero, spawn a `build` subagent to fix the failures, commit, and re-run. Repeat until all pass.
