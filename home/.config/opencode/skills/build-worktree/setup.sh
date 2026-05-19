@@ -3,7 +3,11 @@ set -euo pipefail
 
 BRANCH_NAME="${1:?Usage: setup.sh <branch-name>}"
 
-BASE_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD --short 2>/dev/null | sed 's@origin/@@' || echo "main")
+BASE_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD --short 2>/dev/null | sed 's@origin/@@')
+if [ -z "$BASE_BRANCH" ]; then
+    echo "ERROR: Could not determine base branch" >&2
+    exit 1
+fi
 
 git fetch origin
 
