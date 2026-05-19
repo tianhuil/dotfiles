@@ -30,6 +30,9 @@
       "~/.config/opencode/commands/**": "allow",
       "~/.config/opencode/skills/**": "allow"
     },
+    "bash": {
+      "bash ~/.config/opencode/skills/**": "allow"
+    },
     "edit": {
       "/tmp/**": "allow",
       "~/.config/opencode/**": "deny"
