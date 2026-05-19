@@ -115,19 +115,23 @@ Spawn a **`build` subagent** via the Task tool to verify the task was actually a
 
 ## Phase 4: Monitor CI
 
-1. **Wait for CI to start**: Poll `gh run list --branch $BRANCH_NAME --limit 1 --json databaseId,status --jq '.[0]'` every 10 seconds until a run appears with status `in_progress` or `completed`.
-2. **Poll until completion**: Every 10 seconds, check CI status and mergeability:
-    ```bash
-    gh run list --branch $BRANCH_NAME --limit 1 --json status,conclusion --jq '.[0] | {status, conclusion}'
-    ```
-    ```bash
-    gh pr view $PR_NUMBER --json mergeable,mergeStateStatus --jq '{mergeable, mergeStateStatus}'
-    ```
-    - If `mergeable` is `CONFLICTING` or `mergeStateStatus` is `DIRTY`: **MERGE CONFLICT** — proceed to Phase 4.5
-    - If CI `status` is `in_progress` or `queued`: sleep 10 and poll again
-    - If CI `status` is `completed` and `conclusion` is `success`: **CI PASSED** — report success and stop
-    - If CI `status` is `completed` and `conclusion` is not `success`: proceed to Phase 5
-    - If no CI run exists yet and no merge conflict: sleep 10 and poll again
+Use `gh run watch` to block until CI completes — this avoids repeated AI round-trips for polling:
+
+```bash
+RUN_ID=$(gh run list --branch $BRANCH_NAME --limit 1 --json databaseId --jq '.[0].databaseId')
+gh run watch $RUN_ID --exit-status
+```
+
+After `gh run watch` exits, check the result and mergeability:
+```bash
+gh run view $RUN_ID --json conclusion --jq '.conclusion'
+gh pr view $PR_NUMBER --json mergeable,mergeStateStatus --jq '{mergeable, mergeStateStatus}'
+```
+
+- If `mergeable` is `CONFLICTING` or `mergeStateStatus` is `DIRTY`: **MERGE CONFLICT** — proceed to Phase 4.5
+- If conclusion is `success`: **CI PASSED** — report success and stop
+- If conclusion is not `success`: proceed to Phase 5
+- If no CI run exists yet: sleep 10 and retry the `gh run list` lookup
 
 ## Phase 4.5: Resolve Merge Conflicts
 
