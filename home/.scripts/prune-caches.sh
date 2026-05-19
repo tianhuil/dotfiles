@@ -39,13 +39,16 @@ prune_pnpm() {
 }
 
 prune_uv() {
-  command -v uv &>/dev/null || return
-  local cache="${XDG_CACHE_HOME:-$HOME/Library/Caches}/uv"
-  [ -d "$cache" ] || cache="$HOME/.cache/uv"
+  local cache="${XDG_CACHE_HOME:-$HOME/.cache}/uv"
+  [ -d "$cache" ] || cache="$HOME/Library/Caches/uv"
   [ -d "$cache" ] || return
   local before after
   before=$(du -sk "$cache" 2>/dev/null | cut -f1) || return
-  uv cache prune &>/dev/null
+  # fast deletion: delete files then empty dirs; keep index (simple-v*)
+  find "$cache" -maxdepth 1 -type d ! -name 'simple-v*' ! -name 'CACHEDIR.TAG' -exec sh -c '
+    find "$1" -type f -delete
+    find "$1" -depth -type d -delete
+  ' _ {} \; 2>/dev/null
   after=$(du -sk "$cache" 2>/dev/null | cut -f1)
   report uv "$before" "$after"
 }
