@@ -7,9 +7,7 @@ set -e
 
 git clone https://github.com/tianhuil/dotfiles.git
 
-pushd $HOME/dotfiles
-./setup.sh
-popd
+(cd $HOME/dotfiles && bash setup.sh)
 
 sudo apt update
 

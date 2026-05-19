@@ -39,7 +39,7 @@ if ls ~/.local/bin/* >/dev/null 2>&1; then
 fi
 
 # Build local plugins
-if [ -d ~/.config/opencode/plugins/open-queue ]; then
+if [ -d ~/.config/opencode/plugins/open-queue ] && command -v bun >/dev/null 2>&1; then
   cd ~/.config/opencode/plugins/open-queue && bun install && bun run build
 fi
 
