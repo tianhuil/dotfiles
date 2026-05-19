@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BRANCH_NAME="${1:?Usage: setup.sh <branch-name> e.g. feat/build-front-end-ux}"
+BRANCH_NAME="${1:?Usage: setup.sh <branch-name>}"
 
 BASE_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD --short 2>/dev/null | sed 's@origin/@@' || echo "main")
 
