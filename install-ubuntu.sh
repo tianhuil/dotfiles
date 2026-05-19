@@ -5,7 +5,7 @@
 
 set -e
 
-git clone git@github.com:tianhuil/dotfiles.git
+git clone https://github.com/tianhuil/dotfiles.git
 
 pushd $HOME/dotfiles
 ./setup.sh
