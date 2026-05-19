@@ -29,7 +29,7 @@ Or reference them by their install path at `~/.config/opencode/skills/build-work
 | `setup.sh "<branch>"` | 0 | Create worktree for branch. Outputs `BRANCH_NAME`, `BASE_BRANCH`, `WORKTREE_PATH` |
 | `validate.sh "<worktree>" <cmd...>` | 2 | Run validation commands in worktree. Exits 0 on pass, 1 on failure |
 | `push-pr.sh "<branch>" "<title>" "<body>"` | 3 | Push branch + create PR. Outputs PR URL and `PR_NUMBER` |
-| `monitor-ci.sh "<branch>" "[pr_number]"` | 4 | Wait for CI via `gh run watch`, check mergeability. Outputs `CONCLUSION`, `MERGEABLE`, `RUN_ID` |
+| `monitor-ci.sh "<branch>" "<pr_number>"` | 4 | Wait for CI via `gh run watch`, check mergeability. Outputs `CONCLUSION`, `MERGEABLE`, `RUN_ID` |
 
 ## Execution Model
 

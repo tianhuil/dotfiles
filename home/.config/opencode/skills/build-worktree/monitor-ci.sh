@@ -2,63 +2,40 @@
 set -euo pipefail
 
 BRANCH_NAME="${1:?Usage: monitor-ci.sh <branch> <pr_number>}"
-PR_NUMBER="${2:-}"
+PR_NUMBER="${2:?Usage: monitor-ci.sh <branch> <pr_number>}"
 
-wait_for_run() {
-    local branch="$1"
-    local attempt=0
-    while [ $attempt -lt 30 ]; do
-        local run_json
-        run_json=$(gh run list --branch "$branch" --limit 1 --json databaseId,status,conclusion --jq '.[0]' 2>/dev/null || echo "null")
-        if [ "$run_json" != "null" ] && [ "$run_json" != "" ]; then
-            local status
-            status=$(echo "$run_json" | jq -r '.status')
-            if [ "$status" != "queued" ] && [ "$status" != "" ]; then
-                echo "$run_json"
-                return 0
-            fi
-        fi
+RUN_ID=$(gh run list --branch "$BRANCH_NAME" --limit 1 --json databaseId --jq '.[0].databaseId' 2>/dev/null || true)
+
+if [ -z "$RUN_ID" ]; then
+    echo "Waiting for CI run to appear..."
+    for i in $(seq 1 30); do
         sleep 10
-        attempt=$((attempt + 1))
+        RUN_ID=$(gh run list --branch "$BRANCH_NAME" --limit 1 --json databaseId --jq '.[0].databaseId' 2>/dev/null || true)
+        [ -n "$RUN_ID" ] && break
     done
-    echo "TIMEOUT"
-    return 1
-}
-
-RUN_INFO=$(wait_for_run "$BRANCH_NAME")
-
-if [ "$RUN_INFO" = "TIMEOUT" ]; then
-    echo "TIMEOUT: No CI run appeared after 5 minutes"
-    exit 1
+    if [ -z "$RUN_ID" ]; then
+        echo "TIMEOUT: No CI run appeared after 5 minutes"
+        exit 1
+    fi
 fi
 
-RUN_ID=$(echo "$RUN_INFO" | jq -r '.databaseId')
-RUN_STATUS=$(echo "$RUN_INFO" | jq -r '.status')
-
-if [ "$RUN_STATUS" = "completed" ]; then
-    CONCLUSION=$(echo "$RUN_INFO" | jq -r '.conclusion')
-    echo "CONCLUSION=${CONCLUSION}"
+echo "Watching CI run ${RUN_ID}..."
+if gh run watch "$RUN_ID" --exit-status 2>&1; then
+    CONCLUSION=success
 else
-    echo "Watching CI run ${RUN_ID}..."
-    if gh run watch "$RUN_ID" --exit-status 2>&1; then
-        echo "CONCLUSION=success"
-    else
-        CONCLUSION=$(gh run view "$RUN_ID" --json conclusion --jq '.conclusion')
-        echo "CONCLUSION=${CONCLUSION}"
-    fi
+    CONCLUSION=$(gh run view "$RUN_ID" --json conclusion --jq '.conclusion')
 fi
+echo "CONCLUSION=${CONCLUSION}"
 
-if [ -n "$PR_NUMBER" ]; then
-    MERGE_STATE=$(gh pr view "$PR_NUMBER" --json mergeable,mergeStateStatus --jq '{mergeable, mergeStateStatus}' 2>/dev/null || echo "{}")
-    MERGEABLE=$(echo "$MERGE_STATE" | jq -r '.mergeable // "UNKNOWN"')
-    MERGE_STATE_STATUS=$(echo "$MERGE_STATE" | jq -r '.mergeStateStatus // "UNKNOWN"')
-    echo "MERGEABLE=${MERGEABLE}"
-    echo "MERGE_STATE_STATUS=${MERGE_STATE_STATUS}"
+MERGE_STATE=$(gh pr view "$PR_NUMBER" --json mergeable,mergeStateStatus --jq '{mergeable, mergeStateStatus}' 2>/dev/null || echo "{}")
+MERGEABLE=$(echo "$MERGE_STATE" | jq -r '.mergeable // "UNKNOWN"')
+MERGE_STATE_STATUS=$(echo "$MERGE_STATE" | jq -r '.mergeStateStatus // "UNKNOWN"')
+echo "MERGEABLE=${MERGEABLE}"
+echo "MERGE_STATE_STATUS=${MERGE_STATE_STATUS}"
 
-    if [ "$MERGEABLE" = "CONFLICTING" ] || [ "$MERGE_STATE_STATUS" = "DIRTY" ]; then
-        echo "MERGE_CONFLICT=true"
-        exit 0
-    fi
+if [ "$MERGEABLE" = "CONFLICTING" ] || [ "$MERGE_STATE_STATUS" = "DIRTY" ]; then
+    echo "MERGE_CONFLICT=true"
+    exit 0
 fi
 
 echo "RUN_ID=${RUN_ID}"
