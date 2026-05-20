@@ -21,15 +21,8 @@ done | sort -t'|' -k1,1 -k2,2V | awk -F'|' '
 # pnpm: remove unreferenced packages
 pnpm store prune 2>/dev/null
 
-# uv: remove downloaded packages (keep index)
-uv_cache="${XDG_CACHE_HOME:-$HOME/.cache}/uv"
-[ -d "$uv_cache" ] || uv_cache="$HOME/Library/Caches/uv"
-if [ -d "$uv_cache" ]; then
-  find "$uv_cache" -maxdepth 1 -type d ! -name 'simple-v*' ! -name 'CACHEDIR.TAG' -exec sh -c '
-    find "$1" -type f -delete
-    find "$1" -depth -type d -delete
-  ' _ {} \; 2>/dev/null
-fi
+# uv: prune unreachable cache entries
+uv cache prune 2>/dev/null
 
 # npm: clear cache
 npm cache clean --force 2>/dev/null

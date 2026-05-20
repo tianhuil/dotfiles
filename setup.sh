@@ -13,6 +13,7 @@ cp "$SCRIPT_DIR/home/.stubby.yml" ~/.
 cp "$SCRIPT_DIR/home/.git-completion.sh" ~/.
 cp "$SCRIPT_DIR/home/.git-prompt.sh" ~/.
 cp "$SCRIPT_DIR/home/.gitignore_global" ~/.
+cp "$SCRIPT_DIR/home/.bunfig.toml" ~/.
 cp "$SCRIPT_DIR/home/.env.local" ~/. 2>/dev/null || true
 
 mkdir -p ~/.cursor ~/.local ~/.nvm ~/.config ~/.scripts ~/.agents
