@@ -126,7 +126,7 @@ Parse output:
 Use the **merge-conflict** skill. Rebase and resolve:
 
 ```bash
-cd $WORKTREE_PATH && git fetch origin $BASE_BRANCH && git rebase origin/$BASE_BRANCH
+cd $WORKTREE_PATH && git fetch origin "${BASE_BRANCH#origin/}" && git rebase "$BASE_BRANCH"
 ```
 
 After resolving conflicts, force push and return to Phase 4:

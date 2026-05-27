@@ -3,7 +3,7 @@ set -euo pipefail
 
 BRANCH_NAME="${1:?Usage: setup.sh <branch-name>}"
 
-BASE_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD --short 2>/dev/null | sed 's@origin/@@')
+BASE_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD --short 2>/dev/null)
 if [ -z "$BASE_BRANCH" ]; then
     echo "ERROR: Could not determine base branch" >&2
     exit 1
@@ -19,7 +19,7 @@ if git show-ref --verify --quiet "refs/heads/${BRANCH_NAME}"; then
     BRANCH_NAME="${BRANCH_NAME}-v${SUFFIX}"
 fi
 
-WORKTREE_PATH=$(wt switch -c "$BRANCH_NAME" --base "$BASE_BRANCH" --no-cd -x 'echo {{ worktree_path }}' 2>/dev/null | tail -1)
+WORKTREE_PATH=$(wt switch -c "$BRANCH_NAME" --base "$BASE_BRANCH" --no-cd --yes -x 'echo {{ worktree_path }}' 2>/dev/null | tail -1)
 if [ -z "$WORKTREE_PATH" ] || [ ! -d "$WORKTREE_PATH" ]; then
     echo "ERROR: Could not get worktree path from wt" >&2
     exit 1
