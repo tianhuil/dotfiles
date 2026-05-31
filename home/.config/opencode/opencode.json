@@ -38,6 +38,9 @@
       "~/.config/opencode/**": "deny"
     }
   },
+  "plugin": [
+    "@0xsero/open-queue"
+  ],
   "tools": {
     "context7": true,
     "sequential_thinking": true,
