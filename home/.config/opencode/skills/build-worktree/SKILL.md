@@ -107,6 +107,8 @@ bash ~/.config/opencode/skills/build-worktree/push-pr.sh "$BRANCH_NAME" "$TITLE"
 
 If output contains `NO_REMOTE`, report that no PR is possible and stop.
 
+**If `git push` fails with an auth or permission error, do NOT attempt SSH, HTTPS, credential helpers, or remote URL modifications.** Stop immediately and ask the user to resolve git push permissions (e.g. `gh auth login`). Once resolved, retry this phase.
+
 The AI must compose the PR title and body (summary of changes). Include design doc link if applicable.
 
 ## Phase 4: Monitor CI
@@ -157,6 +159,7 @@ Do NOT remove the worktree. The user cleans up with `wt remove $BRANCH_NAME`.
 ## Error Cases
 
 - **No remote**: `push-pr.sh` outputs `NO_REMOTE` — stop, worktree remains
+- **Push auth/permission failure**: Stop and ask user to resolve (e.g. `gh auth login`). Do NOT try SSH, HTTPS, or remote URL changes.
 - **Branch already exists**: `setup.sh` appends `-v2`, `-v3`, etc.
 - **Worktree creation fails**: Report error and stop
 - **Push fails**: Report error (likely need rebase)
