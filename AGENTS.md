@@ -23,6 +23,12 @@ To see differences between repository files in `home/` and installed files:
 ./diff.sh
 ```
 
+## Adding to ~/ dotfiles
+
+When adding to dotfiles, update them in `./home`, not in `~/.`.  Then tell the user to run `./setup.sh`.
+
+The one exception is when the instructions use a CLI whose actions are mysterious.  In this case, consider adding those instructions to `./setup.sh`.
+
 ## OpenCode Agents and Skills
 
 ### Agents
