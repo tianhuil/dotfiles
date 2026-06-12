@@ -13,15 +13,18 @@ ALL_PASSED=true
 FAILED_CMDS=()
 
 for cmd in "$@"; do
-    echo "=== Running: $cmd ==="
-    if ! (cd "$WORKTREE" && eval "$cmd" 2>&1); then
+    LOG=$(mktemp)
+    if (cd "$WORKTREE" && eval "$cmd" >"$LOG" 2>&1); then
+        echo "PASSED: $cmd"
+    else
         echo "FAILED: $cmd"
+        echo "--- Output ---"
+        cat "$LOG"
+        echo "---"
         ALL_PASSED=false
         FAILED_CMDS+=("$cmd")
-    else
-        echo "PASSED: $cmd"
     fi
-    echo ""
+    rm -f "$LOG"
 done
 
 if [ "$ALL_PASSED" = true ]; then

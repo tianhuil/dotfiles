@@ -20,11 +20,16 @@ if [ -z "$RUN_ID" ]; then
 fi
 
 echo "Watching CI run ${RUN_ID}..."
-if gh run watch "$RUN_ID" --exit-status 2>&1; then
+CI_LOG=$(mktemp)
+if gh run watch "$RUN_ID" --exit-status >"$CI_LOG" 2>&1; then
     CONCLUSION=success
 else
     CONCLUSION=$(gh run view "$RUN_ID" --json conclusion --jq '.conclusion')
+    echo "--- CI Output ---"
+    cat "$CI_LOG"
+    echo "---"
 fi
+rm -f "$CI_LOG"
 echo "CONCLUSION=${CONCLUSION}"
 
 MERGE_STATE=$(gh pr view "$PR_NUMBER" --json mergeable,mergeStateStatus --jq '{mergeable, mergeStateStatus}' 2>/dev/null || echo "{}")

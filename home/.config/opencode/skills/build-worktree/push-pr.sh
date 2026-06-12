@@ -10,7 +10,13 @@ if ! git remote get-url origin &>/dev/null; then
     exit 0
 fi
 
-git push -u origin "$BRANCH_NAME" 2>&1
+PUSH_LOG=$(mktemp)
+if ! git push -u origin "$BRANCH_NAME" >"$PUSH_LOG" 2>&1; then
+    cat "$PUSH_LOG"
+    rm -f "$PUSH_LOG"
+    exit 1
+fi
+rm -f "$PUSH_LOG"
 
 PR_URL=$(gh pr create --title "$TITLE" --body "$BODY" 2>&1)
 

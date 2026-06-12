@@ -9,7 +9,7 @@ if [ -z "$BASE_BRANCH" ]; then
     exit 1
 fi
 
-git fetch origin
+git fetch -q origin 2>/dev/null
 
 if git show-ref --verify --quiet "refs/heads/${BRANCH_NAME}"; then
     SUFFIX=2
@@ -19,7 +19,7 @@ if git show-ref --verify --quiet "refs/heads/${BRANCH_NAME}"; then
     BRANCH_NAME="${BRANCH_NAME}-v${SUFFIX}"
 fi
 
-WORKTREE_PATH=$(wt switch -c "$BRANCH_NAME" --base "$BASE_BRANCH" --no-cd --yes -x 'echo {{ worktree_path }}' 2>/dev/null | tail -1)
+WORKTREE_PATH=$(wt switch -c "$BRANCH_NAME" --base "$BASE_BRANCH" --no-cd --yes -x 'echo {{ worktree_path }}' 2>/dev/null | grep -v '^$' | tail -1)
 if [ -z "$WORKTREE_PATH" ] || [ ! -d "$WORKTREE_PATH" ]; then
     echo "ERROR: Could not get worktree path from wt" >&2
     exit 1
