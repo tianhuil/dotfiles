@@ -23,6 +23,20 @@ To see differences between repository files in `home/` and installed files:
 ./diff.sh
 ```
 
+## Shell Config Architecture
+
+Shell config is split into two files for proper handling of login vs non-login shells:
+
+- **`home/.coreenv`** — Environment variables. Sourced from `~/.zshenv` (zsh: all shells), `~/.bash_profile` (bash login), and `~/.bashrc` (bash interactive). Contents: `PATH`, `EDITOR`, `GOPATH`, `PYENV_ROOT`, `NVM_DIR`, `SSH_AUTH_SOCK`, brew paths, etc.
+- **`home/.corerc`** — Interactive-only config. Sourced from `~/.zshrc` (zsh interactive) and `~/.bashrc` (bash interactive). Contents: aliases, shell functions, completions.
+
+| File | Sourced by | Purpose |
+|------|-----------|---------|
+| `~/.zshenv` → `.coreenv` | All zsh shells | Env vars everywhere |
+| `~/.zshrc` → `.corerc` | Interactive zsh | Aliases, functions |
+| `~/.bashrc` → `.coreenv` + `.corerc` | Interactive bash | Env + interactive |
+| `~/.bash_profile` → `.bashrc` + `BASH_ENV` | Login bash | Interactive + script env |
+
 ## Adding to ~/ dotfiles
 
 When adding to dotfiles, update them in `./home`, not in `~/.`.  Then tell the user to run `./setup.sh`.

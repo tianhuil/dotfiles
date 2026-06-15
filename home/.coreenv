@@ -1,0 +1,130 @@
+# ============================================================================
+# coreenv — environment variables for all shells (zsh, bash, scripts)
+# Source from .zshenv (zsh), .bash_profile (bash login), .bashrc (bash interactive)
+# ============================================================================
+
+# homebrew
+if [ -f "/opt/homebrew/bin/brew" ]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+
+# Set variables for NPM.  Based on https://gist.github.com/DanHerbert/9520689
+export NPM_PACKAGES="$HOME/.npm-packages"
+export NODE_PATH="$NPM_PACKAGES/lib/node_modules:$NODE_PATH"
+export PATH="$PATH:$NPM_PACKAGES/bin"  # npm packages should have lower priority
+export BUN_INSTALL_CACHE_DIR=/Volumes/Workspace/.bun/cache
+
+# .local/bin
+if [ -d "$HOME/.local/bin" ]; then
+  export PATH=$PATH:$HOME/.local/bin
+fi
+
+# opencode when on Linux
+if [ -d "$HOME/.opencode/bin" ]; then
+  export PATH=$PATH:$HOME/.opencode/bin
+fi
+
+# Poetry
+if [ -d "$HOME/.local/bin" ]; then
+  export PATH=$PATH:$HOME/.local/bin
+fi
+
+# Pyenv
+if [ -d "$HOME/.pyenv" ]; then
+  export PYENV_ROOT="$HOME/.pyenv"
+  command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
+  eval "$(pyenv init -)"
+fi
+
+# Go
+if [ -x "$(command -v go)" ]; then
+  export GOPATH=$(go env GOPATH)  # 80 ms
+  export PATH=$PATH:$GOPATH/bin  # go packages should have lower priority
+fi
+
+# icu4c (for CGO support)
+if brew --prefix icu4c &>/dev/null; then
+  export CGO_CPPFLAGS="-I$(brew --prefix icu4c)/include"
+  export CGO_LDFLAGS="-L$(brew --prefix icu4c)/lib"
+fi
+
+# Java
+if [ -d "/opt/homebrew/opt/openjdk/bin" ]; then
+  export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
+fi
+
+# libpq
+if [ -d "/opt/homebrew/opt/libpq/bin" ]; then
+  export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+fi
+
+# sqlite
+if [ -d "/opt/homebrew/opt/sqlite/bin" ]; then
+  export PATH="/opt/homebrew/opt/sqlite/bin:$PATH"
+fi
+
+# bun
+if [ -d "/Users/tianhuil/.bun/bin" ]; then
+  export PATH="/Users/tianhuil/.bun/bin:$PATH"
+fi
+
+# uv
+if [ -d "/Users/tianhuil/.pyenv/versions/3.12.0/bin/" ]; then
+  export PATH="/Users/tianhuil/.pyenv/versions/3.12.0/bin/:$PATH"
+fi
+
+# editor
+if [ -x "$(command -v code)" ]; then
+  export VISUAL=code
+  export EDITOR=code
+elif [ -x "$(command -v cursor)" ]; then
+  export VISUAL=cursor
+  export EDITOR=cursor
+elif [ -x "$(command -v emacs)" ]; then
+  export VISUAL=emacs
+  export EDITOR=emacs
+else
+  export VISUAL=vi
+  export EDITOR=vi
+fi
+
+# 1password
+if [ -f "$HOME/.config/op/plugins.sh" ]; then
+  source $HOME/.config/op/plugins.sh
+fi
+SSH_AUTH_SOCK=~/Library/Group\ Containers/2BUA8C4S2C.com.1password/t/agent.sock
+
+# nvm 
+export NVM_DIR="$HOME/.nvm"
+[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
+[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+
+if [ -f ~/.env.local ]; then
+  source ~/.env.local
+fi
+
+# Spark (from .bashrc)
+if [ -d /opt/spark ]; then
+  export SPARK_HOME=/opt/spark
+  export PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin
+fi
+
+# Java Home (from .bashrc)
+if [ -f /usr/libexec/java_home ]; then
+  export JAVA_HOME=$(/usr/libexec/java_home)
+fi
+
+# GCloud (from .bashrc)
+if [ -L "$(command -v gcloud)" ]; then
+  FULL_PATH=$(readlink $(command -v gcloud))
+else
+  FULL_PATH=$(command -v gcloud)
+fi
+export GCLOUD_PATH="$(dirname "$FULL_PATH")/../"
+export GAEPATH="$GCLOUD_PATH/platform/google_appengine/"
+
+# tmux (from .bashrc)
+export EVENT_NOKQUEUE=1
+
+# bash history size (also respected by zsh)
+export HISTSIZE=1000000

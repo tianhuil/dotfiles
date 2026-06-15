@@ -1,10 +1,12 @@
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 cp "$SCRIPT_DIR/home/.bashrc" ~/.
-cp "$SCRIPT_DIR/home/.bashrc" ~/.bash_profile
+cp "$SCRIPT_DIR/home/.bash_profile" ~/.bash_profile
 cp "$SCRIPT_DIR/home/.inputrc" ~/.
 cp "$SCRIPT_DIR/home/.zshrc" ~/.
+cp "$SCRIPT_DIR/home/.zshenv" ~/.zshenv
 cp "$SCRIPT_DIR/home/.zprofile" ~/.zprofile
+cp "$SCRIPT_DIR/home/.coreenv" ~/.
 cp "$SCRIPT_DIR/home/.corerc" ~/.
 cp "$SCRIPT_DIR/home/.npmrc" ~/.
 cp "$SCRIPT_DIR/home/.gitconfig" ~/.

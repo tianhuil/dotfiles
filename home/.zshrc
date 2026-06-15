@@ -97,6 +97,9 @@ if command -v wt &>/dev/null; then
   eval "$(wt config shell init zsh)"
 fi
 
+# Interactive aliases and functions
+[ -f "$HOME/.corerc" ] && . "$HOME/.corerc"
+
 # User configuration
 
 # export MANPATH="/usr/local/man:$MANPATH"
