@@ -105,6 +105,12 @@ if [ -x "$(command -v go)" ]; then
   export PATH=$PATH:$GOPATH/bin  # go packages should have lower priority
 fi
 
+# icu4c (for CGO support)
+if brew --prefix icu4c &>/dev/null; then
+  export CGO_CPPFLAGS="-I$(brew --prefix icu4c)/include"
+  export CGO_LDFLAGS="-L$(brew --prefix icu4c)/lib"
+fi
+
 # Java
 if [ -d "/opt/homebrew/opt/openjdk/bin" ]; then
   export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
