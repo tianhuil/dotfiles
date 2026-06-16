@@ -1,4 +1,4 @@
-gcm() {
+gcm_ai() {
   generate_commit_message() {
     git diff --cached | llm -m gemini-2.5-flash-lite "Below is a diff of all staged changes, coming from the command:
 \`\`\`

@@ -83,8 +83,8 @@ warp() {
 }
 
 # AI-powered git commit (requires llm CLI: https://llm.datasette.io/)
-if [ -f "$HOME/.config/shell/gcm.sh" ]; then
-  source "$HOME/.config/shell/gcm.sh"
+if [ -f "$HOME/.config/shell/gcm_ai.sh" ]; then
+  source "$HOME/.config/shell/gcm_ai.sh"
 fi
 
 # worktrunk aliases
