@@ -64,13 +64,23 @@ if [ -d "/opt/homebrew/opt/sqlite/bin" ]; then
 fi
 
 # bun
-if [ -d "/Users/tianhuil/.bun/bin" ]; then
-  export PATH="/Users/tianhuil/.bun/bin:$PATH"
+if [ -d "$HOME/.bun/bin" ]; then
+  export PATH="$HOME/.bun/bin:$PATH"
 fi
 
 # uv
-if [ -d "/Users/tianhuil/.pyenv/versions/3.12.0/bin/" ]; then
-  export PATH="/Users/tianhuil/.pyenv/versions/3.12.0/bin/:$PATH"
+if [ -d "$HOME/.pyenv/versions/3.12.0/bin/" ]; then
+  export PATH="$HOME/.pyenv/versions/3.12.0/bin/:$PATH"
+fi
+
+# pnpm
+if [ "$(uname)" = "Darwin" ]; then
+  export PNPM_HOME="$HOME/Library/pnpm"
+else
+  export PNPM_HOME="$HOME/.local/share/pnpm"
+fi
+if [ -d "$PNPM_HOME/bin" ]; then
+  export PATH="$PNPM_HOME/bin:$PATH"
 fi
 
 # editor
