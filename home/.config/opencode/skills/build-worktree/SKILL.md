@@ -31,6 +31,11 @@ Or reference them by their install path at `~/.config/opencode/skills/build-work
 | `push-pr.sh "<branch>" "<title>" "<body>"` | 3 | Push branch + create PR. Outputs PR URL and `PR_NUMBER` |
 | `monitor-ci.sh "<branch>" "<pr_number>"` | 4 | Wait for CI via `gh run watch`, check mergeability. Outputs `CONCLUSION`, `MERGEABLE`, `RUN_ID` |
 
+## Constraints
+
+1. **Never merge a PR without explicit user request.** Stop after CI passes and report the result. Wait for the user to tell you to merge.
+2. **Stay on the worktree you created in Phase 0.** Never create additional branches or worktrees. Fix issues in place.
+
 ## Execution Model
 
 This is an **orchestrator** — it coordinates bash scripts and subagents. Use the **Task tool** for AI phases (1, 2.5, 5). Use the helper scripts for mechanical phases (0, 2, 3, 4). The default subagent type is `build`, but the user may specify a different agent type — use it if provided.
