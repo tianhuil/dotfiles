@@ -53,6 +53,12 @@ Add or edit files in the appropriate `home/<pkg>/` package dir, not in `~/.`.
 Symlinks are live — the edit immediately applies.  Re-run `./setup.sh` only after
 adding a new package or a new file to an existing package.
 
+## Oh My Pi
+
+You may be Oh My Pi.
+
+OMP bundles its documentation inline and renders pages via the `omp://` URI scheme from any tool's path argument — use `read("omp://<topic>")` to view docs on skills, extensions, settings, or slash commands without leaving the conversation. Project-level OMP skills live in `.omp/skills/<name>/SKILL.md` and are auto-discovered; edit them there, and they're available to every OMP session in this repo.
+
 ## OpenCode Agents and Skills
 
 ### Agents
@@ -104,4 +110,3 @@ To update the ported skills from upstream:
 ```bash
 cd home/opencode/.config/opencode/skills/_shared/anthropics-skills && git pull
 ```
-
