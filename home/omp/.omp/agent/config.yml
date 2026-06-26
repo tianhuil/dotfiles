@@ -4,7 +4,7 @@ theme:
 setupVersion: 1
 modelRoles:
   # --- Capability-critical: zai subscription (GLM-5.2, Intelligence Index 51, #1 web/UI-design arena) ---
-  default: zai/glm-5.2:high        # everyday workhorse; 1M ctx, near-frontier coding
+  default: opencode-zen/big-pickle # everyday workhorse; good enough for most tasks; free;
   slow: zai/glm-5.2:xhigh          # hardest reasoning; max thinking on strongest subscription model
   plan: zai/glm-5.2:high           # architecture / multi-file planning
   designer: zai/glm-5.2:high       # GLM-5.2 is #1 on the design arena
