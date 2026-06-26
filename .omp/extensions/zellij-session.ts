@@ -136,12 +136,66 @@ export default function zellijSession(pi: ExtensionAPI) {
   // ── z-rename ──────────────────────────────────────
   pi.registerCommand("z-rename", {
     description:
-      "Rename the current session and its Zellij tab. Usage: /z-rename <new session name>",
+      "Rename the current session and its Zellij tab. Usage: /z-rename [name]  (omitting name auto-generates via commit model from session history)",
     handler: async (args, ctx) => {
-      const name = args.trim();
+      let name = args.trim();
       if (!name) {
-        ctx.ui.notify("Usage: /z-rename <new session name>", "error");
-        return;
+        // Build conversation context from session history
+        const entries = ctx.sessionManager.getBranch();
+        const messageEntries = entries.filter(
+          (e) => e.type === "message",
+        ) as Array<{ message: { role: string; content: unknown } }>;
+
+        if (messageEntries.length === 0) {
+          ctx.ui.notify(
+            "No session history yet — start a conversation first",
+            "error",
+          );
+          return;
+        }
+
+        // Extract text content from a message's content field
+        const textContent = (content: unknown): string => {
+          if (typeof content === "string") return content;
+          if (Array.isArray(content))
+            return content
+              .filter((c) => c.type === "text")
+              .map((c) => c.text)
+              .join(" ");
+          return "";
+        };
+
+        // Take up to 10 most recent user messages as context
+        const recent = messageEntries
+          .filter((e) => e.message.role === "user")
+          .slice(-10);
+        const conversation = recent
+          .map((e) => textContent(e.message.content))
+          .join("\n");
+
+        const commitModel = ctx.models.resolve("pi/commit");
+        if (!commitModel) {
+          ctx.ui.notify("Commit model not configured", "error");
+          return;
+        }
+        const modelSpec = `${commitModel.provider}/${commitModel.id}`;
+
+        // Build prompt with conversation context
+        const prompt = `Generate a short session name (max 15 chars) for this conversation:\n\n${conversation}\n\nOutput only the name.`;
+
+        const result = await pi.exec("omp", [
+          "-p",
+          "--model",
+          modelSpec,
+          "--no-tools",
+          prompt,
+        ]);
+        name = result.stdout
+          .trim()
+          .replace(/\s+/g, "-")
+          .replace(/[^a-zA-Z0-9_-]/g, "")
+          .slice(0, 15);
+        if (!name) name = "unnamed";
       }
 
       // Rename OMP session
