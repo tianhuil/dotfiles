@@ -1,4 +1,6 @@
 symbolPreset: unicode
+extensions:
+  - ~/.omp/agent/extensions/build-worktree/index.ts
 theme: 
   dark: titanium
 setupVersion: 1
