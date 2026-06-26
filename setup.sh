@@ -7,7 +7,7 @@ command -v stow >/dev/null || { echo "Install stow first: brew install stow"; ex
 
 # Stow all packages — .stowrc sets --target="$HOME" and --no-folding
 cd "$SCRIPT_DIR/home"
-PKGS=(shell git ssh node bun tmux stubby bin scripts cursor zellij worktrunk opencode env)
+PKGS=(shell git ssh node bun tmux stubby bin scripts cursor zellij worktrunk opencode env omp)
 stow --restow "${PKGS[@]}"
 
 # Steps stow can't express
