@@ -132,4 +132,31 @@ export default function zellijSession(pi: ExtensionAPI) {
       );
     },
   });
+
+  // ── z-rename ──────────────────────────────────────
+  pi.registerCommand("z-rename", {
+    description:
+      "Rename the current session and its Zellij tab. Usage: /z-rename <new session name>",
+    handler: async (args, ctx) => {
+      const name = args.trim();
+      if (!name) {
+        ctx.ui.notify("Usage: /z-rename <new session name>", "error");
+        return;
+      }
+
+      // Rename OMP session
+      await pi.setSessionName(name);
+
+      // Rename Zellij tab
+      const cmd = `zellij action rename-tab ${sq(name)}`;
+      const code = await runShell(cmd);
+
+      ctx.ui.notify(
+        code === 0
+          ? `Session renamed to "${name}"`
+          : `OMP session renamed to "${name}", but Zellij tab rename failed`,
+        code === 0 ? "info" : "error",
+      );
+    },
+  });
 }
