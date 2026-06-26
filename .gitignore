@@ -1,7 +1,7 @@
 *.sublime-workspace
 *~
 TASKS.md
-home/.config/opencode/zai-api-key
-home/.config/opencode/context7-api-key
-home/.env.local
-home/.ssh/config.local
+home/opencode/.config/opencode/zai-api-key
+home/opencode/.config/opencode/context7-api-key
+home/ssh/.ssh/config.local
+home/env/.env.local

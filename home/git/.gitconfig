@@ -2,7 +2,7 @@
 	name = Tianhui Michael Li
 	email = tianhuil@cs.princeton.edu
 [core]
-	excludesfile = ~/.gitignore_global
+	excludesfile = /Users/tianhuil/.gitignore_global
 	editor = "code --wait"
 [filter "media"]
 	clean = git-media-clean %f

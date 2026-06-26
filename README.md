@@ -1,24 +1,25 @@
 ## This is a repository of useful "dot files" for unix.
 
-To load the .bashrc, .inputrc, and bash completions, run (this will overwrite .bashrc etc ...):
+Dotfiles are managed via GNU Stow.  The `home/` directory contains per-package
+subdirectories (`shell/`, `git/`, `node/`, `opencode/`, …).  Running `setup.sh`
+symlinks each package's files into `~/`:
 
-`setup.sh`
+`./setup.sh`
 
 ### OpenCode Agents and Skills
 
 This repository includes OpenCode agents and skills for AI-assisted development:
 
-- **Agents**: Located in `home/.opencode/agents/`, these define specialized AI agents
-- **Skills (two locations, to be consolidated)**:
-  - `home/.opencode/skills/` — Original location for opencode-native skills
-  - `home/.agents/skills/` — Ported skills from [anthropics/skills](https://github.com/anthropics/skills), adapted for opencode
+- **Agents**: Located in `home/opencode/.config/opencode/agents/`, stowed to `~/.config/opencode/agents/`
+- **Skills**: Consolidated under `home/opencode/.config/opencode/skills/`, covering both opencode-native and ported skills (~40 total)
 
-The `home/.agents/skills/` directory contains these skills:
+The skill directory includes:
 
 | Skill | Description |
 |-------|-------------|
 | `agent-browser` | Browser automation via CLI |
 | `find-skills` | Discover and install skills from the ecosystem |
+| `find-docs` | Fetch current library documentation |
 | `docx` | Word document creation, editing, and analysis |
 | `pdf` | PDF processing, form filling, and extraction |
 | `pptx` | PowerPoint creation and editing |
@@ -26,13 +27,18 @@ The `home/.agents/skills/` directory contains these skills:
 | `webapp-testing` | Playwright-based web app testing |
 | `theme-factory` | 10 curated color/font themes for any artifact |
 | `frontend-design` | Production-grade UI design guidance |
+| `serena` | Semantic code intelligence via LSP |
+| `gh-grep` | Search real-world code on GitHub |
+| `curl-cffi` | Impersonated web fetch |
 
-Skills with Python scripts reference shared office tooling via a git submodule at `home/.agents/skills/_shared/anthropics-skills/`.
+Skills with Python scripts (docx, pdf, pptx, xlsx, webapp-testing) reference shared
+office tooling via a git submodule at
+`home/opencode/.config/opencode/skills/_shared/anthropics-skills/`.
 
 To update the ported skills from upstream:
 
 ```bash
-cd home/.agents/skills/_shared/anthropics-skills && git pull
+cd home/opencode/.config/opencode/skills/_shared/anthropics-skills && git pull
 ```
 
 For details on the architecture and available skills, see [AGENTS.md](AGENTS.md).
