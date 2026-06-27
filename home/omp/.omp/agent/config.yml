@@ -1,11 +1,9 @@
 symbolPreset: unicode
-
 theme: 
   dark: titanium
 setupVersion: 1
-modelRoles:
-  # --- Capability-critical: zai subscription (GLM-5.2, Intelligence Index 51, #1 web/UI-design arena) ---
-  default: opencode-zen/big-pickle # everyday workhorse; good enough for most tasks; free;
+modelRoles: 
+  default: opencode-zen/big-pickle:medium
   slow: zai/glm-5.2:xhigh          # hardest reasoning; max thinking on strongest subscription model
   plan: zai/glm-5.2:high           # architecture / multi-file planning
   designer: zai/glm-5.2:high       # GLM-5.2 is #1 on the design arena
@@ -16,12 +14,12 @@ modelRoles:
   commit: opencode-zen/big-pickle  # = stealth GLM-4.6, free; low-stakes commit messages
   title: opencode-zen/big-pickle   # free; low-stakes conversation titles
   task: opencode-zen/big-pickle    # free; subagents fan out up to 32-wide, preserves subscription throughput
-  advisor: opencode-zen/gpt-5.5:medium  # different family (GPT) for review diversity; AA top-tier, free
-cycleOrder:
+  advisor: opencode-zen/gpt-5.5:medium  #
+cycleOrder: 
   - smol
   - default
   - slow
-modelProviderOrder:                 # canonical-id tie-break: subscription first, then free zen, then paid openrouter
+modelProviderOrder:
   - zai
   - opencode-zen
   - openrouter
