@@ -1,0 +1,8 @@
+providers:
+  opencode-zen:
+    modelOverrides:
+      big-pickle:
+        compat:
+          supportsToolChoice: false
+          requiresReasoningContentForToolCalls: true
+          requiresAssistantContentForToolCalls: true
