@@ -1,5 +1,6 @@
 providers:
   opencode-zen:
+    apiKey: public
     modelOverrides:
       big-pickle:
         compat:
