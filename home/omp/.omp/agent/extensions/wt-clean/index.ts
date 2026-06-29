@@ -122,10 +122,10 @@ export default function wtCleanExtension(pi: ExtensionAPI): void {
       ctx.ui.notify("Fetching from origin...", "info");
       await exec("git fetch -q origin");
 
-      // 3. Compute set of branches merged to origin/<mainBranch>
+      // 3. Compute set of branches merged to main (local main OR origin/<mainBranch>)
       const mergedBranches = new Set<string>();
-      {
-        const r = await exec(`git branch --merged origin/${mainBranch}`);
+      for (const ref of [mainBranch, `origin/${mainBranch}`]) {
+        const r = await exec(`git branch --merged ${ref}`);
         if (r.exitCode === 0) {
           for (const line of r.stdout.trim().split("\n")) {
             const b = line.trim().replace(/^\*\s*/, "");
