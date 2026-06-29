@@ -31,3 +31,4 @@ modelProviderOrder:
   - opencode-zen
   - openrouter
 defaultThinkingLevel: auto
+shellPath: /bin/zsh
