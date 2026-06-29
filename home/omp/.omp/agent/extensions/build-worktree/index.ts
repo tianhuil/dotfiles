@@ -3,6 +3,9 @@ import type {
   ExtensionCommandContext,
   ExtensionContext,
 } from "@oh-my-pi/pi-coding-agent";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { mkdtempSync } from "node:fs";
 
 // ---------------------------------------------------------------------------
 // Types — exported so consumers can reference without ReturnType<> tricks
@@ -11,6 +14,7 @@ import type {
 export interface BuildWorktreeState {
   branch: string;
   baseBranch: string;
+  repoRoot: string;
   worktreePath: string;
   prNumber: number | null;
   runId: number | null;
@@ -233,6 +237,7 @@ async function phaseSetup(
     branch,
     baseBranch,
     worktreePath,
+    repoRoot,
     prNumber: null,
     runId: null,
     phase: "setup",
@@ -435,7 +440,10 @@ async function phasePushPR(
     throw new Error("PUSH_FAILED");
   }
 
-  // Write PR body to temp file to avoid shell escaping issues
+  // Write PR body to a unique temp file, cleaned up after
+  const baseRef = state.baseBranch.replace(/^origin\//, "");
+  const title = state.task.split("\n")[0].slice(0, 72);
+
   const body = [
     `## Summary`,
     ``,
@@ -443,24 +451,24 @@ async function phasePushPR(
     ``,
     `## Changes`,
     ``,
-    `- Implements: ${state.task.split("\n")[0]}`,
+    `- Implements: ${title}`,
   ].join("\n");
 
-  // Use .worktrees/ alongside the worktree dirs
-  const rootResult = await exec("git rev-parse --show-toplevel");
-  const repoRoot = rootResult.exitCode === 0 ? rootResult.stdout.trim() : "/tmp";
-  const bodyFile = `${repoRoot}/.worktrees/.pr-body-${state.branch.replace(/\//g, "-")}.md`;
-  await exec(`cat > '${bodyFile}' << 'PRBODY'\n${body}\nPRBODY`);
-
-  const title = state.task.split("\n")[0].slice(0, 72);
+  const tmpDir = mkdtempSync(join(tmpdir(), "build-wt-"));
+  const bodyFile = join(tmpDir, "body.md");
+  await Bun.write(bodyFile, body);
 
   const pr = await exec(
-    `gh pr create --title '${title.replace(/'/g, "'\\''")}' --body-file '${bodyFile}'`,
+    `gh pr create --title '${title.replace(/'/g, "'\\''")}' --body-file '${bodyFile}' --base '${baseRef}'`,
   );
   if (pr.exitCode !== 0) {
-    ctx.ui.notify(`PR creation failed: ${pr.stderr}`, "error");
-    throw new Error("PR_CREATE_FAILED");
+    const prErr = ((pr.stderr + pr.stdout).trim() || "(no error output)");
+    ctx.ui.notify(`PR creation failed: ${prErr}`, "error");
+    await exec(`rm -rf '${tmpDir}'`).catch(() => {});
+    throw new Error(`PR_CREATE_FAILED: ${prErr}`);
   }
+
+  await exec(`rm -rf '${tmpDir}'`).catch(() => {});
 
   // Parse PR number from URL
   const prUrl = pr.stdout.trim();
