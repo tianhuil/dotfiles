@@ -194,12 +194,18 @@ async function phaseSetup(
     suffix++;
   }
 
-  // Create worktree — store at /tmp/wt/<branch-slug>
-  const slug = branch.replace(/\//g, "-");
-  const worktreePath = `/tmp/wt/${slug}`;
+  // Discover repo root
+  const rootResult = await exec("git rev-parse --show-toplevel");
+  if (rootResult.exitCode !== 0) {
+    ctx.ui.notify("Not in a git repository — can't create worktree", "error");
+    throw new Error("NOT_A_GIT_REPO");
+  }
+  const repoRoot = rootResult.stdout.trim();
 
-  // Ensure parent directory exists
-  await exec(`mkdir -p /tmp/wt`);
+  // Create worktree at <repo-root>/.worktrees/<branch-slug>
+  const slug = branch.replace(/\//g, "-");
+  const worktreePath = `${repoRoot}/.worktrees/${slug}`;
+  await exec(`mkdir -p ${repoRoot}/.worktrees`);
 
   // Try to create worktree tracking a remote branch; fall back to HEAD
   const baseRef = baseBranch.replace(/^origin\//, "");
@@ -440,7 +446,10 @@ async function phasePushPR(
     `- Implements: ${state.task.split("\n")[0]}`,
   ].join("\n");
 
-  const bodyFile = `/tmp/wt/pr-body-${state.branch.replace(/\//g, "-")}.md`;
+  // Use .worktrees/ alongside the worktree dirs
+  const rootResult = await exec("git rev-parse --show-toplevel");
+  const repoRoot = rootResult.exitCode === 0 ? rootResult.stdout.trim() : "/tmp";
+  const bodyFile = `${repoRoot}/.worktrees/.pr-body-${state.branch.replace(/\//g, "-")}.md`;
   await exec(`cat > '${bodyFile}' << 'PRBODY'\n${body}\nPRBODY`);
 
   const title = state.task.split("\n")[0].slice(0, 72);
