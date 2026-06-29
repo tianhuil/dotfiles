@@ -28,14 +28,14 @@ function makeRepo(dir: string): void {
 
 /** Build a mock ctx that captures notifications for assertions. */
 function makeTestCtx(): {
-  ctx: { ui: { notify: (msg: string, kind: string) => void } };
+  ctx: { ui: { notify: (msg: string, type?: "info" | "warning" | "error") => void } };
   notifications: Array<{ msg: string; kind: string }>;
 } {
   const notifications: Array<{ msg: string; kind: string }> = [];
   const ctx = {
     ui: {
-      notify: (msg: string, kind: string) => {
-        notifications.push({ msg, kind });
+      notify: (msg: string, type?: "info" | "warning" | "error") => {
+        notifications.push({ msg, kind: type ?? "info" });
       },
     },
   };

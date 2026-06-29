@@ -9,7 +9,7 @@ import { buildBranchName } from "../branch";
 export async function phaseSetup(
   exec: ExecFn,
   task: string,
-  ctx: { ui: { notify: (msg: string, kind: string) => void } },
+  ctx: { ui: { notify: (msg: string, type?: "info" | "warning" | "error") => void } },
 ): Promise<BuildWorktreeState> {
   ctx.ui.notify("Setting up worktree...", "info");
 
