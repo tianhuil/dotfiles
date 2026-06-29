@@ -14,7 +14,14 @@ modelRoles:
   commit: opencode-zen/big-pickle  # = stealth GLM-4.6, free; low-stakes commit messages
   title: opencode-zen/big-pickle   # free; low-stakes conversation titles
   task: opencode-zen/big-pickle    # free; subagents fan out up to 32-wide, preserves subscription throughput
-  advisor: opencode-zen/gpt-5.5:medium  #
+  advisor: opencode-zen/gpt-5.5:medium  # free; different family than default (GLM-4.6) → genuine review diversity
+# --- Dual-model review loop (advisor) ---
+# /advisor, /advisor status, /advisor dump
+advisor:
+  enabled: true
+  syncBacklog: 1       # closest to synchronous review: primary waits (≤30s) for advisor catch-up after each turn
+  immuneTurns: 1       # after a concern/blocker, later ones become non-interrupting asides for 1 turn
+  subagents: false     # only the main session runs an advisor (keep cost predictable)
 cycleOrder: 
   - smol
   - default
