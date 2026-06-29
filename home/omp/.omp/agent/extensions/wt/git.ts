@@ -58,7 +58,7 @@ export async function listMergedBranches(
   const r = await exec(`git branch --merged ${ref}`);
   if (r.exitCode === 0) {
     for (const line of r.stdout.trim().split("\n")) {
-      const b = line.trim().replace(/^\*\s*/, "");
+      const b = line.trim().replace(/^[*+]\s*/, "");
       if (b) merged.add(b);
     }
   }
