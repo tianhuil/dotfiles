@@ -64,6 +64,7 @@ export async function runRemotePipeline(
   state: BuildWorktreeState,
   io: IoSink,
   createPR: CreatePRFn | null,
+  sleep?: (ms: number) => Promise<void>,
 ): Promise<void> {
   if (createPR) {
     await createPR(exec, state, io);
@@ -71,20 +72,20 @@ export async function runRemotePipeline(
     await pushExistingBranch(exec, state, io);
   }
 
-  const ciResult = await phaseMonitorCI(exec, state, io);
-  await phaseCILoop(exec, ai, state, ciResult, io);
+  const ciResult = await phaseMonitorCI(exec, state, io, sleep);
+  await phaseCILoop(exec, ai, state, ciResult, io, sleep);
 }
 
 // ---------------------------------------------------------------------------
 // Orchestrate build (fresh worktree, new PR)
 // ---------------------------------------------------------------------------
-
 export async function orchestrateBuild(
   exec: ExecFn,
   ai: AiDriver,
   state: BuildWorktreeState,
   opts: { noGh?: boolean },
   io: IoSink,
+  sleep?: (ms: number) => Promise<void>,
 ): Promise<void> {
   state.phase = "implementing";
   await phaseImplement(ai, state, 0);
@@ -101,7 +102,7 @@ export async function orchestrateBuild(
   }
 
   if (!opts.noGh) {
-    await runRemotePipeline(exec, ai, state, io, phasePushPR);
+    await runRemotePipeline(exec, ai, state, io, phasePushPR, sleep);
   }
 
   io.notify(
@@ -113,7 +114,6 @@ export async function orchestrateBuild(
 // ---------------------------------------------------------------------------
 // Orchestrate continue (follow-up on existing worktree / PR)
 // ---------------------------------------------------------------------------
-
 export async function orchestrateContinue(
   exec: ExecFn,
   ai: AiDriver,
@@ -121,6 +121,7 @@ export async function orchestrateContinue(
   instructions: string,
   opts: { noGh?: boolean },
   io: IoSink,
+  sleep?: (ms: number) => Promise<void>,
 ): Promise<void> {
   await phaseImplementContinue(ai, state, instructions);
 
@@ -139,7 +140,7 @@ export async function orchestrateContinue(
   }
 
   if (!opts.noGh) {
-    await runRemotePipeline(exec, ai, state, io, null);
+    await runRemotePipeline(exec, ai, state, io, null, sleep);
   }
 
   io.notify(

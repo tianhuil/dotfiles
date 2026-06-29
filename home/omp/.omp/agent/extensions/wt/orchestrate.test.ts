@@ -1,73 +1,41 @@
 // ---------------------------------------------------------------------------
 // Tests for orchestrate.ts — fully scripted exec + scripted ai
+// Uses dependency injection (sleep parameter) instead of mock.module
+// to avoid module-cache pollution across test files.
 // ---------------------------------------------------------------------------
 
-import { test, expect, describe, mock, beforeAll, afterAll } from "bun:test";
-import type { ExecFn, AiDriver, BuildWorktreeState, IoSink, CIResult } from "./types";
+import { test, expect, describe } from "bun:test";
+import type { ExecFn, AiDriver, BuildWorktreeState, IoSink } from "./types";
 
-// ──────────────────────────────────────────────────
-// Mocks for sleep-heavy CI phases
-// These are set up before any test imports orchestrate
-// so the mock registry intercepts the module loads.
-// ──────────────────────────────────────────────────
-
-const monitorCalls: {
-  exec: ExecFn;
-  state: BuildWorktreeState;
-  io: IoSink;
-}[] = [];
-const ciLoopCalls: {
-  exec: ExecFn;
-  state: BuildWorktreeState;
-  ciResult: CIResult;
-  io: IoSink;
-}[] = [];
-
-beforeAll(() => {
-  mock.module("./phases/monitor-ci", () => ({
-    phaseMonitorCI: async (
-      exec: ExecFn,
-      state: BuildWorktreeState,
-      io: IoSink,
-    ): Promise<CIResult> => {
-      monitorCalls.push({ exec, state, io });
-      return {
-        conclusion: "success",
-        runId: 42,
-        mergeable: "MERGEABLE",
-        mergeStateStatus: "CLEAN",
-      };
-    },
-  }));
-
-  mock.module("./phases/fix-ci", () => ({
-    phaseCILoop: async (
-      exec: ExecFn,
-      _ai: AiDriver,
-      state: BuildWorktreeState,
-      ciResult: CIResult,
-      io: IoSink,
-    ): Promise<void> => {
-      ciLoopCalls.push({ exec, state, ciResult, io });
-    },
-  }));
-});
-
-afterAll(() => {
-  mock.restore();
-});
+// Import the REAL functions (no mocking needed — sleep is injected)
+import {
+  orchestrateBuild,
+  orchestrateContinue,
+  runRemotePipeline,
+} from "./orchestrate";
+import { phasePushPR } from "./phases/push";
 
 // ──────────────────────────────────────────────────
 // Helpers
 // ──────────────────────────────────────────────────
 
+/** No-op sleep: makes CI-phase tests instant */
+const noSleep = async () => {};
+
 function makeFakeExec(
-  responses: Record<string, { stdout: string; stderr?: string; exitCode?: number }>,
+  responses: Record<
+    string,
+    { stdout: string; stderr?: string; exitCode?: number }
+  >,
 ): ExecFn {
   return async (cmd: string) => {
     for (const [pat, r] of Object.entries(responses)) {
       if (cmd.includes(pat)) {
-        return { stdout: r.stdout, stderr: r.stderr ?? "", exitCode: r.exitCode ?? 0 };
+        return {
+          stdout: r.stdout,
+          stderr: r.stderr ?? "",
+          exitCode: r.exitCode ?? 0,
+        };
       }
     }
     return { stdout: "", stderr: `UNEXPECTED: ${cmd}`, exitCode: 1 };
@@ -76,7 +44,10 @@ function makeFakeExec(
 
 const silentAi: AiDriver = async () => {};
 
-function makeTestIo(): { io: IoSink; notifs: { msg: string; kind: string }[] } {
+function makeTestIo(): {
+  io: IoSink;
+  notifs: { msg: string; kind: string }[];
+} {
   const notifs: { msg: string; kind: string }[] = [];
   return {
     io: {
@@ -108,144 +79,139 @@ const MIN_STATE: BuildWorktreeState = {
 // ──────────────────────────────────────────────────
 
 describe("orchestrateBuild --no-gh", () => {
-  test("completes with implementing -> validating -> done (no push)", async () => {
-    monitorCalls.length = 0;
-    ciLoopCalls.length = 0;
-
-    const { orchestrateBuild } = await import("./orchestrate");
-
-    // Validation skipped: package.json discovery returns nothing
+  test("completes implement + validate, no remote pipeline", async () => {
+    // Fake exec: discoverValidationCommands finds "test" script,
+    // "bun run test" passes, git commands succeed
     const exec = makeFakeExec({
-      "bun -e": { stdout: "", exitCode: 1 },
-      "git add -A": { stdout: "", exitCode: 0 },
+      'console.log(Object.keys(s).join' : { stdout: "test\nlint", exitCode: 0 },
+      "bun run test": { stdout: "", exitCode: 0 },
+      "bun run lint": { stdout: "", exitCode: 0 },
       "git diff --cached --quiet": { stdout: "", exitCode: 1 },
-      "git commit -m": { stdout: "ok", exitCode: 0 },
+      "git add -A": { stdout: "", exitCode: 0 },
+      "git commit -m": { stdout: "", exitCode: 0 },
     });
-
     const { io, notifs } = makeTestIo();
+
     const state = { ...MIN_STATE };
+    await orchestrateBuild(exec, silentAi, state, { noGh: true }, io, noSleep);
 
-    await orchestrateBuild(exec, silentAi, state, { noGh: true }, io);
-
+    // Validation did NOT fail
     expect(state.phase).not.toBe("validation-failed");
-    expect(notifs.some((n) => n.msg.includes("Worktree ready at"))).toBe(true);
-    // pipeline functions should NOT have been called
-    expect(monitorCalls.length).toBe(0);
-    expect(ciLoopCalls.length).toBe(0);
+    // Validation succeeded (passed on 1st iteration)
+    expect(state.validationIteration).toBe(1);
+
+    // Worktree ready notification
+    const readyMsg = notifs.find((n) => n.msg.includes("Worktree ready"));
+    expect(readyMsg).toBeDefined();
   });
 });
 
 describe("orchestrateBuild with validation failure", () => {
-  test("stops at validation-failed after max retries", async () => {
-    monitorCalls.length = 0;
-    ciLoopCalls.length = 0;
-
-    const { orchestrateBuild } = await import("./orchestrate");
-
-    // Discover "test" script, but it always fails
+  test("enters validation-failed phase after max retries", async () => {
+    // All validation commands fail
     const exec = makeFakeExec({
-      "bun -e": { stdout: "test", exitCode: 0 },
+      'console.log(Object.keys(s).join' : { stdout: "test", exitCode: 0 },
       "bun run test": { stdout: "", stderr: "FAIL", exitCode: 1 },
-      "git add -A": { stdout: "", exitCode: 0 },
       "git diff --cached --quiet": { stdout: "", exitCode: 1 },
-      "git commit -m": { stdout: "ok", exitCode: 0 },
+      "git add -A": { stdout: "", exitCode: 0 },
+      "git commit -m": { stdout: "", exitCode: 0 },
     });
+    const { io } = makeTestIo();
 
-    const { io, notifs } = makeTestIo();
-    const state = { ...MIN_STATE };
+    const state = { ...MIN_STATE, failures: [] };
+    await orchestrateBuild(exec, silentAi, state, { noGh: true }, io, noSleep);
 
-    await orchestrateBuild(exec, silentAi, state, { noGh: false }, io);
-
+    // Should have failed after max retries
     expect(state.phase).toBe("validation-failed");
-    expect(
-      notifs.some(
-        (n) => n.kind === "error" && n.msg.includes("Validation failed"),
-      ),
-    ).toBe(true);
+    expect(state.validationIteration).toBe(5);
   });
 });
 
 describe("orchestrateContinue --no-gh", () => {
   test("completes implementContinue + commit + validate", async () => {
-    monitorCalls.length = 0;
-    ciLoopCalls.length = 0;
-
-    const { orchestrateContinue } = await import("./orchestrate");
-
     const exec = makeFakeExec({
-      "bun -e": { stdout: "", exitCode: 1 },
-      "git add -A": { stdout: "", exitCode: 0 },
+      'console.log(Object.keys(s).join' : { stdout: "test", exitCode: 0 },
+      "bun run test": { stdout: "", exitCode: 0 },
       "git diff --cached --quiet": { stdout: "", exitCode: 1 },
+      "git add -A": { stdout: "", exitCode: 0 },
       "git commit -m": { stdout: "ok", exitCode: 0 },
-      "test -d": { stdout: "", exitCode: 0 },
     });
-
     const { io, notifs } = makeTestIo();
-    const state = {
-      ...MIN_STATE,
-      branch: "feat/follow-up",
-      prNumber: 123,
-    };
 
+    const state = { ...MIN_STATE, prNumber: 42 };
     await orchestrateContinue(
       exec,
       silentAi,
       state,
-      "Add more tests",
+      "Add error handling",
       { noGh: true },
       io,
+      noSleep,
     );
 
     expect(state.phase).not.toBe("validation-failed");
-    const followUpMsg = notifs.find((n) => n.msg.includes("Follow-up complete"));
-    expect(followUpMsg).toBeDefined();
-    expect(followUpMsg!.msg).toContain("No remote");
+    expect(state.validationIteration).toBeGreaterThanOrEqual(1);
+
+    // Follow-up complete notification
+    const followupMsg = notifs.find((n) =>
+      n.msg.includes("Follow-up complete"),
+    );
+    expect(followupMsg).toBeDefined();
   });
 });
 
 describe("runRemotePipeline with createPR", () => {
-  test("calls phasePushPR -> phaseMonitorCI -> phaseCILoop", async () => {
-    monitorCalls.length = 0;
-    ciLoopCalls.length = 0;
-
-    const { runRemotePipeline } = await import("./orchestrate");
-    const { phasePushPR } = await import("./phases/push");
-
+  test("pushes, monitors CI, and runs CI loop", async () => {
     const exec = makeFakeExec({
+      "git remote get-url origin": { stdout: "git@github.com:org/repo.git", exitCode: 0 },
       "git push": { stdout: "", exitCode: 0 },
-      "git remote get-url origin": { stdout: "git@github.com:user/repo.git", exitCode: 0 },
-      "gh pr create": { stdout: "https://github.com/user/repo/pull/123", exitCode: 0 },
+      "gh pr create": { stdout: "https://github.com/org/repo/pull/42", exitCode: 0 },
+      "gh run list": { stdout: "99", exitCode: 0 },
+      "gh run view": { stdout: "success", exitCode: 0 },
+      "gh pr view": {
+        stdout: JSON.stringify({ mergeable: "MERGEABLE", mergeStateStatus: "CLEAN" }),
+        exitCode: 0,
+      },
+      // git commands for CI loop commit
+      "git diff --cached --quiet": { stdout: "", exitCode: 1 },
+      "git add -A": { stdout: "", exitCode: 0 },
+      "git commit -m": { stdout: "", exitCode: 0 },
+      // For commit detection in phaseCILoop
+      'console.log(Object.keys(s).join': { stdout: "test", exitCode: 0 },
     });
+    const { io } = makeTestIo();
 
-    const { io: _io } = makeTestIo();
-    const state = { ...MIN_STATE, prNumber: 123 };
+    const state = { ...MIN_STATE, phase: "validating" };
+    await runRemotePipeline(exec, silentAi, state, io, phasePushPR, noSleep);
 
-    await runRemotePipeline(exec, silentAi, state, _io, phasePushPR);
-
-    expect(state.phase).toBe("pushed");
-    expect(monitorCalls.length).toBe(1);
-    expect(ciLoopCalls.length).toBe(1);
-    expect(monitorCalls[0]!.state).toBe(state);
+    expect(state.prNumber).toBe(42);
+    expect(state.phase).toBe("done"); // CI success -> phase "done"
   });
 });
 
 describe("runRemotePipeline with createPR=null (push existing)", () => {
-  test("calls pushExisting -> phaseMonitorCI -> phaseCILoop", async () => {
-    monitorCalls.length = 0;
-    ciLoopCalls.length = 0;
-
-    const { runRemotePipeline } = await import("./orchestrate");
-
+  test("pushes existing branch, monitors CI, runs CI loop", async () => {
     const exec = makeFakeExec({
-      "git push origin": { stdout: "", exitCode: 0 },
+      "git remote get-url origin": { stdout: "git@github.com:org/repo.git", exitCode: 0 },
+      "git push": { stdout: "", exitCode: 0 },
+      "gh run list": { stdout: "99", exitCode: 0 },
+      "gh run view": { stdout: "success", exitCode: 0 },
+      "gh pr view": {
+        stdout: JSON.stringify({ mergeable: "MERGEABLE", mergeStateStatus: "CLEAN" }),
+        exitCode: 0,
+      },
+      "git diff --cached --quiet": { stdout: "", exitCode: 1 },
+      "git add -A": { stdout: "", exitCode: 0 },
+      "git commit -m": { stdout: "", exitCode: 0 },
+      'console.log(Object.keys(s).join': { stdout: "test", exitCode: 0 },
     });
+    const { io } = makeTestIo();
 
-    const { io: _io } = makeTestIo();
-    const state = { ...MIN_STATE, prNumber: 456 };
+    const state = { ...MIN_STATE, phase: "validating", prNumber: 42 };
+    await runRemotePipeline(exec, silentAi, state, io, null, noSleep);
 
-    await runRemotePipeline(exec, silentAi, state, _io, null);
-
-    expect(monitorCalls.length).toBe(1);
-    expect(ciLoopCalls.length).toBe(1);
+    // Pushed to existing branch (no new PR)
+    expect(state.prNumber).toBe(42); // unchanged
+    expect(state.phase).toBe("done");
   });
 });
