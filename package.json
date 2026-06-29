@@ -4,6 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "check": "tsc --noEmit",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
