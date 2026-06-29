@@ -10,6 +10,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { execSync } from "node:child_process";
 import wtBuildExtension from "./index";
+import type { ExtensionAPI } from "@oh-my-pi/pi-coding-agent";
 
 // ──────────────────────────────────────────────────
 // Test harness — provides scripted AI, real exec,
@@ -50,7 +51,7 @@ function createHarness() {
       const m = prompt.match(/`([^`]*\.worktrees[^`]*)`/);
       const wt = m?.[1] ?? "";
       if (aiCallIndex < aiActions.length) {
-        aiActions[aiCallIndex](wt);
+        aiActions[aiCallIndex]!(wt);
         aiCallIndex++;
       }
     },
@@ -103,7 +104,7 @@ describe("wt-build extension", () => {
 
   test("registers wt-build and wt-continue commands", () => {
     const { pi, commands } = createHarness();
-    wtBuildExtension(pi);
+    wtBuildExtension(pi as unknown as ExtensionAPI);
     expect(commands.has("wt-build")).toBe(true);
     expect(commands.has("wt-continue")).toBe(true);
   });
@@ -112,7 +113,7 @@ describe("wt-build extension", () => {
 
   test("wt-build --no-gh creates worktree, runs scripted AI, commits", async () => {
     const { pi, ctx, commands, notifications } = createHarness();
-    wtBuildExtension(pi);
+    wtBuildExtension(pi as unknown as ExtensionAPI);
 
     let buildWorktreePath = "";
     aiActions.push((wt) => {
@@ -155,7 +156,7 @@ describe("wt-build extension", () => {
 
   test("wt-build then wt-continue --no-gh modifies file, creates follow-up commit", async () => {
     const { pi, ctx, commands, notifications } = createHarness();
-    wtBuildExtension(pi);
+    wtBuildExtension(pi as unknown as ExtensionAPI);
 
     let buildWorktreePath = "";
     aiActions.push((wt) => {
@@ -215,7 +216,7 @@ describe("wt-build extension", () => {
 
   test("wt-continue without prior build shows warning", async () => {
     const { pi, ctx, commands, notifications } = createHarness();
-    wtBuildExtension(pi);
+    wtBuildExtension(pi as unknown as ExtensionAPI);
 
     // No state in this harness → recoverState returns null
     await commands.get("wt-continue")!("add goodbye", ctx);
@@ -230,7 +231,7 @@ describe("wt-build extension", () => {
 
   test("wt-build without task shows usage", async () => {
     const { pi, ctx, commands, notifications } = createHarness();
-    wtBuildExtension(pi);
+    wtBuildExtension(pi as unknown as ExtensionAPI);
 
     await commands.get("wt-build")!("", ctx);
 
@@ -242,7 +243,7 @@ describe("wt-build extension", () => {
 
   test("wt-continue without instructions shows usage", async () => {
     const { pi, ctx, commands, notifications } = createHarness();
-    wtBuildExtension(pi);
+    wtBuildExtension(pi as unknown as ExtensionAPI);
 
     await commands.get("wt-continue")!("", ctx);
 

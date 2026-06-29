@@ -115,7 +115,7 @@ function createExec(): ExecFn {
       return {
         stdout,
         stderr,
-        exitCode: proc.exitCode,
+        exitCode: proc.exitCode ?? 1,
       };
     } catch (err: unknown) {
       if (err && typeof err === "object" && "exitCode" in err) {
@@ -231,7 +231,7 @@ async function phaseSetup(
     throw new Error(`Worktree creation failed: ${wtResult.stderr}`);
   }
 
-  ctx.ui.notify(`Worktree ready: ${worktreePath} (branch: ${branch})`, "success");
+  ctx.ui.notify(`Worktree ready: ${worktreePath} (branch: ${branch})`, "info");
 
   const state: BuildWorktreeState = {
     branch,
@@ -291,7 +291,6 @@ async function phaseImplement(
 
   await pi.sendUserMessage(prompt, {
     deliverAs: "steer",
-    triggerTurn: true,
   });
 
   await ctx.waitForIdle();
@@ -328,7 +327,6 @@ async function phaseImplementContinue(
 
   await pi.sendUserMessage(prompt, {
     deliverAs: "steer",
-    triggerTurn: true,
   });
 
   await ctx.waitForIdle();
@@ -396,7 +394,7 @@ async function phaseValidate(
   for (const cmd of cmds) {
     const r = await wtExec(exec, state.worktreePath, cmd);
     if (r.exitCode === 0) {
-      ctx.ui.notify(`PASS: ${cmd}`, "success");
+      ctx.ui.notify(`PASS: ${cmd}`, "info");
     } else {
       ctx.ui.notify(`FAIL: ${cmd}`, "error");
       state.failures.push(`Validation: ${cmd}\n${r.stderr || r.stdout}`);
@@ -479,7 +477,7 @@ async function phasePushPR(
 
   // Write PR body to a unique temp file, cleaned up after
   const baseRef = state.baseBranch.replace(/^origin\//, "");
-  const title = state.task.split("\n")[0].slice(0, 72);
+  const title = (state.task.split("\n")[0] ?? "").slice(0, 72);
 
   const body = [
     `## Summary`,
@@ -513,7 +511,7 @@ async function phasePushPR(
   state.prNumber = prMatch ? Number(prMatch[1]) : null;
   state.phase = "pushed";
 
-  ctx.ui.notify(`PR created: ${prUrl}`, "success");
+  ctx.ui.notify(`PR created: ${prUrl}`, "info");
 }
 
 // ---------------------------------------------------------------------------
@@ -729,7 +727,7 @@ async function phaseCILoop(
     saveState(pi, state);
     ctx.ui.notify(
       `CI passed! PR #${state.prNumber} is ready. Branch: ${state.branch}`,
-      "success",
+      "info",
     );
   } else if (state.ciIteration >= MAX_CI_ITERS) {
     state.phase = "ci-max-retries";
@@ -886,7 +884,7 @@ async function orchestrateContinue(
       ctx.ui.notify(`Push failed: ${push.stderr || push.stdout}`, "error");
       throw new Error("PUSH_FAILED");
     }
-    ctx.ui.notify(`Pushed to ${state.branch}`, "success");
+    ctx.ui.notify(`Pushed to ${state.branch}`, "info");
 
     // --- Monitor CI ---
     const ciResult = await phaseMonitorCI(exec, pi, ctx, state);
