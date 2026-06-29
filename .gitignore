@@ -6,3 +6,4 @@ home/opencode/.config/opencode/context7-api-key
 home/ssh/.ssh/config.local
 home/env/.env.local
 node_modules
+.worktrees/
