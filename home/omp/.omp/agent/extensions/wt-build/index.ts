@@ -366,12 +366,12 @@ async function discoverValidationCommands(
   const commands: string[] = [];
   const wt = state.worktreePath;
 
-  // Check package.json scripts
-  const pkg = await wtExec(exec, wt, "cat package.json 2>/dev/null | grep -o '\"[a-z-]*\":'");
-  if (pkg.exitCode === 0) {
-    const scripts = pkg.stdout;
+  // Parse package.json scripts section exactly — avoids substring false matches
+  const pkg = await wtExec(exec, wt, `bun -e "const p=JSON.parse(await Bun.file('package.json').text());const s=p.scripts||{};console.log(Object.keys(s).join('\\n'))"`);
+  if (pkg.exitCode === 0 && pkg.stdout.trim()) {
+    const defined = new Set(pkg.stdout.trim().split("\n"));
     for (const script of ["test", "lint", "typecheck", "check", "validate", "format"]) {
-      if (scripts.includes(script)) {
+      if (defined.has(script)) {
         commands.push(`bun run ${script}`);
       }
     }
