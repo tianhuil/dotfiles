@@ -36,7 +36,7 @@ function createExec(): (command: string) => Promise<ExecResult> {
       return {
         stdout,
         stderr,
-        exitCode: proc.exitCode,
+        exitCode: proc.exitCode ?? 0,
       };
     } catch (err: unknown) {
       if (err && typeof err === "object" && "exitCode" in err) {

@@ -46,9 +46,9 @@ function createHarness() {
       entries.push({ type: "custom", customType, data });
     },
     on: () => {},
-    sendUserMessage: async (prompt: string) => {
-      // Parse worktree path from the prompt (wrapped in backticks)
-      const m = prompt.match(/`([^`]*\.worktrees[^`]*)`/);
+    sendMessage: (message: { content: string | unknown[] }) => {
+      const content = typeof message.content === "string" ? message.content : "";
+      const m = content.match(/`([^`]*\.worktrees[^`]*)`/);
       const wt = m?.[1] ?? "";
       if (aiCallIndex < aiActions.length) {
         aiActions[aiCallIndex]!(wt);

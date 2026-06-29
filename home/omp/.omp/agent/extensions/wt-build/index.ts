@@ -289,9 +289,12 @@ async function phaseImplement(
   // Ensure AI is idle before sending
   await ctx.waitForIdle();
 
-  await pi.sendUserMessage(prompt, {
-    deliverAs: "steer",
-  });
+  // sendMessage with triggerTurn starts a turn immediately when idle.
+  // sendUserMessage does NOT support triggerTurn (per OMP docs).
+  pi.sendMessage(
+    { customType: "wt-build", content: prompt, display: true },
+    { deliverAs: "steer", triggerTurn: true },
+  );
 
   await ctx.waitForIdle();
 }
@@ -325,9 +328,10 @@ async function phaseImplementContinue(
   // Ensure AI is idle before sending
   await ctx.waitForIdle();
 
-  await pi.sendUserMessage(prompt, {
-    deliverAs: "steer",
-  });
+  pi.sendMessage(
+    { customType: "wt-build", content: prompt, display: true },
+    { deliverAs: "steer", triggerTurn: true },
+  );
 
   await ctx.waitForIdle();
 }
@@ -759,7 +763,6 @@ async function orchestrate(
   // --- Phase 1: Implement ---
   await phaseImplement(pi, ctx, state, 0);
 
-  // --- Phase 2: Commit + Validate ---
   state.phase = "validating";
   saveState(pi, state);
 

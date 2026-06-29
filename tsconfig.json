@@ -27,6 +27,6 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
   },
-  "include": ["home/**/*.ts", ".omp/**/*.ts"],
+  "include": ["home/**/*.ts", ".omp/**/*.ts", "home/omp/.omp/agent/extensions/**/*.ts"],
   "exclude": ["node_modules", ".git"]
 }
