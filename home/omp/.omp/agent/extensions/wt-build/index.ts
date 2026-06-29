@@ -42,7 +42,7 @@ export interface CIResult {
 // Helpers
 // ---------------------------------------------------------------------------
 
-const STATE_TYPE = "build-worktree";
+const STATE_TYPE = "wt-build";
 
 function slugify(text: string, max = 50): string {
   return (
@@ -454,7 +454,7 @@ async function phasePushPR(
     `- Implements: ${title}`,
   ].join("\n");
 
-  const tmpDir = mkdtempSync(join(tmpdir(), "build-wt-"));
+  const tmpDir = mkdtempSync(join(tmpdir(), "wt-build-"));
   const bodyFile = join(tmpDir, "body.md");
   await Bun.write(bodyFile, body);
 
@@ -731,7 +731,7 @@ async function orchestrate(
 
   if (!validationOk) {
     ctx.ui.notify(
-      "Validation failed after max retries. Worktree left in place for manual fix.",
+      `Validation failed after max retries. Worktree: ${state.worktreePath}. Run subsequent requests inside the worktree to fix issues manually.`,
       "error",
     );
     state.phase = "validation-failed";
@@ -748,24 +748,30 @@ async function orchestrate(
 
   // --- Phase 5: CI loop (fix failures, retry) ---
   await phaseCILoop(exec, pi, ctx, state, ciResult);
+
+  // Notify user to run subsequent requests in the worktree
+  ctx.ui.notify(
+    `Worktree ready at ${state.worktreePath}. Subsequent requests should be run inside this directory to build on this feature.`,
+    "info",
+  );
 }
 
 // ---------------------------------------------------------------------------
 // Extension entry point
 // ---------------------------------------------------------------------------
 
-export default function buildWorktreeExtension(pi: ExtensionAPI): void {
-  pi.setLabel("Build Worktree");
+export default function wtBuildExtension(pi: ExtensionAPI): void {
+  pi.setLabel("WT Build");
 
-  // ── User command: /build-wt <task> ───────────────────────────────────
-  pi.registerCommand("build-wt", {
+  // ── User command: /wt-build <task> ────────────────────────────────────
+  pi.registerCommand("wt-build", {
     description:
       "(extension) Build a feature in an isolated git worktree, validate locally, push a PR, and iterate until CI passes",
     handler: async (args: string, ctx: ExtensionCommandContext) => {
       const task = args.trim();
       if (!task) {
         ctx.ui.notify(
-          "Usage: /build-wt <task description>",
+          "Usage: /wt-build <task description>",
           "warning",
         );
         return;
@@ -775,7 +781,7 @@ export default function buildWorktreeExtension(pi: ExtensionAPI): void {
         await orchestrate(pi, ctx, task);
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : String(err);
-        ctx.ui.notify(`Build worktree failed: ${msg}`, "error");
+        ctx.ui.notify(`WT build failed: ${msg}`, "error");
       }
     },
   });
@@ -787,7 +793,7 @@ export default function buildWorktreeExtension(pi: ExtensionAPI): void {
       const state = recoverState(ctx);
       if (state && state.phase !== "done") {
         ctx.ui.notify(
-          `Incomplete build-worktree found: ${state.branch} (phase: ${state.phase}). Worktree: ${state.worktreePath}`,
+          `Incomplete wt-build found: ${state.branch} (phase: ${state.phase}). Worktree: ${state.worktreePath}`,
           "warning",
         );
       }

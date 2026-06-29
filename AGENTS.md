@@ -118,12 +118,12 @@ Changes to `config.yml`, `models.yml`, or extensions can silently break OMP
 
 ```bash
 # Pipe JSONL commands via stdin, capture all output
-echo '{"id":"t1","type":"prompt","message":"/build-wt"}' | \
+echo '{"id":"t1","type":"prompt","message":"/wt-build"}' | \
   omp --mode rpc --no-session --cwd /tmp > /tmp/rpc.jsonl
 
 # Assertions
 grep -q '"type":"extension_error"' /tmp/rpc.jsonl && echo "FAIL: extension error" || true
-grep -q '"name":"build-wt"' /tmp/rpc.jsonl && echo "PASS: registered" || echo "FAIL: not found"
+grep -q '"name":"wt-build"' /tmp/rpc.jsonl && echo "PASS: registered" || echo "FAIL: not found"
 ```
 
 **Key signals** in the output:
