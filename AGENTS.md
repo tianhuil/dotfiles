@@ -145,3 +145,16 @@ stdin read, so piping one command at startup captures both the registration burs
 and a handler smoke test in a single run. Pipe `echo` sends one frame then closes
 stdin — omp sees EOF after processing it and exits cleanly.
 
+## Validation
+
+TypeScript changes are validated with:
+
+```bash
+bun typecheck
+```
+
+This runs `tsc --noEmit` against all `.ts` files in `home/` and `.omp/`.
+Since `.config` is a hidden directory, the `include` patterns are explicit paths
+rather than `**/*.ts` (which doesn't traverse hidden directories).
+
+Always run `bun typecheck` after editing any `.ts` file in the repo.
