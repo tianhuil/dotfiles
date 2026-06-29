@@ -9,7 +9,7 @@ import {
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { execSync } from "node:child_process";
-import wtBuildExtension from "./wt-build";
+import wtBuildExtension from "./index";
 
 // ──────────────────────────────────────────────────
 // Test harness — provides scripted AI, real exec,

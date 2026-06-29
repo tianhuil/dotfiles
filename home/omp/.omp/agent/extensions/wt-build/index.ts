@@ -298,6 +298,43 @@ async function phaseImplement(
 }
 
 // ---------------------------------------------------------------------------
+// Phase 1 (continue): AI implements follow-up instructions on existing worktree
+// ---------------------------------------------------------------------------
+
+async function phaseImplementContinue(
+  pi: ExtensionAPI,
+  ctx: ExtensionCommandContext,
+  state: BuildWorktreeState,
+  instructions: string,
+): Promise<void> {
+  const prompt = [
+    `## Follow-up task on existing worktree`,
+    ``,
+    instructions,
+    ``,
+    `## Context`,
+    ``,
+    `This builds on an existing feature in worktree: \`${state.worktreePath}\``,
+    `Branch: \`${state.branch}\` (PR #${state.prNumber ?? "unknown"} is already open).`,
+    `You MAY modify existing files — this is a follow-up, not a fresh build.`,
+    ``,
+    `Use \`cd ${state.worktreePath}\` before any file operation or command.`,
+    `Do NOT commit changes — I will commit for you.`,
+    `Do NOT leave the worktree to modify files in the main repository.`,
+  ].join("\n");
+
+  // Ensure AI is idle before sending
+  await ctx.waitForIdle();
+
+  await pi.sendUserMessage(prompt, {
+    deliverAs: "steer",
+    triggerTurn: true,
+  });
+
+  await ctx.waitForIdle();
+}
+
+// ---------------------------------------------------------------------------
 // Phase 2: Commit + Validate
 // ---------------------------------------------------------------------------
 
@@ -712,6 +749,7 @@ async function orchestrate(
   pi: ExtensionAPI,
   ctx: ExtensionCommandContext,
   task: string,
+  opts: { noGh?: boolean } = {},
 ): Promise<void> {
   const exec = createExec();
 
@@ -740,20 +778,134 @@ async function orchestrate(
   }
 
   // --- Phase 3: Push PR ---
-  await phasePushPR(exec, pi, ctx, state);
-  saveState(pi, state);
+  if (!opts.noGh) {
+    await phasePushPR(exec, pi, ctx, state);
+    saveState(pi, state);
 
-  // --- Phase 4: Monitor CI ---
-  const ciResult = await phaseMonitorCI(exec, pi, ctx, state);
+    // --- Phase 4: Monitor CI ---
+    const ciResult = await phaseMonitorCI(exec, pi, ctx, state);
 
-  // --- Phase 5: CI loop (fix failures, retry) ---
-  await phaseCILoop(exec, pi, ctx, state, ciResult);
+    // --- Phase 5: CI loop (fix failures, retry) ---
+    await phaseCILoop(exec, pi, ctx, state, ciResult);
+  }
 
   // Notify user to run subsequent requests in the worktree
   ctx.ui.notify(
     `Worktree ready at ${state.worktreePath}. Subsequent requests should be run inside this directory to build on this feature.`,
     "info",
   );
+}
+
+// ---------------------------------------------------------------------------
+// Continue orchestration — resume work on an existing worktree
+// ---------------------------------------------------------------------------
+
+async function orchestrateContinue(
+  pi: ExtensionAPI,
+  ctx: ExtensionCommandContext,
+  instructions: string,
+  opts: { noGh?: boolean } = {},
+): Promise<void> {
+  const state = recoverState(ctx);
+  if (!state) {
+    ctx.ui.notify(
+      "No previous wt-build found in this session. Run /wt-build first.",
+      "warning",
+    );
+    return;
+  }
+
+  const exec = createExec();
+
+  // Verify the worktree still exists on disk
+  const exists = await exec(`test -d ${state.worktreePath}`);
+  if (exists.exitCode !== 0) {
+    ctx.ui.notify(
+      `Worktree no longer exists: ${state.worktreePath}. Cannot continue.`,
+      "error",
+    );
+    return;
+  }
+
+  ctx.ui.notify(
+    `Continuing on ${state.branch} (worktree: ${state.worktreePath})`,
+    "info",
+  );
+
+  // Reset iteration counters and failures for the follow-up
+  state.validationIteration = 0;
+  state.ciIteration = 0;
+  state.failures = [];
+  state.phase = "continuing";
+  saveState(pi, state);
+
+  // --- AI implements the follow-up ---
+  await phaseImplementContinue(pi, ctx, state, instructions);
+
+  // --- Commit the follow-up ---
+  const prefix = state.branch.split("/")[0];
+  await commitInWorktree(exec, state, `${prefix}: follow-up changes`);
+
+  // --- Validate (reuses the same loop as wt-build) ---
+  state.phase = "validating";
+  saveState(pi, state);
+  const validationOk = await phaseValidateLoop(exec, pi, ctx, state);
+  if (!validationOk) {
+    ctx.ui.notify(
+      `Validation failed after max retries. Worktree: ${state.worktreePath}.`,
+      "error",
+    );
+    state.phase = "validation-failed";
+    saveState(pi, state);
+    return;
+  }
+
+  // --- Push to existing branch (PR already exists, no gh pr create) ---
+  if (!opts.noGh) {
+    state.phase = "pushing";
+    saveState(pi, state);
+    const push = await wtExec(
+      exec,
+      state.worktreePath,
+      `git push origin ${state.branch}`,
+    );
+    if (push.exitCode !== 0) {
+      const err = (push.stderr + push.stdout).toLowerCase();
+      if (
+        err.includes("auth") ||
+        err.includes("permission") ||
+        err.includes("403") ||
+        err.includes("401")
+      ) {
+        ctx.ui.notify(
+          "Git push auth/permission error. Run `gh auth login` and retry.",
+          "error",
+        );
+        throw new Error("PUSH_AUTH_FAILURE");
+      }
+      ctx.ui.notify(`Push failed: ${push.stderr || push.stdout}`, "error");
+      throw new Error("PUSH_FAILED");
+    }
+    ctx.ui.notify(`Pushed to ${state.branch}`, "success");
+
+    // --- Monitor CI ---
+    const ciResult = await phaseMonitorCI(exec, pi, ctx, state);
+
+    // --- CI loop ---
+    await phaseCILoop(exec, pi, ctx, state, ciResult);
+  }
+
+  if (opts.noGh) {
+    ctx.ui.notify(
+      `Follow-up complete. Worktree: ${state.worktreePath} (branch: ${state.branch}). No remote — push manually to proceed.`,
+      "info",
+    );
+  } else {
+    ctx.ui.notify(
+      `Follow-up pushed. Worktree: ${state.worktreePath}, PR #${state.prNumber}.`,
+      "info",
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -768,7 +920,8 @@ export default function wtBuildExtension(pi: ExtensionAPI): void {
     description:
       "(extension) Build a feature in an isolated git worktree, validate locally, push a PR, and iterate until CI passes",
     handler: async (args: string, ctx: ExtensionCommandContext) => {
-      const task = args.trim();
+      const noGh = args.includes("--no-gh");
+      const task = args.replace("--no-gh", "").trim();
       if (!task) {
         ctx.ui.notify(
           "Usage: /wt-build <task description>",
@@ -778,10 +931,34 @@ export default function wtBuildExtension(pi: ExtensionAPI): void {
       }
 
       try {
-        await orchestrate(pi, ctx, task);
+        await orchestrate(pi, ctx, task, { noGh });
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : String(err);
         ctx.ui.notify(`WT build failed: ${msg}`, "error");
+      }
+    },
+  });
+
+  // ── User command: /wt-continue <instructions> ────────────────────────
+  pi.registerCommand("wt-continue", {
+    description:
+      "(extension) Continue work on an existing wt-build worktree: implement follow-up changes, validate, push to the existing PR, and iterate until CI passes",
+    handler: async (args: string, ctx: ExtensionCommandContext) => {
+      const noGh = args.includes("--no-gh");
+      const instructions = args.replace("--no-gh", "").trim();
+      if (!instructions) {
+        ctx.ui.notify(
+          "Usage: /wt-continue <follow-up instructions>",
+          "warning",
+        );
+        return;
+      }
+
+      try {
+        await orchestrateContinue(pi, ctx, instructions, { noGh });
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        ctx.ui.notify(`WT continue failed: ${msg}`, "error");
       }
     },
   });

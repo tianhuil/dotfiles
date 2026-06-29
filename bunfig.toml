@@ -1,2 +1,2 @@
 [test]
-root = "./.omp"
+root = "home/omp/.omp/agent/extensions/wt-build"
