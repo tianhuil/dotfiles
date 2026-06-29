@@ -371,7 +371,7 @@ async function phaseValidateLoop(
   ctx: ExtensionCommandContext,
   state: BuildWorktreeState,
 ): Promise<boolean> {
-  const MAX_VALIDATION_ITERS = 3;
+  const MAX_VALIDATION_ITERS = 5;
 
   for (let iter = 0; iter < MAX_VALIDATION_ITERS; iter++) {
     state.validationIteration = iter + 1;
