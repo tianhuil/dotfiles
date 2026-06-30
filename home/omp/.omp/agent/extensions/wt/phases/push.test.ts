@@ -88,6 +88,7 @@ describe("phasePushPR", () => {
   test("happy: pushes and creates PR, sets prNumber from URL", async () => {
     const exec = makeFakeGhExec({
       "git remote get-url origin": { stdout: "git@github.com:user/repo.git" },
+      "git fetch origin": { stdout: "" },
       "git push -u origin": { stdout: "Everything up-to-date" },
       "gh pr create": {
         stdout: "https://github.com/user/repo/pull/42",
@@ -122,6 +123,8 @@ describe("phasePushPR", () => {
   test("throws PUSH_AUTH_FAILURE on permission error", async () => {
     const exec = makeFakeGhExec({
       "git remote get-url origin": { stdout: "git@github.com:user/repo.git" },
+
+      "git fetch origin": { stdout: "" },
       "git push -u origin": {
         stdout: "",
         stderr:
@@ -140,6 +143,7 @@ describe("phasePushPR", () => {
   test("throws PUSH_FAILED on non-auth push error", async () => {
     const exec = makeFakeGhExec({
       "git remote get-url origin": { stdout: "git@github.com:user/repo.git" },
+      "git fetch origin": { stdout: "" },
       "git push -u origin": {
         stdout: "",
         stderr: "src refspec does not match any",
@@ -155,6 +159,8 @@ describe("phasePushPR", () => {
   test("throws PR_CREATE_FAILED when gh pr create errors", async () => {
     const exec = makeFakeGhExec({
       "git remote get-url origin": { stdout: "git@github.com:user/repo.git" },
+
+      "git fetch origin": { stdout: "" },
       "git push -u origin": { stdout: "Everything up-to-date" },
       "gh pr create": {
         stdout: "",

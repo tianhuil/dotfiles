@@ -22,6 +22,15 @@ export async function phasePushPR(
     throw new Error("NO_REMOTE");
   }
 
+  // Derive base branch (strip any origin/ prefix for fetch)
+  const baseRef = state.baseBranch.replace(/^origin\//, "");
+
+  // Fetch latest remote state before pushing
+  const fetch = await exec(`git fetch origin ${baseRef}`);
+  if (fetch.exitCode !== 0) {
+    io.notify(`Fetch failed: ${fetch.stderr || fetch.stdout}`, "warning");
+  }
+
   // Push
   const push = await wtExec(
     exec,
@@ -47,7 +56,6 @@ export async function phasePushPR(
   }
 
   // Write PR body to a unique temp file, cleaned up after
-  const baseRef = state.baseBranch.replace(/^origin\//, "");
   const title = (state.task.split("\n")[0] ?? "").slice(0, 72);
 
   const body = [
@@ -65,7 +73,7 @@ export async function phasePushPR(
   await Bun.write(bodyFile, body);
 
   const pr = await exec(
-    `gh pr create --title '${title.replace(/'/g, "'\\''")}' --body-file '${bodyFile}' --base '${baseRef}' --head '${state.branch}'`,
+    `gh pr create --title '${title.replace(/'/g, "'\\''")}' --body-file '${bodyFile}' --base 'origin/${baseRef}' --head '${state.branch}'`,
   );
   if (pr.exitCode !== 0) {
     const prErr = (pr.stderr + pr.stdout).trim() || "(no error output)";
