@@ -71,9 +71,10 @@ function createWorktreeRepo(
 
   // Create worktree
   const wt = join(dir, ".worktrees", "feat-test");
-  execSync(`mkdir -p ${join(dir, ".worktrees")}`);
   execSync(`git worktree add -b feat/test ${wt} HEAD`, { cwd: dir });
 
+  // Leave an untracked file so commitInWorktree has something to stage
+  writeFileSync(join(wt, "feature.txt"), "initial\n");
   const state: BuildWorktreeState = {
     branch: "feat/test",
     baseBranch: "origin/main",

@@ -106,6 +106,7 @@ describe("commitInWorktree", () => {
     });
   });
 
+
   test("embedded quotes in message escaped correctly", async () => {
     await createTemp(async (repoDir) => {
       makeRepo(repoDir);
@@ -128,4 +129,5 @@ describe("commitInWorktree", () => {
       expect(subject).toBe('he said "hello world"');
     });
   });
+
 });

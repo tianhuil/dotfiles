@@ -11,7 +11,11 @@ export async function commitInWorktree(
   message: string,
 ): Promise<boolean> {
   const add = await wtExec(exec, state.worktreePath, "git add -A");
-  if (add.exitCode !== 0) return false;
+  if (add.exitCode !== 0) {
+    throw new Error(
+      `COMMIT_FAILED: git add -A failed in ${state.worktreePath}: ${(add.stderr || add.stdout).trim() || "(no output)"}`,
+    );
+  }
 
   // Check if anything staged
   const diff = await wtExec(
@@ -26,5 +30,10 @@ export async function commitInWorktree(
     state.worktreePath,
     `git commit -m "${message.replace(/"/g, '\\"')}"`,
   );
-  return cmt.exitCode === 0;
+  if (cmt.exitCode !== 0) {
+    throw new Error(
+      `COMMIT_FAILED: git commit failed in ${state.worktreePath}: ${(cmt.stderr || cmt.stdout).trim() || "(no output)"}`,
+    );
+  }
+  return true;
 }

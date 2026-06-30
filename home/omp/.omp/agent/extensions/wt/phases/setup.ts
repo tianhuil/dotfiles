@@ -17,8 +17,13 @@ export async function phaseSetup(
   const base = await detectBaseBranch(exec);
   const baseBranch = base.ref;
 
-  // Fetch latest
-  await exec("git fetch -q origin");
+  const fetchResult = await exec("git fetch -q origin");
+  if (fetchResult.exitCode !== 0) {
+    ctx.ui.notify(
+      `git fetch failed: ${(fetchResult.stderr || fetchResult.stdout).trim() || "(no output)"}`,
+      "warning",
+    );
+  }
 
   // Derive branch name, handle collisions with -v2, -v3, ...
   const desired = buildBranchName(task);
