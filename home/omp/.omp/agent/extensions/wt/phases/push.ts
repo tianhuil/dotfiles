@@ -65,7 +65,7 @@ export async function phasePushPR(
   await Bun.write(bodyFile, body);
 
   const pr = await exec(
-    `gh pr create --title '${title.replace(/'/g, "'\\''")}' --body-file '${bodyFile}' --base '${baseRef}'`,
+    `gh pr create --title '${title.replace(/'/g, "'\\''")}' --body-file '${bodyFile}' --base '${baseRef}' --head '${state.branch}'`,
   );
   if (pr.exitCode !== 0) {
     const prErr = (pr.stderr + pr.stdout).trim() || "(no error output)";
