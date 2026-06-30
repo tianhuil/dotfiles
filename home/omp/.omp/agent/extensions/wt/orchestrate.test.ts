@@ -164,6 +164,9 @@ describe("runRemotePipeline with createPR", () => {
   test("pushes, monitors CI, and runs CI loop", async () => {
     const exec = makeFakeExec({
       "git remote get-url origin": { stdout: "git@github.com:org/repo.git", exitCode: 0 },
+      "git fetch origin": { stdout: "" },
+      "git rebase origin": { stdout: "Successfully rebased" },
+      "git rev-list --count origin": { stdout: "1" },
       "git push": { stdout: "", exitCode: 0 },
       "gh pr create": { stdout: "https://github.com/org/repo/pull/42", exitCode: 0 },
       "gh run list": { stdout: "99", exitCode: 0 },
