@@ -91,7 +91,15 @@ export async function phaseValidateLoop(
       iter === 0
         ? `${prefix}: initial implementation`
         : `fix: address validation failures (attempt ${iter + 1})`;
-    await commitInWorktree(exec, state, commitMsg);
+    const committed = await commitInWorktree(exec, state, commitMsg);
+
+    // First iteration MUST produce a commit — AI should have created changes
+    if (iter === 0 && !committed) {
+      throw new Error(
+        `VALIDATE_FAILED: no changes to commit on first iteration in ${state.worktreePath}. ` +
+        `The AI did not produce any file changes. Ensure the worktree contains modifications after implementation.`,
+      );
+    }
 
     const ok = await phaseValidate(exec, state, io);
     if (ok) return true;

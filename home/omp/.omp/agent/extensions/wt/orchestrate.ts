@@ -7,8 +7,9 @@ import type { ExecFn, AiDriver, BuildWorktreeState, IoSink } from "./types";
 import { phaseImplement, phaseImplementContinue } from "./phases/implement";
 import { phaseValidateLoop } from "./phases/validate";
 import { phasePushPR } from "./phases/push";
-import { phaseMonitorCI } from "./phases/monitor-ci";
 import { phaseCILoop } from "./phases/fix-ci";
+import { phaseMonitorCI } from "./phases/monitor-ci";
+import { wtExec } from "./exec";
 import { commitInWorktree } from "./phases/commit";
 
 // ---------------------------------------------------------------------------
@@ -75,6 +76,30 @@ export async function runRemotePipeline(
   const ciResult = await phaseMonitorCI(exec, state, io, sleep);
   await phaseCILoop(exec, ai, state, ciResult, io, sleep);
 }
+/**
+ * Poll the worktree for changes after an AI turn.
+ * waitForIdle can return before the AI's filesystem operations complete,
+ * so verify changes are visible before proceeding.
+ */
+async function waitForWorktreeChanges(
+  exec: ExecFn,
+  state: BuildWorktreeState,
+  io: IoSink,
+  timeoutMs: number = 10_000,
+): Promise<void> {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    const r = await wtExec(exec, state.worktreePath, "git status --porcelain");
+    if (r.exitCode !== 0) break;  // git command itself failed; can't poll, proceed
+    if (r.stdout.trim().length > 0) return;  // changes detected
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  io.notify(
+    `No changes detected in worktree after ${timeoutMs}ms — proceeding`,
+    "warning",
+  );
+}
+
 
 // ---------------------------------------------------------------------------
 // Orchestrate build (fresh worktree, new PR)
@@ -89,6 +114,7 @@ export async function orchestrateBuild(
 ): Promise<void> {
   state.phase = "implementing";
   await phaseImplement(ai, state, 0);
+  await waitForWorktreeChanges(exec, state, io);
 
   state.phase = "validating";
   const validationOk = await phaseValidateLoop(exec, ai, state, io);
@@ -124,9 +150,16 @@ export async function orchestrateContinue(
   sleep?: (ms: number) => Promise<void>,
 ): Promise<void> {
   await phaseImplementContinue(ai, state, instructions);
+  await waitForWorktreeChanges(exec, state, io);
 
   const prefix = state.branch.split("/")[0];
-  await commitInWorktree(exec, state, `${prefix}: follow-up changes`);
+  const committed = await commitInWorktree(exec, state, `${prefix}: follow-up changes`);
+  if (!committed) {
+    throw new Error(
+      `CONTINUE_FAILED: no changes to commit in ${state.worktreePath}. ` +
+      `The follow-up instructions did not produce any file changes.`,
+    );
+  }
 
   state.phase = "validating";
   const validationOk = await phaseValidateLoop(exec, ai, state, io);
