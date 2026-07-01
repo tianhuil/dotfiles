@@ -96,8 +96,9 @@ worktree-path = "{{ repo_path }}/.worktrunk/{{ branch | sanitize }}"
 ### Merge
 
 # Most flags are on by default. Set to false to change default behavior.
+### Aliases
 
-[post-start]
+[aliases]
 opencode = """
 LAYOUT=$(mktemp /tmp/wt-layout-{{ branch | sanitize }}.XXXXX.kdl) && \
 sed -e 's|__BRANCH__|{{ branch | sanitize }}|g' -e 's|__WORKTREE_PATH__|{{ worktree_path }}|g' \
