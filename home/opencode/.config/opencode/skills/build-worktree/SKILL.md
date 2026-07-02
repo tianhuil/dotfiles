@@ -94,7 +94,7 @@ bash ~/.config/opencode/skills/build-worktree/validate.sh "$WORKTREE_PATH" "npm 
 
 If it exits non-zero, spawn a subagent to fix the failures, commit, and re-run. Repeat until all pass.
 
-## Phase 2.5: Task Review (optional)
+## Phase 2.5: Task Review (highly recommended)
 
 Spawn a subagent to verify the task was accomplished. Pass it:
 - **Worktree path**, **Task description**
@@ -102,7 +102,7 @@ Spawn a subagent to verify the task was accomplished. Pass it:
 
 If unmet requirements: spawn another subagent to fix, re-run Phase 2 + Phase 2.5. Max 3 review iterations.
 
-Skip this phase for straightforward tasks.
+Skip this phase only for straightforward tasks.
 
 ## Phase 3: Push PR
 
