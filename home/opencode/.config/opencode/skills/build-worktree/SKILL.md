@@ -68,17 +68,21 @@ Parse the output for `BRANCH_NAME` (may have `-v2` suffix if branch existed), `B
 ## Phase 1: Execute the Task
 
 Spawn a subagent (default: **`build`**) via the Task tool. Pass it:
-- **Worktree path**: from Phase 0
+- **Worktree path**: from Phase 0; **ALWAYS** work in the same worktree, not on the main branch / worktree.
 - **Task description**: the full task text
 - **Instructions**: Read AGENTS.md, README, package.json; implement the task; do NOT commit
-- **Parallelization**: If there are multiple independent tasks, always spawn multiple subagents sequentially.  Do not commit until all subagents completed their work.
-- **Sequence**: If there are dependent tasks, spawn subagents sequentially, passing the worktree path and task description to each.  Commit after each subagent completes. 
 
 To commit work in the worktree, run:
 ```bash
 cd $WORKTREE_PATH && git add -A && git commit -m "<type>: <descriptive message>"
 ```
 
+### Subagents
+
+Speed up your work and improve quality with subagents
+
+- If there are multiple independent tasks, always spawn multiple subagents sequentially.  Do not commit until all subagents completed their work.
+- If there are dependent tasks, spawn subagents sequentially, passing the worktree path and task description to each.  Commit after each subagent completes. 
 
 
 ## Phase 2: Local Validation
