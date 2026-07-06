@@ -111,7 +111,7 @@ To update the ported skills from upstream:
 cd home/opencode/.config/opencode/skills/_shared/anthropics-skills && git pull
 ```
 
-## OMP Config Validation via RPC
+## Oh My Pi (ompP) Config Validation via RPC
 
 Changes to `config.yml`, `models.yml`, or extensions can silently break OMP
 (load errors, unrecognized models, extension factory crashes). Validate with RPC:
