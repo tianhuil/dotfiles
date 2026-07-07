@@ -4,3 +4,6 @@
 [submodule "home/.config/opencode/plugins/open-queue"]
 	path = home/opencode/.config/opencode/plugins/open-queue
 	url = https://github.com/tianhuil/open-queue.git
+[submodule "compound-engineering-src"]
+	path = compound-engineering-src
+	url = https://github.com/EveryInc/compound-engineering-plugin.git
