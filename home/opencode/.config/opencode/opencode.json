@@ -18,7 +18,8 @@
     }
   },
   "plugin": [
-    "@0xsero/open-queue"
+    "@0xsero/open-queue",
+    "@plannotator/opencode@latest"
   ],
   "tools": {
     "context7": true
