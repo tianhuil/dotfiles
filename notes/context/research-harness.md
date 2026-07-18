@@ -1,5 +1,7 @@
 ## Step 0
-In tmpfs, checkout https://github.com/code-yeongyu/oh-my-openagent and https://github.com/everyinc/compound-engineering-plugin;  They are two harnesses. Each harness is basically large systems of prompts.  We want to analyze these.
+In tmpfs, checkout https://github.com/code-yeongyu/oh-my-openagent / https://github.com/everyinc/compound-engineering-plugin / https://github.com/mattpocock/skills
+
+They are harnesses (mostly collections of skills with some code). Each harness is basically large systems of prompts.  We want to analyze these.
 
 ## Step 1
 For each harness, spin up a subagent in parallel to study each harness carefully and write a file about the harness.
@@ -7,6 +9,7 @@ For each harness, spin up a subagent in parallel to study each harness carefully
 2. Do the agents create artifacts as part of their workflow?  And where do the artifacts go in the repo?  Which agent writes them?  Which agent is responsible for reading them?
 3. For each agent in the harness, what does each agent do?  Which agents call which other agents? What gets put into separate subagent vs main agent?  Draw mermaid diagrams for this to help explain
 4. What is handled by LLM prompts vs skill vs command vs code (e.g. *.ts files).
+5. How does the harness learn from its work so it gets smarter over time?  This probably requires persisting files into the repo.  How does it remove out of date information that has been supplanted by new designs or standards?
 
 ### General Advice
 - Back up your claims with github links to the original code prompts at a frozen git hash..
