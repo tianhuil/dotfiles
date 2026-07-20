@@ -71,8 +71,8 @@ fi
 #   eval "$(ngrok completion)"
 # fi
 
-# fzf
-if command -v fzf &>/dev/null; then
+# fzf (one-time install; ~/.fzf.zsh sourced from .zshrc)
+if command -v fzf &>/dev/null && [ ! -f "$HOME/.fzf.zsh" ]; then
   $(brew --prefix)/opt/fzf/install --no-bash --no-fish --completion --key-bindings --no-update-rc >/dev/null 2>&1
 fi
 
