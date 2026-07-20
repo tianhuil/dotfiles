@@ -66,10 +66,10 @@ if [[ "$OSTYPE" == "darwin"* && -f ~/Applications/ngrok && ! -f /usr/local/bin/n
   ln -s ~/Applications/ngrok /usr/local/bin/ngrok
 fi
 
-# ngrok
-if command -v ngrok &>/dev/null; then
-  eval "$(ngrok completion)"
-fi
+# ngrok - 111ms; takes too long, disabling for now
+# if command -v ngrok &>/dev/null; then
+#   eval "$(ngrok completion)"
+# fi
 
 # fzf
 if command -v fzf &>/dev/null; then
