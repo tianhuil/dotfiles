@@ -34,4 +34,27 @@ fi
 # RTK opencode integration
 command -v rtk >/dev/null 2>&1 && rtk init -g --opencode
 
+# Generate cached shell init/completion files (avoids subprocess on every shell start)
+# Usage: cache_output <command> <args...> <output-file>
+cache_output() {
+  local file="${@: -1}"
+  local cmd="${@:1:$#-1}"
+  if command -v "${cmd%% *}" &>/dev/null && [ ! -f "$file" ]; then
+    mkdir -p "$(dirname "$file")"
+    $cmd > "$file"
+    echo "Generated $file"
+  fi
+}
+
+cache_output ngrok completion "$HOME/.config/ngrok/completion.zsh"
+cache_output zoxide init zsh "$HOME/.config/zoxide/init.zsh"
+cache_output wtp completion zsh "$HOME/.config/wtp/completion.zsh"
+cache_output wt config shell init zsh "$HOME/.config/wt/init.zsh"
+
+# fzf: one-time install generates ~/.fzf.zsh (key bindings + completions)
+if command -v fzf &>/dev/null && [ ! -f "$HOME/.fzf.zsh" ]; then
+  $(brew --prefix)/opt/fzf/install --no-bash --no-fish --completion --key-bindings --no-update-rc >/dev/null 2>&1
+  echo "Generated ~/.fzf.zsh"
+fi
+
 echo "Stowed ${#PKGS[@]} packages → $HOME"

@@ -66,16 +66,6 @@ if [[ "$OSTYPE" == "darwin"* && -f ~/Applications/ngrok && ! -f /usr/local/bin/n
   ln -s ~/Applications/ngrok /usr/local/bin/ngrok
 fi
 
-# ngrok - 111ms; takes too long, disabling for now
-# if command -v ngrok &>/dev/null; then
-#   eval "$(ngrok completion)"
-# fi
-
-# fzf (one-time install; ~/.fzf.zsh sourced from .zshrc)
-if command -v fzf &>/dev/null && [ ! -f "$HOME/.fzf.zsh" ]; then
-  $(brew --prefix)/opt/fzf/install --no-bash --no-fish --completion --key-bindings --no-update-rc >/dev/null 2>&1
-fi
-
 # Create a new tab in Warp with the current directory
 warp() {
   local target_path="${1:-.}"
