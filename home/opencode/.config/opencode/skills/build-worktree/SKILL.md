@@ -102,11 +102,17 @@ If it exits non-zero, spawn a subagent to fix the failures, commit, and re-run. 
 
 ## Phase 2.5: Task Review (highly recommended)
 
-Spawn a subagent to verify the task was accomplished. Pass it:
-- **Worktree path**, **Task description**
-- **Instructions**: Read the git diff, verify each requirement is MET or UNMET, check for gaps
+Spawn two review subagents **in parallel**:
 
-If unmet requirements: spawn another subagent to fix, re-run Phase 2 + Phase 2.5. Max 3 review iterations.
+1. **`build`** subagent — verify the task was accomplished. Pass it:
+   - **Worktree path**, **Task description**
+   - **Instructions**: Read the git diff, verify each requirement is MET or UNMET, check for gaps
+
+2. **`design-review`** subagent — verify alignment with design docs. Pass it:
+   - **Worktree path**, **Task description**
+   - It will diff against merge-base, find any referenced design docs in `notes/design/`, and compare implementation against design
+
+If either review finds issues: spawn a subagent to fix, re-run Phase 2 + Phase 2.5. Max 3 review iterations.
 
 Skip this phase only for straightforward tasks.
 
