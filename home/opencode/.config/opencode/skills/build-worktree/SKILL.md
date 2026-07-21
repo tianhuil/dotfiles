@@ -104,9 +104,9 @@ If it exits non-zero, spawn a subagent to fix the failures, commit, and re-run. 
 
 Spawn two review subagents **in parallel**:
 
-1. **`build`** subagent — verify the task was accomplished. Pass it:
+1. **`code-quality-reviewer`** subagent — consolidated review of task completion, code quality, security, and test coverage. Pass it:
    - **Worktree path**, **Task description**
-   - **Instructions**: Read the git diff, verify each requirement is MET or UNMET, check for gaps
+   - It will diff against merge-base, read changed files, check for tests, and produce a single report covering all four axes
 
 2. **`design-review`** subagent — verify alignment with design docs. Pass it:
    - **Worktree path**, **Task description**
