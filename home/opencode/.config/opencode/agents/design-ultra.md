@@ -190,3 +190,7 @@ Loop:
 - **Prefer concrete examples over description.** When explaining an input,
   output, or contract, show the actual JSON/YAML/code rather than a table
   describing the fields. This is more precise and often shorter.
+- **Never defer verification to the reader.** If something needs checking—API
+  surface, library behavior, codebase structure—dispatch a subagent to
+  investigate (`read`, `grep`, `glob`, `webfetch`, or `task`). Resolve it
+  before it reaches the doc.

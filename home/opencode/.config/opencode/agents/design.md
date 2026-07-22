@@ -128,6 +128,7 @@ For LLM/AI features specifically:
 
 - **300-line cap**: Design docs must stay under 300 lines. If a section becomes verbose, cut or move detail to an appendix or follow-up doc.
 - **Prefer concrete examples over description**: When explaining an input, output, or contract, show the actual JSON/YAML/code rather than a table describing the fields. This is more precise and often shorter.
+- **Never defer verification to the reader**: If something needs checking—API surface, library behavior, codebase structure—investigate it (`read`, `grep`, `glob`, `webfetch`, or a subagent) and resolve it before it reaches the doc.
 - **Open Questions**: In this section, **ALWAYS** use a numbered list (`1.`, `2.`, etc.). Never use bullet points. This makes it easy to reference specific questions by number during review.
 
 ## Output Location
