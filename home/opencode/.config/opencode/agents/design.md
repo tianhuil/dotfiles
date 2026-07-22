@@ -127,6 +127,7 @@ For LLM/AI features specifically:
 ## Formatting Rules
 
 - **300-line cap**: Design docs must stay under 300 lines. If a section becomes verbose, cut or move detail to an appendix or follow-up doc.
+- **Prefer concrete examples over description**: When explaining an input, output, or contract, show the actual JSON/YAML/code rather than a table describing the fields. This is more precise and often shorter.
 - **Open Questions**: In this section, **ALWAYS** use a numbered list (`1.`, `2.`, etc.). Never use bullet points. This makes it easy to reference specific questions by number during review.
 
 ## Output Location

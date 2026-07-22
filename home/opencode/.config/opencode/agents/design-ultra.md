@@ -187,3 +187,6 @@ Loop:
   phase suggested by its frontmatter rather than overwriting.
 - **300-line cap.** Design docs must stay under 300 lines. If a section
   becomes verbose, cut or move detail to an appendix or follow-up doc.
+- **Prefer concrete examples over description.** When explaining an input,
+  output, or contract, show the actual JSON/YAML/code rather than a table
+  describing the fields. This is more precise and often shorter.
