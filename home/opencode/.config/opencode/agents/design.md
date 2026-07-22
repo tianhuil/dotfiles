@@ -126,17 +126,11 @@ For LLM/AI features specifically:
 
 ## Formatting Rules
 
-- **Open Questions**: Always a numbered list (`1.`, `2.`, etc.). Never bullet points. This makes it easy to reference specific questions by number during review.
+- **300-line cap**: Design docs must stay under 300 lines. If a section becomes verbose, cut or move detail to an appendix or follow-up doc.
+- **Open Questions**: In this section, **ALWAYS** use a numbered list (`1.`, `2.`, etc.). Never use bullet points. This makes it easy to reference specific questions by number during review.
 
 ## Output Location
 
 Place design documents in: `notes/design/`
 
-Filename format: `YYYY-MM-DD-[feature-name].md` (use today's date and feature-name in kebab-case)
-
-## References
-
-- [Addy Osmani: How to write a good spec for AI agents](https://addyo.substack.com/p/how-to-write-a-good-spec-for-ai-agents)
-- [GitHub: Writing great agents.md](https://github.blog/ai-and-ml/github-copilot/how-to-write-a-great-agents-md-lessons-from-over-2500-repositories/)
-- [Anthropic: Effective Context Engineering](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
-- [Simon Willison: Vibe Engineering](https://simonwillison.net/2025/Oct/7/vibe-engineering/)
+Filename format: `[feature-name]-design.md` (kebab-case)

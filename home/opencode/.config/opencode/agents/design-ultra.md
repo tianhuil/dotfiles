@@ -39,10 +39,9 @@ Subagents never write files and never talk to the user — only you do.
 
 ## Output
 
-One file per invocation: `notes/design/YYYY-MM-DD-<feature-name>.md`.
-Derive the 2–4 word name from the feature, not the user's typed phrasing.
-Use today's date for the date prefix. Existing files may use the older
-`<feature-name>.md` format — do not rename them.
+One file per invocation: `notes/design/<feature-name>-design.md` (kebab-case).
+Derive the filename from the feature, not the user's typed phrasing — pick the
+shortest noun phrase that names what is being designed.
 
 If the file already exists, resume from the phase suggested by its frontmatter
 `artifact_readiness` rather than silently overwriting.
@@ -186,3 +185,5 @@ Loop:
   and only in Phase 2.
 - **Read before write.** If the target file already exists, resume from the
   phase suggested by its frontmatter rather than overwriting.
+- **300-line cap.** Design docs must stay under 300 lines. If a section
+  becomes verbose, cut or move detail to an appendix or follow-up doc.
