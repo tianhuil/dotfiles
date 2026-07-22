@@ -185,27 +185,3 @@ Loop:
   and only in Phase 2.
 - **Read before write.** If the target file already exists, resume from the
   phase suggested by its frontmatter rather than overwriting.
-
-## References
-
-Primary — local harness analyses (the concrete patterns this agent is built
-from):
-
-- `notes/research/harness-analysis/compound-engineering-plugin.md` — two-altitude
-  enrichment (brainstorm WHAT → plan HOW in the same file), unified-plan
-  frontmatter contract, `ce-doc-review` persona roster, U-IDs + Verification
-  Contract + KTDs
-- `notes/research/harness-analysis/mattpocock-skills.md` — `grilling`
-  interview loop (one question at a time, recommended answer,
-  dependency-first), facts-vs-decisions split, confirmation gate,
-  `to-tickets` tracer-bullet vertical slices with blocking edges
-- `notes/research/harness-analysis/oh-my-openagent.md` — `Metis` pre-planning
-  gap analysis with AI-failure-point detection, `Momus` adversarial review
-  loop, plan checkbox / U-ID / Final Verification Wave structure
-
-Secondary — background blog posts (preserved in the sibling
-`home/opencode/.config/opencode/agents/design.md`):
-- Addy Osmani — How to write a good spec for AI agents
-- GitHub — Writing great agents.md
-- Anthropic — Effective Context Engineering
-- Simon Willison — Vibe Engineering
