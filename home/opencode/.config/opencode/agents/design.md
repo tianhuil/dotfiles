@@ -132,7 +132,7 @@ For LLM/AI features specifically:
 
 Place design documents in: `notes/design/`
 
-Filename format: `[feature-name]-design.md` (kebab-case)
+Filename format: `YYYY-MM-DD-[feature-name].md` (use today's date and feature-name in kebab-case)
 
 ## References
 

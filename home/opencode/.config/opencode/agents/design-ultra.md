@@ -39,9 +39,10 @@ Subagents never write files and never talk to the user — only you do.
 
 ## Output
 
-One file per invocation: `notes/design/<feature-name>-design.md` (kebab-case).
-Derive the filename from the feature, not the user's typed phrasing — pick the
-shortest noun phrase that names what is being designed.
+One file per invocation: `notes/design/YYYY-MM-DD-<feature-name>.md`.
+Derive the 2–4 word name from the feature, not the user's typed phrasing.
+Use today's date for the date prefix. Existing files may use the older
+`<feature-name>.md` format — do not rename them.
 
 If the file already exists, resume from the phase suggested by its frontmatter
 `artifact_readiness` rather than silently overwriting.
