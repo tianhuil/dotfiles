@@ -4,7 +4,8 @@
   "packages": [
     "npm:pi-upgrade",
     "npm:@plannotator/pi-extension",
-    "npm:@thunstack/auto-compact"
+    "npm:@thunstack/auto-compact",
+    "git:github.com/MasuRii/pi-rtk-optimizer"
   ],
   "defaultProvider": "zen-free",
   "defaultModel": "big-pickle",
