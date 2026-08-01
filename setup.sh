@@ -26,6 +26,9 @@ else
   echo "WARNING: CE skills not found at $CE_SKILLS_SRC" >&2
 fi
 
+# Install shared ~/.agents/skills via the `skills` CLI
+"$SCRIPT_DIR/setup_skills.sh"
+
 # Build local open-queue plugin
 if [ -d ~/.config/opencode/plugins/open-queue ] && command -v bun >/dev/null 2>&1; then
   (cd ~/.config/opencode/plugins/open-queue && bun install && bun run build)
