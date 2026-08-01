@@ -1,0 +1,12 @@
+{
+  "lastChangelogVersion": "0.80.3",
+  "theme": "dark",
+  "packages": [
+    "npm:pi-upgrade",
+    "npm:@plannotator/pi-extension"
+  ],
+  "defaultProvider": "zen-free",
+  "defaultModel": "big-pickle",
+  "defaultThinkingLevel": "high",
+  "hideThinkingBlock": false
+}
