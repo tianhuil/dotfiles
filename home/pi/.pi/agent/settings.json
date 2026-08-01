@@ -3,7 +3,8 @@
   "theme": "dark",
   "packages": [
     "npm:pi-upgrade",
-    "npm:@plannotator/pi-extension"
+    "npm:@plannotator/pi-extension",
+    "npm:@thunstack/auto-compact"
   ],
   "defaultProvider": "zen-free",
   "defaultModel": "big-pickle",
