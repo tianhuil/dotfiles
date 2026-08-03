@@ -111,6 +111,26 @@ To update the ported skills from upstream:
 cd home/opencode/.config/opencode/skills/_shared/anthropics-skills && git pull
 ```
 
+### Agent Skills via the `skills` CLI (`setup_skills.sh`)
+
+`setup.sh` runs `setup_skills.sh`, which manages `~/.agents/skills/` — the shared
+Agent Skills dir that pi reads directly. **Declarative names, not vendored content:**
+
+the lock file `~/.agents/.skill-lock.json` maps each skill name → source repo + hash,
+and every `setup.sh` run refreshes lock-tracked skills to latest via `npx skills update`.
+
+Three classes, all declared in `setup_skills.sh`:
+
+| Class | Mechanism | Declared in |
+|-------|-----------|-------------|
+| Whole-repo wildcard (anthropics: `pdf`, `docx`, … — rolling set) | `"anthropics/skills:*"` | `REMOTE_SKILLS` array |
+| Named remote (`lavish`) | `"kunchenguid/lavish-axi:lavish"` | `REMOTE_SKILLS` array |
+| Repo-versioned custom skills | symlinked from `home/opencode/.config/opencode/skills/` | `LOCAL_SKILLS` array |
+
+To add a new remote skill, append `"<owner>/<repo>:<skill>"` to `REMOTE_SKILLS` and
+re-run `./setup.sh`. The CLI installs under the `cline` agent alias (its global dir
+is `~/.agents/skills/`; pi has no alias but reads that dir).
+
 ## Oh My Pi (ompP) Config Validation via RPC
 
 Changes to `config.yml`, `models.yml`, or extensions can silently break OMP
