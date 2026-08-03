@@ -124,7 +124,7 @@ Three classes, all declared in `setup_skills.sh`:
 | Class | Mechanism | Declared in |
 |-------|-----------|-------------|
 | Whole-repo wildcard (anthropics: `pdf`, `docx`, … — rolling set) | `"anthropics/skills:*"` | `REMOTE_SKILLS` array |
-| Named remote (`lavish`) | `"kunchenguid/lavish-axi:lavish"` | `REMOTE_SKILLS` array |
+| Named remote (`lavish`, `orca-cli`) | `"kunchenguid/lavish-axi:lavish"`, `"stablyai/orca:orca-cli"` | `REMOTE_SKILLS` array |
 | Repo-versioned custom skills | symlinked from `home/opencode/.config/opencode/skills/` | `LOCAL_SKILLS` array |
 
 To add a new remote skill, append `"<owner>/<repo>:<skill>"` to `REMOTE_SKILLS` and

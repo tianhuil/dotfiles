@@ -34,6 +34,7 @@ LOCAL_SRC="$SCRIPT_DIR/home/opencode/.config/opencode/skills"
 REMOTE_SKILLS=(
   "anthropics/skills:*"
   "kunchenguid/lavish-axi:lavish"
+  "stablyai/orca:orca-cli"
 )
 
 # Custom skills shared with opencode, versioned in this repo
