@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Resolve the Orca CLI for non-Orca shells (matches the orca-cli skill's order).
+# On macOS the CLI lives inside the app bundle and is not on PATH; on Linux use
+# orca-ide (never bare `orca`, which is the GNOME screen reader there).
+if [ -n "${ORCA_CLI_COMMAND:-}" ]; then
+  exec "$ORCA_CLI_COMMAND" "$@"
+fi
+for candidate in \
+  /Applications/Orca.app/Contents/Resources/bin/orca \
+  orca-ide \
+  orca
+do
+  if command -v "$candidate" >/dev/null 2>&1; then
+    exec "$candidate" "$@"
+  fi
+done
+echo "orca: no Orca CLI found on this machine" >&2
+exit 1

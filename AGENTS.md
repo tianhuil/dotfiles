@@ -131,6 +131,13 @@ To add a new remote skill, append `"<owner>/<repo>:<skill>"` to `REMOTE_SKILLS` 
 re-run `./setup.sh`. The CLI installs under the `cline` agent alias (its global dir
 is `~/.agents/skills/`; pi has no alias but reads that dir).
 
+## Orca CLI Bin
+
+Orca's CLI is not on PATH outside Orca's own terminals, so the repo ships a
+wrapper at `home/bin/.local/bin/orca` (stowed to `~/.local/bin/orca`). It resolves
+the CLI per the orca-cli skill's order: `ORCA_CLI_COMMAND` → Orca.app bundle
+(macOS) → `orca-ide` (Linux) → `orca`.
+
 ## Oh My Pi (ompP) Config Validation via RPC
 
 Changes to `config.yml`, `models.yml`, or extensions can silently break OMP
