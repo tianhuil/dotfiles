@@ -6,7 +6,8 @@
     "npm:@plannotator/pi-extension",
     "npm:@thunstack/auto-compact",
     "git:github.com/MasuRii/pi-rtk-optimizer",
-    "npm:pi-subagents"
+    "npm:pi-subagents",
+    "npm:pi-web-access"
   ],
   "defaultProvider": "zen-free",
   "defaultModel": "big-pickle",
