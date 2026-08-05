@@ -29,11 +29,13 @@ DEST="$HOME/.agents/skills"
 LOCAL_SRC="$SCRIPT_DIR/home/opencode/.config/opencode/skills"
 
 # Remote skills to install/refresh on every setup.sh run. Format: "<repo>:<skill>".
-# Use "<repo>:*" to install every skill a repo ships — a rolling set (anthropics adds
+# Use "<repo>:*" to install every skill a repo ships — a rolling set (the repo adds
 # new skills without touching this file); named entries are pinned to exactly that skill.
 REMOTE_SKILLS=(
-  "anthropics/skills:*"
-  "kunchenguid/lavish-axi:lavish"
+  # "anthropics/skills:*"
+  # "kunchenguid/lavish-axi:lavish"
+  "kunchenguid/axi:axi"
+  "mattpocock/skills:*"
   "stablyai/orca:orca-cli"
 )
 
@@ -51,12 +53,13 @@ mkdir -p "$DEST"
 
 # Remote skills — install any that are missing (content comes from the CLI,
 # lock-tracked for refresh below). Wildcard entries gate on a representative skill
-# (pdf ships with anthropics/skills) so the whole-repo install isn't re-run.
+# (gate_skill_for) so the whole-repo install isn't re-run every setup.
 for entry in "${REMOTE_SKILLS[@]}"; do
   repo="${entry%%:*}"
   name="${entry##*:}"
   if [ "$name" = "*" ]; then
-    if ! has_skill pdf; then
+    gate="$(gate_skill_for "$repo")"
+    if [ -z "$gate" ] || ! has_skill "$gate"; then
       npx --yes skills add "$repo" --agent "$AGENT" --global --yes --skill '*' \
         || echo "WARNING: failed to install skills from $repo" >&2
     fi
