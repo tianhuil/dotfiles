@@ -52,17 +52,14 @@ fi
 mkdir -p "$DEST"
 
 # Remote skills — install any that are missing (content comes from the CLI,
-# lock-tracked for refresh below). Wildcard entries gate on a representative skill
-# (gate_skill_for) so the whole-repo install isn't re-run every setup.
+# lock-tracked for refresh below). `skills add` is idempotent, so wildcard repos are
+# always (re)added — no per-repo gate needed.
 for entry in "${REMOTE_SKILLS[@]}"; do
   repo="${entry%%:*}"
   name="${entry##*:}"
   if [ "$name" = "*" ]; then
-    gate="$(gate_skill_for "$repo")"
-    if [ -z "$gate" ] || ! has_skill "$gate"; then
-      npx --yes skills add "$repo" --agent "$AGENT" --global --yes --skill '*' \
-        || echo "WARNING: failed to install skills from $repo" >&2
-    fi
+    npx --yes skills add "$repo" --agent "$AGENT" --global --yes --skill '*' \
+      || echo "WARNING: failed to install skills from $repo" >&2
   elif ! has_skill "$name"; then
     npx --yes skills add "$repo" --agent "$AGENT" --global --yes --skill "$name" \
       || echo "WARNING: failed to install skill '$name' from $repo" >&2
