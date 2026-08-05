@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "0.80.3",
+  "lastChangelogVersion": "0.83.0",
   "theme": "dark",
   "packages": [
     "npm:pi-upgrade",
