@@ -40,7 +40,7 @@ REMOTE_SKILLS=(
 )
 
 # Custom skills shared with opencode, versioned in this repo
-LOCAL_SKILLS=(agent-browser find-docs find-skills gh-grep installing-age-gated-packages serena vercel-ai-sdk-models)
+LOCAL_SKILLS=(agent-browser find-docs find-skills gh-grep installing-age-gated-packages orca-spawn serena vercel-ai-sdk-models)
 
 has_skill() { [ -e "$DEST/$1" ]; }
 
