@@ -49,5 +49,5 @@
 [credential "https://gist.github.com"]
 	helper = 
 	helper = !/opt/homebrew/bin/gh auth git-credential
-[url "git@github.com:"]
-	insteadof = https://github.com/
+[url "https://github.com/"]
+	insteadOf = git@github.com:
