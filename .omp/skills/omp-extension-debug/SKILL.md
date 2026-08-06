@@ -1,6 +1,6 @@
 ---
-name: omp-extensions
-description: Debug loop for resolving ctx.models.resolve() returning undefined, config null overrides crashing getModelRole, and extension model resolution issues. Use when an extension command crashes on model lookup or resolve() silently returns undefined.
+name: omp-extension-debug
+description: Debug loop for OMP extension model resolution — ctx.models.resolve() returning undefined, config null overrides crashing getModelRole, and related extension issues. Use when an OMP extension command crashes on model lookup or resolve() silently returns undefined.
 ---
 
 # Debug Loop for Extension Model Resolution
