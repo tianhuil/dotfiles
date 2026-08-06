@@ -1,6 +1,6 @@
 ---
 name: dotfiles-omp-validation
-description: Validating Oh My Pi (OMP) config changes in the dotfiles repo via the `omp --mode rpc` smoke test. Use after editing config.yml, models.yml, or extensions to catch load errors, unrecognized models, or extension factory crashes before they silently break OMP. Covers the JSONL pipe command, the ready / extension_error / available_commands_update / prompt_result signals, and the --no-session / --cwd flags. See also the omp-extensions skill for extension model-resolution debugging.
+description: Validating Oh My Pi (OMP) config changes in the dotfiles repo via the `omp --mode rpc` smoke test. Use after editing config.yml, models.yml, or extensions to catch load errors, unrecognized models, or extension factory crashes before they silently break OMP. Covers the JSONL pipe command, the ready / extension_error / available_commands_update / prompt_result signals, and the --no-session / --cwd flags. See also the omp-extension-debug skill for extension model-resolution debugging.
 ---
 
 # Oh My Pi (OMP) Config Validation via RPC
@@ -38,4 +38,5 @@ and a handler smoke test in a single run. Pipe `echo` sends one frame then close
 stdin — omp sees EOF after processing it and exits cleanly.
 
 > Extension-specific debugging (e.g. `ctx.models.resolve()` returning undefined,
-> `modelRoles` null overrides) is covered by the `omp-extensions` skill.
+> `modelRoles` null overrides) is covered by the `omp-extension-debug` skill (and
+> general OMP orientation is in the `omp` skill, both under `.omp/skills/`).
