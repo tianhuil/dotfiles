@@ -24,6 +24,8 @@ home/            ← stow root
     …
   opencode/
     .config/opencode/…  → ~/.config/opencode/…
+  agents/
+    .agents/skills/<name>  → ~/.agents/skills/<name>  (symlinks into opencode/ skills, so pi reads the same repo skills)
 ```
 
 **Key property**: since symlinks replace copies, editing a file in `home/shell/.bashrc`

@@ -5,9 +5,14 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 command -v stow >/dev/null || { echo "Install stow first: brew install stow"; exit 1; }
 
+# Prepare ~/.agents/skills BEFORE stow: install remote skills via the `skills` CLI
+# and clear CLI ownership of repo-stowed skills, so the `agents` stow package can
+# own them without clashing with CLI-installed copies (docx/pdf/pptx/... from anthropics).
+"$SCRIPT_DIR/setup_skills.sh"
+
 # Stow all packages — .stowrc sets --target="$HOME" and --no-folding
 cd "$SCRIPT_DIR/home"
-PKGS=(shell git ssh node bun tmux stubby bin scripts cursor zellij worktrunk opencode env omp pi)
+PKGS=(shell git ssh node bun tmux stubby bin scripts cursor zellij worktrunk opencode env omp pi agents)
 stow --restow "${PKGS[@]}"
 # Steps stow can't express
 git config --global core.excludesfile ~/.gitignore_global
@@ -25,9 +30,6 @@ if [ -d "$CE_SKILLS_SRC" ]; then
 else
   echo "WARNING: CE skills not found at $CE_SKILLS_SRC" >&2
 fi
-
-# Install shared ~/.agents/skills via the `skills` CLI
-"$SCRIPT_DIR/setup_skills.sh"
 
 # Build local open-queue plugin
 if [ -d ~/.config/opencode/plugins/open-queue ] && command -v bun >/dev/null 2>&1; then

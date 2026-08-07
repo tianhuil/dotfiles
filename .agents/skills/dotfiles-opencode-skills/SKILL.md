@@ -26,6 +26,14 @@ not in `~/.config/opencode/skills/<name>/`.  The symlink propagates the change.
 
 Skills are loaded automatically by the `skill` tool when agents need them.
 
+**Shared with pi via the `agents` stow package:** every skill dir with a `SKILL.md` is
+symlinked from `home/agents/.agents/skills/<name>` → `../../../opencode/.config/opencode/skills/<name>`
+and stowed to `~/.agents/skills/<name>`, so pi reads the same repo-versioned skills.
+When adding a **new** skill here, also create that symlink (see the
+`dotfiles-agent-skills-cli` skill); `setup_skills.sh` derives its cleanup from the
+repo automatically. Empty dirs without a `SKILL.md` (e.g. `smart-commit`, `wt-build`)
+are not shared.
+
 **Notable skills:**
 
 - **`curl-cffi`**: Impersonated web fetch via `uvx --from git+https://github.com/lexiforest/curl_cffi curl-cffi`. Replaces the `webfetch_camouflage` MCP — use when `web_fetch` is blocked or returns empty responses.

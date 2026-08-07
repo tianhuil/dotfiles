@@ -7,19 +7,15 @@ set -euo pipefail
 # which this build doesn't read). The CLI maps cline/warp/zed/loaf/dexto/kimi-code-cli
 # to ~/.agents/skills/, so we install under "cline" and pi picks the skills up.
 #
-# Model: declarative names, not vendored content. setup.sh re-runs this script on
-# every machine, so:
-#   - missing skills are installed from their source repo (lists below), and
-#   - installed skills are refreshed to latest via `skills update` — the lock file
-#     ~/.agents/.skill-lock.json maps skill name → source repo + content hash, so
-#     re-running setup.sh pulls updates without storing any skill content in this repo.
-#
-# Two classes of skills:
-#   1. Remote skills from other repos (anthropics/skills, lavish-axi) — declared in
+# Two ownership classes:
+#   1. Remote skills from other repos (mattpocock/skills, axi, orca-cli) — declared in
 #      REMOTE_SKILLS, installed via the `skills` CLI, lock-tracked, refreshed every run.
-#   2. Custom skills versioned in this repo (home/opencode/.config/opencode/skills/) —
-#      symlinked straight from the repo so edits propagate to pi immediately. The CLI
-#      copies local-path sources and doesn't lock them, so symlinks are a better fit.
+#   2. Repo-versioned skills (home/opencode/.config/opencode/skills/) — owned by the
+#      `agents` stow package: home/agents/.agents/skills/<name> symlinks each skill into
+#      the opencode source, and stow exposes it at ~/.agents/skills/<name> for pi.
+#      This script's only job for them is to clear CLI lock entries + installed copies
+#      before stow runs (setup.sh calls this script before stow), so `skills update`
+#      can never clobber the stowed repo versions.
 #
 # plannotator-* skills are installed by the plannotator CLI itself and are left alone.
 
@@ -39,15 +35,12 @@ REMOTE_SKILLS=(
   "stablyai/orca:orca-cli"
 )
 
-# Custom skills shared with opencode, versioned in this repo
-LOCAL_SKILLS=(agent-browser find-docs find-skills gh-grep installing-age-gated-packages serena vercel-ai-sdk-models)
-
-has_skill() { [ -e "$DEST/$1" ]; }
-
 if ! command -v npx >/dev/null 2>&1; then
   echo "WARNING: npx not found; skipping skills install" >&2
   exit 0
 fi
+
+has_skill() { [ -e "$DEST/$1" ]; }
 
 mkdir -p "$DEST"
 
@@ -66,14 +59,41 @@ for entry in "${REMOTE_SKILLS[@]}"; do
   fi
 done
 
-# 3. Custom skills from this repo. Drop any stale CLI lock entry first so 'skills update'
-#    won't overwrite the repo version, then symlink so the repo stays the source of truth.
-#    (Symlinks are rebuilt every run, so they self-correct if the repo moves machines.)
-for s in "${LOCAL_SKILLS[@]}"; do
-  npx --yes skills remove "$s" -g -a "$AGENT" -y >/dev/null 2>&1 || true
-  rm -rf "$DEST/$s"
-  ln -s "$LOCAL_SRC/$s" "$DEST/$s"
+# 3. Repo-versioned skills (now owned by the `agents` stow package): drop any stale CLI
+#    lock entry and installed copy so stow — which setup.sh runs AFTER this script — can
+#    own the name. Derived from the repo, so new opencode skills are covered automatically
+#    once they have a SKILL.md. (Symlinked stow targets resolve to the opencode source.)
+for s in "$LOCAL_SRC"/*/; do
+  [ -f "$s/SKILL.md" ] || continue
+  name="$(basename "$s")"
+  if grep -q "\"$name\":" "$HOME/.agents/.skill-lock.json" 2>/dev/null; then
+    npx --yes skills remove "$name" -g -a "$AGENT" -y >/dev/null 2>&1 || true
+  fi
+  rm -rf "$DEST/$name"
 done
+
+# 3b. `skills remove` deletes the installed dir but leaves the lock entry; purge those
+#     inert entries so the lock file only tracks CLI-managed (remote) skills and
+#     `skills update` can never resurrect a stow-owned name.
+if command -v python3 >/dev/null 2>&1; then
+  python3 - "$HOME/.agents/.skill-lock.json" "$LOCAL_SRC" <<'PY'
+import json, os, sys
+lock_path, src = sys.argv[1], sys.argv[2]
+try:
+    with open(lock_path) as f:
+        lock = json.load(f)
+except (OSError, ValueError):
+    sys.exit(0)
+removed = [n for n in os.listdir(src)
+           if os.path.isfile(os.path.join(src, n, 'SKILL.md')) and n in lock.get('skills', {})]
+for n in removed:
+    del lock['skills'][n]
+if removed:
+    with open(lock_path, 'w') as f:
+        json.dump(lock, f, indent=2)
+        f.write('\n')
+PY
+fi
 
 # 4. Refresh everything lock-tracked (anthropics + REMOTE_SKILLS) to latest.
 #    Best-effort: fail soft when offline so setup.sh still completes.
@@ -83,4 +103,4 @@ else
   echo "WARNING: 'skills update' failed (offline?); keeping installed versions" >&2
 fi
 
-echo "Skills installed → $DEST (refresh every run via 'skills update')"
+echo "Remote skills refreshed → $DEST (repo skills are stowed via the \`agents\` package)"
