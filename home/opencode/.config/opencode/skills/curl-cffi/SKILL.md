@@ -1,11 +1,11 @@
 ---
 name: curl-cffi
 description: >-
-  Fetch web content with browser impersonation using curl_cffi. Use when
-  web_fetch is unavailable or returns blocked/empty responses, or when TLS
-  fingerprint-based blocking is detected. Triggers include "fetch URL",
-  "scrape page", "impersonate browser", or any web fetch that fails with
-  built-in tools.
+  Fetch a specific web page's content with browser impersonation (curl_cffi) to
+  bypass TLS-fingerprint blocking. Use ONLY when a specific URL is consistently
+  blocked or returns empty/403 responses to normal fetch tools — not for
+  searching. For general web search use the web-search skill or the built-in
+  web_search tool instead; use agent-browser only to take action on a page.
 ---
 
 # curl-cffi — Impersonated Web Fetch

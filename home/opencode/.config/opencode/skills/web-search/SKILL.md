@@ -1,6 +1,6 @@
 ---
 name: web-search
-description: Search the web using the web-search-prime MCP server via mcpc CLI. Use when the user needs to search the web for information, find current events, look up facts, or research topics online. Triggers include requests to "search the web", "look up", "find information about", "what's the latest on", or any task requiring web search results.
+description: Default web-search skill — the first choice for any "search the web", "look up", "find information about", "what's the latest on", or general research request, using the web-search-prime MCP server through the mcpc CLI. It is also fine to use the built-in web_search tool directly. Prefer this over curl-cffi (use only when a specific URL is consistently blocked) and agent-browser (use only to take action on a page). One-time install/connect lives in the web-search-setup skill.
 allowed-tools: Bash(mcpc *)
 ---
 
@@ -8,31 +8,6 @@ allowed-tools: Bash(mcpc *)
 
 Search the web using the [web-search-prime](https://z.ai) MCP server through `mcpc`.
 
-## Prerequisites
-
-- `mcpc` installed globally (`npm install -g @apify/mcpc`)
-- `ZAI_API_KEY` set (see API Keys table in AGENTS.md)
-
-## Setup
-
-```bash
-export ZAI_API_KEY=$(tr -d '\n\r' < ~/.config/opencode/zai-api-key)
-mcpc connect /tmp/mcp-servers.json:web-search-prime @web 2>/dev/null || {
-  cat > /tmp/mcp-servers.json << 'EOF'
-{
-  "mcpServers": {
-    "web-search-prime": {
-      "url": "https://api.z.ai/api/mcp/web_search_prime/mcp",
-      "headers": {
-        "Authorization": "Bearer ${ZAI_API_KEY}"
-      }
-    }
-  }
-}
-EOF
-  mcpc connect /tmp/mcp-servers.json:web-search-prime @web
-}
-```
 
 ## Usage
 
