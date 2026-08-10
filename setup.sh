@@ -10,9 +10,16 @@ command -v stow >/dev/null || { echo "Install stow first: brew install stow"; ex
 # own them without clashing with CLI-installed copies (docx/pdf/pptx/... from anthropics).
 "$SCRIPT_DIR/setup_skills.sh"
 
-# Stow all packages — .stowrc sets --target="$HOME" and --no-folding
+# Stow every package present in this checkout — .stowrc sets --target=$HOME
+# and --no-folding. We filter to existing dirs because some packages are
+# local-only: e.g. `env` holds a gitignored secret (.env.local) and is absent
+# in a fresh clone on any platform — stowing it would abort otherwise.
 cd "$SCRIPT_DIR/home"
-PKGS=(shell git ssh node bun tmux stubby bin scripts cursor zellij worktrunk opencode env omp pi agents)
+ALL_PKGS=(shell git ssh node bun tmux stubby bin scripts cursor zellij worktrunk opencode env omp pi agents)
+PKGS=()
+for pkg in "${ALL_PKGS[@]}"; do
+  [ -d "$pkg" ] && PKGS+=("$pkg")
+done
 stow --restow "${PKGS[@]}"
 # Steps stow can't express
 git config --global core.excludesfile ~/.gitignore_global

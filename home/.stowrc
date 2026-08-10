@@ -1,2 +1,2 @@
---target="$HOME"
+--target=$HOME
 --no-folding

@@ -70,11 +70,7 @@ sudo apt update && sudo apt-get install -y ngrok
 # oh-my-zsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
-# pyenv + poetry
-curl https://pyenv.run | bash
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
-curl -sSL https://install.python-poetry.org | python3 -
+# uv (replaces pyenv + poetry — manages Python + packages)
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
 echo "Done!"
