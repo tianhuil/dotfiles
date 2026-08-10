@@ -114,3 +114,8 @@ if command -v zellij &>/dev/null && [[ -n "$ZELLIJ" ]]; then
   fi
   __zellij_rename_tab
 fi
+
+# pi-node (Linux)
+if [ -d "$HOME/.local/share/pi-node/node-v22.23.2-linux-x64/bin" ]; then
+  export PATH="$HOME/.local/share/pi-node/node-v22.23.2-linux-x64/bin:$PATH"
+fi
