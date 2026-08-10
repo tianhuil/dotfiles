@@ -2,7 +2,7 @@
 	name = Tianhui Michael Li
 	email = tianhuil@cs.princeton.edu
 [core]
-	excludesfile = /Users/tianhuil/.gitignore_global
+	excludesfile = ~/.gitignore_global
 	editor = "code --wait"
 [filter "media"]
 	clean = git-media-clean %f
@@ -45,9 +45,9 @@
      cmd = code --wait --diff $LOCAL $REMOTE
 [credential "https://github.com"]
 	helper = 
-	helper = !/opt/homebrew/bin/gh auth git-credential
+	helper = !gh auth git-credential
 [credential "https://gist.github.com"]
 	helper = 
-	helper = !/opt/homebrew/bin/gh auth git-credential
+	helper = !gh auth git-credential
 [url "https://github.com/"]
 	insteadOf = git@github.com:

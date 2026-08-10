@@ -22,7 +22,9 @@ for pkg in "${ALL_PKGS[@]}"; do
 done
 stow --restow "${PKGS[@]}"
 # Steps stow can't express
-git config --global core.excludesfile ~/.gitignore_global
+# git expands ~ itself, so keep the value neutral across machines
+# (an absolute path here would leak this box's HOME into the repo file)
+git config --global core.excludesfile '~/.gitignore_global'
 
 # Init submodules (includes compound-engineering-src for CE skills)
 cd "$SCRIPT_DIR"
