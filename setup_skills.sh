@@ -29,7 +29,7 @@ LOCAL_SRC="$SCRIPT_DIR/home/opencode/.config/opencode/skills"
 # new skills without touching this file); named entries are pinned to exactly that skill.
 REMOTE_SKILLS=(
   # "anthropics/skills:*"
-  # "kunchenguid/lavish-axi:lavish"
+  "kunchenguid/lavish-axi:lavish"
   "kunchenguid/axi:axi"
   "mattpocock/skills:*"
   "stablyai/orca:orca-cli"
