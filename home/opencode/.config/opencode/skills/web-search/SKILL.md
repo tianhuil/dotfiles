@@ -1,6 +1,6 @@
 ---
 name: web-search
-description: Default web-search skill — the first choice for any "search the web", "look up", "find information about", "what's the latest on", or general research request, using the web-search-prime MCP server through the mcpc CLI. It is also fine to use the built-in web_search tool directly. Prefer this over curl-cffi (use only when a specific URL is consistently blocked) and agent-browser (use only to take action on a page). One-time install/connect lives in the web-search-setup skill.
+description: Default web-search skill — the first choice for any "search the web", "look up", "find information about", "what's the latest on", or general research request, using the web-search-prime MCP server through the mcpc CLI. It is also fine to use the built-in web_search tool directly — but please read this skill first. Prefer this over curl-cffi (use only when a specific URL is consistently blocked) and agent-browser (use only to take action on a page). One-time install/connect lives in the web-search-setup skill.
 allowed-tools: Bash(mcpc *)
 ---
 
@@ -8,6 +8,24 @@ allowed-tools: Bash(mcpc *)
 
 Search the web using the [web-search-prime](https://z.ai) MCP server through `mcpc`.
 
+## Using the built-in `web_search` tool
+
+It's fine to use the built-in `web_search` tool directly instead of `mcpc`, but
+**please read this section first.** By default `web_search` opens an interactive
+localhost browser (the "curator" UI), which you almost never want when running
+headless. Disable it by setting the `workflow` parameter:
+
+```javascript
+// Disables opening the localhost browser while still returning a summary
+web_search({ query: "your query", workflow: "auto-summary" })
+
+// Disables the curator UI and skips summary drafting entirely
+web_search({ query: "your query", workflow: "none" })
+```
+
+Default to `workflow: "auto-summary"` (summary, no browser) or `workflow: "none"`
+(no browser, no summary) on every `web_search` call so it never opens a browser
+tab.
 
 ## Usage
 
