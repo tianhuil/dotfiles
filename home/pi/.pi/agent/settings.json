@@ -9,7 +9,7 @@
     "npm:pi-subagents",
     "npm:pi-web-access"
   ],
-  "defaultProvider": "zen-free",
+  "defaultProvider": "opencode",
   "defaultModel": "big-pickle",
   "defaultThinkingLevel": "high",
   "hideThinkingBlock": false
