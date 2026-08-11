@@ -60,7 +60,7 @@ cache_output() {
   fi
 }
 
-cache_output ngrok completion "$HOME/.config/ngrok/completion.zsh"
+cache_output ngrok completion zsh "$HOME/.config/ngrok/completion.zsh"
 cache_output zoxide init zsh "$HOME/.config/zoxide/init.zsh"
 cache_output wtp completion zsh "$HOME/.config/wtp/completion.zsh"
 cache_output wt config shell init zsh "$HOME/.config/wt/init.zsh"
