@@ -1,6 +1,6 @@
 ---
 name: web-search
-description: Default web-search skill — the first choice for any "search the web", "look up", "find information about", "what's the latest on", or general research request, using the web-search-prime MCP server through the mcpc CLI. It is also fine to use the built-in web_search tool directly — but please read this skill first. Prefer this over curl-cffi (use only when a specific URL is consistently blocked) and agent-browser (use only to take action on a page). One-time install/connect lives in the web-search-setup skill.
+description: Default web-search skill — the first choice for any "search the web", "look up", "find information about", "what's the latest on", or general research request, using the web-search-prime MCP server through the mcpc CLI. READ THIS SKILL FIRST before doing any web searches.
 allowed-tools: Bash(mcpc *)
 ---
 
@@ -66,6 +66,10 @@ mcpc @web tools-list                          # List available tools
 mcpc close @web                               # Close session
 mcpc clean sessions                           # Clean stale sessions
 ```
+
+## Other tools
+
+Prefer these tools over curl-cffi (use only when a specific URL is consistently blocked) and agent-browser (use only to take action on a page).
 
 ## Tips
 
