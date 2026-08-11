@@ -1,4 +1,9 @@
 allowBuilds:
   onnxruntime-node: set this to true or false
   protobufjs: set this to true or false
-  sharp: set this to true or false
+# pnpm 11 settings (the package.json "pnpm" field is no longer read).
+# Force patched versions of transitive dev deps flagged by Dependabot
+# (sharp < 0.35.0 libvips CVEs; adm-zip < 0.6.0 ZIP memory-allocation DoS).
+overrides:
+  sharp: ^0.35.0
+  adm-zip: ^0.6.0
