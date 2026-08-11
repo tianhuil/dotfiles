@@ -21,6 +21,19 @@ for pkg in "${ALL_PKGS[@]}"; do
   [ -d "$pkg" ] && PKGS+=("$pkg")
 done
 stow --restow "${PKGS[@]}"
+
+# npm writes auth tokens to its user config on `npm login`; keep them out of the
+# stowed (tracked) .npmrc. NPM_CONFIG_USERCONFIG in .coreenv redirects npm's user
+# config to the gitignored ~/.npmrc.secrets; this strip is defense-in-depth for
+# shells that didn't source .coreenv.
+NODE_NPMRC="$SCRIPT_DIR/home/node/.npmrc"
+if grep -qs '_authToken' "$NODE_NPMRC"; then
+  awk '!/_authToken/' "$NODE_NPMRC" > "$NODE_NPMRC.tmp"
+  mv "$NODE_NPMRC.tmp" "$NODE_NPMRC"
+  echo "WARNING: stripped leaked _authToken from home/node/.npmrc (use ~/.npmrc.secrets)" >&2
+fi
+touch "$HOME/.npmrc.secrets"
+
 # Steps stow can't express
 # git expands ~ itself, so keep the value neutral across machines
 # (an absolute path here would leak this box's HOME into the repo file)

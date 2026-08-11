@@ -14,6 +14,10 @@ export NODE_PATH="$NPM_PACKAGES/lib/node_modules:$NODE_PATH"
 export PATH="$PATH:$NPM_PACKAGES/bin"  # npm packages should have lower priority
 export BUN_INSTALL_CACHE_DIR=/Volumes/Workspace/.bun/cache
 
+# npm user config → gitignored ~/.npmrc.secrets so `npm login` never writes
+# tokens into the stowed (tracked) ~/.npmrc
+export NPM_CONFIG_USERCONFIG="$HOME/.npmrc.secrets"
+
 # .local/bin
 if [ -d "$HOME/.local/bin" ]; then
   export PATH=$PATH:$HOME/.local/bin
