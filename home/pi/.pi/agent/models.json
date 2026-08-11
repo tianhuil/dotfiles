@@ -1,13 +1,3 @@
-# Thinking level mappings for models with reasoning support.
-#
-# Pi's 7 thinking levels (off, minimal, low, medium, high, xhigh, max) are fixed.
-# thinkingLevelMap remaps each pi level to the provider-specific string sent to the API,
-# or null to hide/disable it. Omitted keys inherit the built-in default.
-#
-# Only levels that produce distinct behavior are exposed.
-# Binary-thinking models get off + one "on" level; effort-string models get each
-# distinct effort tier.
-
 {
   "providers": {
     "opencode": {
