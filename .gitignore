@@ -7,3 +7,4 @@ home/ssh/.ssh/config.local
 home/env/.env.local
 node_modules
 .worktrees/
+.pi-subagents/

@@ -1,0 +1,26 @@
+# pi-models-filter — regex-driven model catalog filter
+#
+# Each entry is a regex anchored against "<providerId>/<modelId>". Models from
+# any built-in provider whose "<providerId>/<modelId>" pair matches a rule are
+# kept; all others are removed from `pi --list-models` and the `/model` picker.
+#
+# Optional per-provider overrides (merged on top of pi's built-in defaults):
+#   - apiKey: override the auth key (e.g. "public" for opencode free tier)
+#
+# The extension auto-discovers each provider's base URL from its known catalog.
+# Stored credentials from `~/.pi/agent/auth.json` (via `/login`) are used for
+# catalog fetching automatically — no baseUrl, api, or model metadata needs
+# to be configured.
+
+filters:
+  - "opencode/big-pickle"
+  - "opencode/deepseek-v4-flash-free"
+  - "opencode/mimo-v2.5-free"
+  - "opencode/nemotron-3-ultra-free"
+  - "opencode/north-mini-code-free"
+  - "zai/glm-5([^v].*|$)"  # glm-5, glm-5-turbo, glm-5.1, glm-5.2 (text only)
+  - "zai/glm-4.7-flash"  # free
+
+providers:
+  opencode:
+    apiKey: public   # free tier — no OPENCODE_API_KEY env var needed

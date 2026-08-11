@@ -1,0 +1,13 @@
+{
+  "name": "pi-models-filter",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Filter pi providers' live model catalogs down to provider/model regexes from config.yml",
+  "packageManager": "bun@1.3.14",
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  },
+  "pi": {
+    "extensions": ["./src/index.ts"]
+  }
+}
