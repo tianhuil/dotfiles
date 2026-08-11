@@ -90,10 +90,21 @@ if [ -f "$HOME/.config/op/plugins.sh" ]; then
 fi
 SSH_AUTH_SOCK=~/Library/Group\ Containers/2BUA8C4S2C.com.1password/t/agent.sock
 
-# nvm 
+# nvm — one block for both installs: script install (Ubuntu/Linux, files under
+# ~/.nvm) and Homebrew (macOS). Brew's wrapper self-creates the ~/.nvm/nvm.sh
+# symlink, so the first branch covers a previously-initialized brew nvm too.
 export NVM_DIR="$HOME/.nvm"
-[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
-[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+if [ -s "$NVM_DIR/nvm.sh" ]; then
+  \. "$NVM_DIR/nvm.sh"  # script install, or brew's symlinked nvm.sh on macOS
+elif [ -s "/opt/homebrew/opt/nvm/nvm.sh" ]; then
+  \. "/opt/homebrew/opt/nvm/nvm.sh"  # Homebrew (Apple Silicon)
+elif [ -s "/usr/local/opt/nvm/nvm.sh" ]; then
+  \. "/usr/local/opt/nvm/nvm.sh"  # Homebrew (Intel)
+fi
+# bash completion — script install puts it in ~/.nvm, brew under its own prefix
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
+[ -s "/usr/local/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/usr/local/opt/nvm/etc/bash_completion.d/nvm"
 
 if [ -f ~/.env.local ]; then
   source ~/.env.local
