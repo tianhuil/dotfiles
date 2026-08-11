@@ -119,3 +119,14 @@ fi
 if [ -d "$HOME/.local/share/pi-node/node-v22.23.2-linux-x64/bin" ]; then
   export PATH="$HOME/.local/share/pi-node/node-v22.23.2-linux-x64/bin:$PATH"
 fi
+
+# ~/.local/bin (lychee v0.24.2, uv, llm, ...) — prepend so these win over
+# brew copies and are visible to pre-commit hooks that shell out
+if [ -d "$HOME/.local/bin" ]; then
+  export PATH="$HOME/.local/bin:$PATH"
+fi
+
+# nvm (script install at ~/.nvm; .coreenv covers the brew install)
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion

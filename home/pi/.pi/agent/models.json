@@ -1,0 +1,56 @@
+# Thinking level mappings for models that support reasoning effort control.
+#
+# Pi's 7 thinking levels (off, minimal, low, medium, high, xhigh, max) are fixed.
+# thinkingLevelMap remaps each pi level to the provider-specific string sent to the API,
+# or null to hide/disable it. Omitted keys inherit the built-in default.
+#
+# Mappings below are sourced from provider API docs:
+#   - DeepSeek V4 Flash:  reasoning_effort accepts low, high, max (medium/xhigh → high)
+#   - Cohere North Mini:  binary reasoning; "none" disables, anything else enables
+#   - GLM-5.2 (zai):      reasoning_effort accepts high, max only
+
+{
+  "providers": {
+    "opencode": {
+      "modelOverrides": {
+        "deepseek-v4-flash-free": {
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": null,
+            "low": "low",
+            "medium": null,
+            "high": "high",
+            "xhigh": null,
+            "max": "max"
+          }
+        },
+        "north-mini-code-free": {
+          "thinkingLevelMap": {
+            "off": "none",
+            "minimal": null,
+            "low": null,
+            "medium": null,
+            "high": "high",
+            "xhigh": null,
+            "max": null
+          }
+        }
+      }
+    },
+    "zai": {
+      "modelOverrides": {
+        "glm-5.2": {
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": null,
+            "low": null,
+            "medium": null,
+            "high": "high",
+            "xhigh": null,
+            "max": "max"
+          }
+        }
+      }
+    }
+  }
+}
