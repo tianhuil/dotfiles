@@ -3,12 +3,11 @@ name: web-search
 description: Default web-search skill — the first choice for any "search the web", "look up", "find information about", "what's the latest on", or general research request, using the web-search-prime MCP server through the mcpc CLI. READ THIS SKILL FIRST before doing any web searches.
 allowed-tools: Bash(mcpc *)
 ---
-
 # Web Search via mcpc
 
 Search the web using the [web-search-prime](https://z.ai) MCP server through `mcpc`.
 
-## Using the built-in `web_search` tool
+## IMPORTANT: Disable localhost browser when using the built-in `web_search` tool
 
 It's fine to use the built-in `web_search` tool directly instead of `mcpc`, but
 **please read this section first.** By default `web_search` opens an interactive
@@ -35,13 +34,15 @@ mcpc @web tools-call web_search_prime search_query:="YOUR QUERY"
 
 ### Parameters
 
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `search_query` | Yes | The search query string (max 70 chars recommended) |
-| `search_domain_filter` | No | Restrict to specific domain (e.g. `www.example.com`) |
-| `search_recency_filter` | No | Time range: `oneDay`, `oneWeek`, `oneMonth`, `oneYear`, `noLimit` |
-| `content_size` | No | Summary size: `medium` (400-600 words) or `high` (2500 words) |
-| `location` | No | Region: `cn` (Chinese) or `us` (non-Chinese) |
+
+| Parameter               | Required | Description                                                       |
+| ----------------------- | -------- | ----------------------------------------------------------------- |
+| `search_query`          | Yes      | The search query string (max 70 chars recommended)                |
+| `search_domain_filter`  | No       | Restrict to specific domain (e.g. `www.example.com`)              |
+| `search_recency_filter` | No       | Time range: `oneDay`, `oneWeek`, `oneMonth`, `oneYear`, `noLimit` |
+| `content_size`          | No       | Summary size: `medium` (400-600 words) or `high` (2500 words)     |
+| `location`              | No       | Region: `cn` (Chinese) or `us` (non-Chinese)                      |
+
 
 ### Examples
 
@@ -78,3 +79,4 @@ Prefer these tools over curl-cffi (use only when a specific URL is consistently 
 - Session auth is stored in OS keychain automatically
 - If session is stale, run `mcpc connect /tmp/mcp-servers.json:web-search-prime @web` to reconnect
 - Warm calls take ~2s (0.3s CLI overhead + ~1.5s API latency)
+
