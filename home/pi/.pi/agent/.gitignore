@@ -1,0 +1,6 @@
+# Runtime cache written by the models-filter extension
+# (~/.pi/agent/models-filter-cache.json, 24h TTL, regenerated from models.dev).
+# Never commit — the path is resolved from $HOME at runtime, and if this
+# directory ever becomes a git repo, keep these out of history.
+models-filter-cache.json
+models-filter-cache.json.tmp
