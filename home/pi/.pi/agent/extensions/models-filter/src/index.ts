@@ -29,13 +29,15 @@
  * to node:fs + js-yaml under node-based pi.
  */
 
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
 const FETCH_TIMEOUT_MS = 8000;
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 const PI_AGENT_DIR = path.join(process.env.HOME ?? process.env.USERPROFILE ?? "/", ".pi", "agent");
 const MODELS_DEV_URL = "https://models.dev/api.json";
+const CACHE_PATH = path.join(PI_AGENT_DIR, "models-filter-cache.json");
 
 // ── YAML I/O (dual runtime) ─────────────────────────────────────────────────
 
@@ -122,6 +124,8 @@ const KNOWN_MODELS: Record<string, ModelMeta> = {
   // ── zai ──
   "glm-4.5-air": { name: "GLM-4.5-Air", reasoning: true, input: ["text"], contextWindow: 131072, maxTokens: 98304, compat: { supportsReasoningEffort: false, thinkingFormat: "zai" } },
   "glm-4.7": { name: "GLM-4.7", reasoning: true, input: ["text"], contextWindow: 204800, maxTokens: 131072, compat: { supportsReasoningEffort: false, thinkingFormat: "zai", zaiToolStream: true } },
+  "glm-4.7-flash": { name: "GLM-4.7-Flash", reasoning: true, input: ["text"], contextWindow: 200000, maxTokens: 131072, compat: { supportsReasoningEffort: false, thinkingFormat: "zai", zaiToolStream: true } },
+  "glm-5": { name: "GLM-5", reasoning: true, input: ["text"], contextWindow: 204800, maxTokens: 131072, compat: { supportsReasoningEffort: false, thinkingFormat: "zai", zaiToolStream: true } },
   "glm-5-turbo": { name: "GLM-5-Turbo", reasoning: true, input: ["text"], contextWindow: 200000, maxTokens: 131072, compat: { supportsReasoningEffort: false, thinkingFormat: "zai", zaiToolStream: true } },
   "glm-5.1": { name: "GLM-5.1", reasoning: true, input: ["text"], contextWindow: 200000, maxTokens: 131072, compat: { supportsReasoningEffort: false, thinkingFormat: "zai", zaiToolStream: true } },
   "glm-5.2": { name: "GLM-5.2", reasoning: true, thinkingLevelMap: { minimal: null, low: "high", medium: "high", high: "high", max: "max" }, input: ["text"], contextWindow: 1000000, maxTokens: 131072, compat: { supportsReasoningEffort: true, thinkingFormat: "zai", zaiToolStream: true } },
@@ -417,93 +421,227 @@ function toModelConfig(resolved: ResolvedModel): Record<string, unknown> {
   };
 }
 
-// ── Factory ─────────────────────────────────────────────────────────────────
+// ── Cache (24h TTL) ────────────────────────────────────────────────────────
 
-export default async function (pi: PiApi): Promise<void> {
-  const config = await loadConfig();
-  const rules = compileRules(config.filters);
+interface CacheEntry {
+  fetchedAt: number;
+  fingerprint: string;
+  providers: Record<string, Record<string, unknown>>;
+}
 
-  if (rules.length === 0) {
-    console.warn("[models-filter] no filter rules; nothing to do");
-    return;
+/** Invalidate the cache when filter rules or provider overrides change. */
+function configFingerprint(config: Config): string {
+  return JSON.stringify({ filters: config.filters, providers: config.providers });
+}
+
+function readCache(): CacheEntry | null {
+  try {
+    if (!existsSync(CACHE_PATH)) return null;
+    const parsed = JSON.parse(readFileSync(CACHE_PATH, "utf8")) as Partial<CacheEntry> | null;
+    if (!parsed || typeof parsed.fetchedAt !== "number" || typeof parsed.fingerprint !== "string" || typeof parsed.providers !== "object" || parsed.providers === null) {
+      return null;
+    }
+    return parsed as CacheEntry;
+  } catch {
+    return null;
   }
+}
 
-  const providerIds = referencedProviders(rules);
-  if (providerIds.size === 0) return;
+function writeCache(entry: CacheEntry): void {
+  try {
+    const tmpPath = `${CACHE_PATH}.tmp`;
+    writeFileSync(tmpPath, JSON.stringify(entry, null, 2), "utf8");
+    renameSync(tmpPath, CACHE_PATH);
+  } catch (error) {
+    console.warn(`[models-filter] cache write failed: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
 
+// ── Static fallback registration (offline warm start) ───────────────────────
+
+/**
+ * Build a filtered provider registration from KNOWN_MODELS only — no network.
+ * Used so the model snapshot is never the full unfiltered catalog while the
+ * background fetch is in flight or when it fails.
+ */
+function buildFallbackRegistration(providerId: string, rules: FilterRule[], config: Config): Record<string, unknown> | null {
+  const providerRules = rules.filter((r) => r.providerRe.test(providerId));
+  if (providerRules.length === 0) return null;
+  const catalog = PROVIDER_CATALOGS[providerId];
+  if (!catalog) return null;
+
+  const ids = Object.keys(KNOWN_MODELS).filter((id) => providerRules.some((r) => r.modelRe.test(id)));
+  if (ids.length === 0) return null;
+
+  const override = config.providers[providerId];
+  const registration: Record<string, unknown> = {
+    baseUrl: override?.baseUrl ?? catalog.url,
+    api: override?.api ?? catalog.api,
+    models: ids.map((id) => toModelConfig(resolveFallback(id))),
+  };
+  if (override?.apiKey) registration.apiKey = override.apiKey;
+  return registration;
+}
+
+// ── Metadata resolution (network) ───────────────────────────────────────────
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+/** Fetch models.dev + live catalogs in parallel, filter, and build per-provider registrations. */
+async function resolveRegistrations(
+  providerIds: Set<string>,
+  rules: FilterRule[],
+  config: Config,
+): Promise<Record<string, Record<string, unknown>>> {
   // Fetch models.dev once for all providers
   let modelsDev: Record<string, ModelsDevProvider> | null = null;
   try {
     modelsDev = await fetchModelsDev();
     console.info(`[models-filter] models.dev: ${Object.keys(modelsDev).length} providers loaded`);
   } catch (error) {
-    console.warn(`[models-filter] models.dev fetch failed (${error instanceof Error ? error.message : String(error)}); using live catalog + static fallback`);
+    console.warn(`[models-filter] models.dev fetch failed (${errorMessage(error)}); using live catalog + static fallback`);
   }
 
-  for (const providerId of providerIds) {
-    const providerRules = rules.filter((r) => r.providerRe.test(providerId));
-    const catalog = PROVIDER_CATALOGS[providerId];
-    if (!catalog) {
-      console.warn(`[models-filter] unknown provider "${providerId}" — add its catalog URL to PROVIDER_CATALOGS`);
-      continue;
+  const results = await Promise.all(
+    [...providerIds].map(async (providerId): Promise<[string, Record<string, unknown>] | null> => {
+      const providerRules = rules.filter((r) => r.providerRe.test(providerId));
+      const catalog = PROVIDER_CATALOGS[providerId];
+      if (!catalog) {
+        console.warn(`[models-filter] unknown provider "${providerId}" — add its catalog URL to PROVIDER_CATALOGS`);
+        return null;
+      }
+
+      const override = config.providers[providerId];
+      const apiKey = resolveApiKey(providerId, override?.apiKey);
+      const overrideBaseUrl = override?.baseUrl ?? catalog.url;
+      const overrideApi = override?.api ?? catalog.api;
+
+      // Get models.dev metadata for this provider
+      const mdProvider = modelsDev?.[providerId];
+      const mdModels: Record<string, ModelsDevModel> = mdProvider?.models ?? {};
+
+      // Also fetch live catalog for IDs not in models.dev
+      let liveIds: string[] = [];
+      let liveOk = false;
+      try {
+        liveIds = await fetchLiveCatalog(overrideBaseUrl, apiKey);
+        liveOk = true;
+      } catch (error) {
+        console.warn(`[models-filter] ${providerId}: live catalog fetch failed (${errorMessage(error)})`);
+      }
+
+      // Merge: start with models.dev models, add live-only IDs
+      const allIds = new Set(Object.keys(mdModels));
+      for (const id of liveIds) allIds.add(id);
+
+      if (allIds.size === 0) {
+        // Final fallback: static KNOWN_MODELS
+        for (const id of Object.keys(KNOWN_MODELS)) allIds.add(id);
+        console.warn(`[models-filter] ${providerId}: no models from models.dev or live catalog; using static fallback`);
+      }
+
+      // Apply filters
+      const kept = [...allIds].filter((id) => providerRules.some((r) => r.modelRe.test(id)));
+      if (kept.length === 0) {
+        console.warn(`[models-filter] ${providerId}: no models matched filters; skipping`);
+        return null;
+      }
+
+      // Resolve metadata for each kept model
+      const resolved = kept.map((id) => {
+        const md = mdModels[id];
+        if (md) return resolveFromModelsDev(md, providerId);
+        return resolveFallback(id);
+      });
+
+      // Register the provider with filtered models
+      const registration: Record<string, unknown> = {
+        baseUrl: overrideBaseUrl,
+        api: overrideApi,
+        models: resolved.map(toModelConfig),
+      };
+      // Only pass apiKey to registerProvider when the user explicitly configured it;
+      // pi's own stored auth handles credentials for providers not in config.yml.
+      if (override?.apiKey) registration.apiKey = override.apiKey;
+
+      const source = Object.keys(mdModels).length > 0 ? "models.dev" : liveOk ? `${liveIds.length} live` : "static fallback";
+      console.info(`[models-filter] ${providerId}: ${kept.length}/${allIds.size} (${source}): ${kept.join(", ")}`);
+      return [providerId, registration];
+    }),
+  );
+
+  const out: Record<string, Record<string, unknown>> = {};
+  for (const entry of results) {
+    if (entry) out[entry[0]] = entry[1];
+  }
+  return out;
+}
+
+// ── Factory ─────────────────────────────────────────────────────────────────
+
+/**
+ * Fire-and-forget: the factory returns synchronously so pi never blocks startup
+ * on network I/O. Registration order:
+ *   1. Fresh 24h disk cache → register immediately, no network.
+ *   2. Otherwise static KNOWN_MODELS fallback → the filtered set is present at once.
+ *   3. Background fetch of models.dev + live catalogs → re-register with
+ *      authoritative metadata (post-bind, takes effect immediately) and cache.
+ */
+export default function (pi: PiApi): void {
+  void bootstrap(pi);
+}
+
+async function bootstrap(pi: PiApi): Promise<void> {
+  try {
+    const config = await loadConfig();
+    const rules = compileRules(config.filters);
+
+    if (rules.length === 0) {
+      console.warn("[models-filter] no filter rules; nothing to do");
+      return;
     }
 
-    const override = config.providers[providerId];
-    const apiKey = resolveApiKey(providerId, override?.apiKey);
-    const overrideBaseUrl = override?.baseUrl ?? catalog.url;
-    const overrideApi = override?.api ?? catalog.api;
+    const providerIds = referencedProviders(rules);
+    if (providerIds.size === 0) return;
 
-    // Get models.dev metadata for this provider
-    const mdProvider = modelsDev?.[providerId];
-    const mdModels: Record<string, ModelsDevModel> = mdProvider?.models ?? {};
+    const fingerprint = configFingerprint(config);
 
-    // Also fetch live catalog for IDs not in models.dev
-    let liveIds: string[] = [];
-    let liveOk = false;
+    // 1. Fast path: fresh cache — register instantly, no network at all.
+    const cached = readCache();
+    if (cached && cached.fingerprint === fingerprint && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
+      for (const [providerId, registration] of Object.entries(cached.providers)) {
+        pi.registerProvider(providerId, registration);
+      }
+      console.info(`[models-filter] cache hit: ${Object.keys(cached.providers).length} provider(s) registered from cache`);
+      return;
+    }
+
+    // 2. Warm path: register the static fallback immediately so the snapshot is
+    //    filtered even before the fetch lands or when it fails.
+    for (const providerId of providerIds) {
+      const registration = buildFallbackRegistration(providerId, rules, config);
+      if (registration) {
+        pi.registerProvider(providerId, registration);
+        const count = (registration.models as unknown[]).length;
+        console.info(`[models-filter] ${providerId}: static fallback (${count} models)`);
+      }
+    }
+
+    // 3. Fetch authoritative metadata in the background; re-register when it lands.
     try {
-      liveIds = await fetchLiveCatalog(overrideBaseUrl, apiKey);
-      liveOk = true;
+      const registrations = await resolveRegistrations(providerIds, rules, config);
+      if (Object.keys(registrations).length === 0) return;
+      for (const [providerId, registration] of Object.entries(registrations)) {
+        pi.registerProvider(providerId, registration);
+      }
+      writeCache({ fetchedAt: Date.now(), fingerprint, providers: registrations });
+      console.info("[models-filter] cache refreshed");
     } catch (error) {
-      console.warn(`[models-filter] ${providerId}: live catalog fetch failed (${error instanceof Error ? error.message : String(error)})`);
+      console.warn(`[models-filter] refresh failed (${errorMessage(error)}); keeping static fallback`);
     }
-
-    // Merge: start with models.dev models, add live-only IDs
-    const allIds = new Set(Object.keys(mdModels));
-    for (const id of liveIds) allIds.add(id);
-
-    if (allIds.size === 0) {
-      // Final fallback: static KNOWN_MODELS
-      for (const id of Object.keys(KNOWN_MODELS)) allIds.add(id);
-      console.warn(`[models-filter] ${providerId}: no models from models.dev or live catalog; using static fallback`);
-    }
-
-    // Apply filters
-    const kept = [...allIds].filter((id) => providerRules.some((r) => r.modelRe.test(id)));
-    if (kept.length === 0) {
-      console.warn(`[models-filter] ${providerId}: no models matched filters; skipping`);
-      continue;
-    }
-
-    // Resolve metadata for each kept model
-    const resolved = kept.map((id) => {
-      const md = mdModels[id];
-      if (md) return resolveFromModelsDev(md, providerId);
-      return resolveFallback(id);
-    });
-
-    // Register the provider with filtered models
-    const registration: Record<string, unknown> = {
-      baseUrl: overrideBaseUrl,
-      api: overrideApi,
-      models: resolved.map(toModelConfig),
-    };
-    // Only pass apiKey to registerProvider when the user explicitly configured it;
-    // pi's own stored auth handles credentials for providers not in config.yml.
-    if (override?.apiKey) registration.apiKey = override.apiKey;
-
-    pi.registerProvider(providerId, registration);
-
-    const source = Object.keys(mdModels).length > 0 ? "models.dev" : liveOk ? `${liveIds.length} live` : "static fallback";
-    console.info(`[models-filter] ${providerId}: ${kept.length}/${allIds.size} (${source}): ${kept.join(", ")}`);
+  } catch (error) {
+    console.warn(`[models-filter] bootstrap failed: ${errorMessage(error)}`);
   }
 }
