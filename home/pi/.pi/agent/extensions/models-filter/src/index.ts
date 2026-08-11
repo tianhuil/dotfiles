@@ -14,16 +14,18 @@
  *   2. Provider's live /models endpoint (model IDs only)
  *   3. Hardcoded KNOWN_MODELS fallback table
  *
- * At load time the extension:
+ * The factory is fire-and-forget: it returns synchronously so pi never blocks
+ * startup on network I/O. In the background it:
  *   1. Reads config.yml filter rules
- *   2. For each provider mentioned in filters:
- *      a. Fetches the models.dev API for that provider's full metadata
- *      b. Fetches the provider's live /v1/models for model IDs
- *      c. Merges: uses models.dev metadata where available, live catalog
- *         for IDs not in models.dev, KNOWN_MODELS as last resort
- *   3. Keeps only models matching a filter regex
- *   4. Re-registers each provider with just the filtered models via
- *      registerProvider() (queued before listModels runs)
+ *   2. Registers from a fresh 24h disk cache (~/.pi/agent/models-filter-cache.json)
+ *      when present, keyed by a fingerprint of the filters/overrides
+ *   3. Otherwise registers a static KNOWN_MODELS fallback immediately, then
+ *      fetches models.dev + each provider's live /v1/models, merges them
+ *      (models.dev metadata where available, live catalog for IDs not in
+ *      models.dev, KNOWN_MODELS as last resort), keeps only models matching a
+ *      filter regex, re-registers each provider via registerProvider() (which
+ *      takes effect immediately after the initial load phase), and writes the
+ *      result to the cache.
  *
  * Built on bun runtime APIs when available (Bun.file, Bun.YAML); falls back
  * to node:fs + js-yaml under node-based pi.
