@@ -11,7 +11,10 @@ symlinks each package's files into `~/`:
 This repository includes OpenCode agents and skills for AI-assisted development:
 
 - **Agents**: Located in `home/opencode/.config/opencode/agents/`, stowed to `~/.config/opencode/agents/`
-- **Skills**: Consolidated under `home/opencode/.config/opencode/skills/`, covering both opencode-native and ported skills (~40 total)
+- **Skills**: Shared skills live in `home/agents/.agents/skills/` (the single source of
+  truth, stowed to `~/.agents/skills/`); both pi and opencode read that directory
+  natively. The opencode package carries no skills dir — `agent-browser`/`find-skills`
+  are CLI-installed by `setup_skills.sh` (see [AGENTS.md](AGENTS.md)).
 
 The skill directory includes:
 
@@ -33,12 +36,12 @@ The skill directory includes:
 
 Skills with Python scripts (docx, pdf, pptx, xlsx, webapp-testing) reference shared
 office tooling via a git submodule at
-`home/opencode/.config/opencode/skills/_shared/anthropics-skills/`.
+`home/agents/.agents/skills/_shared/anthropics-skills/`.
 
 To update the ported skills from upstream:
 
 ```bash
-cd home/opencode/.config/opencode/skills/_shared/anthropics-skills && git pull
+cd home/agents/.agents/skills/_shared/anthropics-skills && git pull
 ```
 
 For details on the architecture and available skills, see [AGENTS.md](AGENTS.md).

@@ -1,6 +1,6 @@
 ---
 name: dotfiles-opencode-skills
-description: Editing OpenCode agents and skills in the dotfiles repo. Use when modifying home/opencode/.config/opencode/agents/ or skills/, the curl-cffi impersonated-fetch skill, the mcpc-based MCP skills (sequential-thinking, web-search, serena), or the _shared/anthropics-skills git submodule backing docx/pdf/pptx/xlsx/webapp-testing scripts. Covers where to edit (source dir, not the symlink), the skills catalog, and updating ported skills from upstream.
+description: Editing OpenCode agents and skills in the dotfiles repo. Use when modifying home/opencode/.config/opencode/agents/ or opencode.json, or the shared skills in home/agents/.agents/skills/ (curl-cffi, the mcpc-based MCP skills sequential-thinking/web-search/serena, and the _shared/anthropics-skills git submodule backing docx/pdf/pptx/xlsx/webapp-testing scripts). Covers where to edit (home/agents/.agents/skills/, never the live ~/.agents/skills symlinks), the skills catalog, and updating ported skills from upstream.
 ---
 
 # OpenCode Agents and Skills
@@ -12,31 +12,33 @@ Located in `home/opencode/.config/opencode/agents/` (stowed to
 **writing-skills.md**: Expert agent for creating opencode skills.
 
 ### Skills
-All skills are consolidated under `home/opencode/.config/opencode/skills/`,
-covering both opencode-native skills and ported skills from
-[anthropics/skills](https://github.com/anthropics/skills):
+**All shared skills live in `home/agents/.agents/skills/`** — the single source of
+truth, stowed to `~/.agents/skills/`. Both pi and opencode read that directory
+natively (pi natively; opencode discovers agent-format skills from `~/.agents/`).
+The opencode package (`home/opencode/.config/opencode/skills/`) intentionally has
+**no skills directory** — no copies, no symlinks. `opencode.json` extends its
+permission allowlist to `~/.agents/skills/**` so skill scripts can run.
 
 | Origin | Included skills |
 |--------|----------------|
-| Opencode-native | `bun`, `coding-standards`, `drizzle-orm`, `nextjs-frontend`, `trpc`, `web-search`, … (~25) |
-| Ported from anthropics | `docx`, `pdf`, `pptx`, `xlsx`, `frontend-design`, `agent-browser`, `serena`, … (~14) |
+| Repo-authored | `design`, `model-inventory`, `my-research`, `pi-package-publish` |
+| Ported/customized from anthropics | `docx`, `pdf`, `pptx`, `xlsx`, `frontend-design`, `webapp-testing`, `theme-factory`, … |
+| Opencode-flavored | `bun`, `coding-standards`, `drizzle-orm`, `nextjs-frontend`, `trpc`, `web-search`, … (~30) |
+| CLI-installed (NOT in repo) | `agent-browser`, `find-skills` (vercel-labs), `research` (mattpocock) — installed by `setup_skills.sh` into `~/.agents/skills/` |
 
-**Important:** Edit skills in their `home/opencode/.config/opencode/skills/<name>/` source,
-not in `~/.config/opencode/skills/<name>/`.  The symlink propagates the change.
-
+**Important:** Edit skills in `home/agents/.agents/skills/<name>/`, never in the live
+`~/.agents/skills/<name>/` symlinks — stow propagates the change on next `setup.sh`.
 Skills are loaded automatically by the `skill` tool when agents need them.
 
-**Shared with pi via the `agents` stow package:** every skill dir with a `SKILL.md` is
-symlinked from `home/agents/.agents/skills/<name>` → `../../../opencode/.config/opencode/skills/<name>`
-and stowed to `~/.agents/skills/<name>`, so pi reads the same repo-versioned skills.
-When adding a **new** skill here, also create that symlink (see the
-`dotfiles-agent-skills-cli` skill); `setup_skills.sh` derives its cleanup from the
-repo automatically. Empty dirs without a `SKILL.md` (e.g. `smart-commit`, `wt-build`)
-are not shared.
+### Adding or Removing a Skill
 
-**Notable skills:**
-
-- **`curl-cffi`**: Impersonated web fetch via `uvx --from git+https://github.com/lexiforest/curl_cffi curl-cffi`. Replaces the `webfetch_camouflage` MCP — use when `web_fetch` is blocked or returns empty responses.
+- **Repo-versioned skill:** put the dir under `home/agents/.agents/skills/<name>/`
+  with a `SKILL.md`; re-run `./setup.sh` (which runs `setup_skills.sh`, then stows
+  `agents`). `setup_skills.sh` derives its repo-owned cleanup list from this dir
+  automatically, so `skills update` can never clobber a stowed skill.
+- **CLI-installable skill** (e.g. from vercel-labs, anthropics, mattpocock): add it
+  to `REMOTE_SKILLS` in `setup_skills.sh` instead of vendoring it — see the
+  `dotfiles-agent-skills-cli` skill.
 
 ### mcpc-Based MCP Skills
 
@@ -54,11 +56,11 @@ API keys are stored in `~/.config/opencode/` (see AGENTS.md there for the table)
 
 Skills with Python scripts (docx, pdf, pptx, xlsx, webapp-testing) reference shared
 office tooling via a git submodule at
-`home/opencode/.config/opencode/skills/_shared/anthropics-skills/`. The scripts are
-symlinked from each skill directory into the submodule.
+`home/agents/.agents/skills/_shared/anthropics-skills/`. Each skill dir carries a
+`scripts` symlink into `../_shared/anthropics-skills/skills/<name>/scripts`.
 
 To update the ported skills from upstream:
 
 ```bash
-cd home/opencode/.config/opencode/skills/_shared/anthropics-skills && git pull
+cd home/agents/.agents/skills/_shared/anthropics-skills && git pull
 ```

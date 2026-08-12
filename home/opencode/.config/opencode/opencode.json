@@ -7,10 +7,12 @@
       "~/.config/opencode/AGENTS.md": "allow",
       "~/.config/opencode/agents/**": "allow",
       "~/.config/opencode/commands/**": "allow",
-      "~/.config/opencode/skills/**": "allow"
+      "~/.config/opencode/skills/**": "allow",
+      "~/.agents/skills/**": "allow"
     },
     "bash": {
-      "bash ~/.config/opencode/skills/**": "allow"
+      "bash ~/.config/opencode/skills/**": "allow",
+      "bash ~/.agents/skills/**": "allow"
     },
     "edit": {
       "/tmp/**": "allow",

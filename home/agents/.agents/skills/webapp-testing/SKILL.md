@@ -7,7 +7,7 @@ description: Toolkit for interacting with and testing local web applications usi
 
 To test local web applications, write native Python Playwright scripts.
 
-**Helper Scripts Available** (in `_shared/anthropics-skills/skills/webapp-testing/scripts/`):
+**Helper Scripts Available** (in `SKILL_DIR/scripts/`):
 - `with_server.py` - Manages server lifecycle (supports multiple servers)
 
 **Always run scripts with `--help` first** to see usage.
