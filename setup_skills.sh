@@ -35,7 +35,7 @@ AGENTS_SRC="$SCRIPT_DIR/home/agents/.agents/skills"
 # so stow can own them. A wildcard rolling set can still drop NEW skills (e.g.
 # mattpocock's `research`) into ~/.agents — those stay CLI-managed unless vendored.
 REMOTE_SKILLS=(
-  "anthropics/skills:*"
+  # "anthropics/skills:*"
   "kunchenguid/lavish-axi:lavish"
   "kunchenguid/axi:axi"
   "mattpocock/skills:*"
