@@ -18,10 +18,23 @@ export BUN_INSTALL_CACHE_DIR=/Volumes/Workspace/.bun/cache
 # tokens into the stowed (tracked) ~/.npmrc
 export NPM_CONFIG_USERCONFIG="$HOME/.npmrc.secrets"
 
-# .local/bin
+# ~/.local/bin (lychee, uv, llm, …) — prepend so these win over
+# brew copies and are visible to non-interactive shells (e.g. Orca)
 if [ -d "$HOME/.local/bin" ]; then
-  export PATH=$PATH:$HOME/.local/bin
+  export PATH="$HOME/.local/bin:$PATH"
 fi
+
+# pi-node — glob so self-updates to a new node version don't break the path
+_pi_node_base="$HOME/.local/share/pi-node"
+if [ -d "$_pi_node_base" ]; then
+  for _pi_node_bin in "$_pi_node_base"/node-*/bin; do
+    if [ -d "$_pi_node_bin" ]; then
+      export PATH="$_pi_node_bin:$PATH"
+      break
+    fi
+  done
+fi
+unset _pi_node_bin _pi_node_base
 
 # opencode when on Linux
 if [ -d "$HOME/.opencode/bin" ]; then
