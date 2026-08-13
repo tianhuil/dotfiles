@@ -76,7 +76,11 @@ fi
 # uv — installed to ~/.local/bin by https://astral.sh/uv/install.sh
 # (already on PATH via the ~/.local/bin block above)
 
-# pnpm
+# pnpm — PNPM_HOME differs by platform (~/Library/pnpm on macOS,
+# ~/.local/share/pnpm on Linux). pnpm v11+ puts global bins in
+# $PNPM_HOME/bin; older releases put them directly in $PNPM_HOME.
+# Add whichever exists so pnpm is on PATH across versions — the bare-dir
+# fallback is what fixes "pnpm not picking up" on older layouts.
 if [ "$(uname)" = "Darwin" ]; then
   export PNPM_HOME="$HOME/Library/pnpm"
 else
@@ -84,6 +88,8 @@ else
 fi
 if [ -d "$PNPM_HOME/bin" ]; then
   export PATH="$PNPM_HOME/bin:$PATH"
+elif [ -d "$PNPM_HOME" ]; then
+  export PATH="$PNPM_HOME:$PATH"
 fi
 
 # editor
