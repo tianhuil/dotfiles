@@ -83,6 +83,7 @@ For LLM/AI features specifically:
 
 ## Executive Summary
 [1-2 paragraphs: what, why, success criteria]
+[TODO: decision to be made — confirm success criteria and scope boundaries]
 
 ## User Stories
 - [User] can [action] so that [benefit]
@@ -94,9 +95,11 @@ For LLM/AI features specifically:
 
 ### Data Model
 [Schema, types, relationships]
+[TODO: decision to be made — if multiple storage options exist, list them]
 
 ### API Contracts
 [Endpoints, request/response shapes]
+[TODO: decision to be made — authentication/authorization approach: API key, session cookie, OAuth, or JWT]
 
 ## Implementation Plan
 
@@ -115,10 +118,6 @@ For LLM/AI features specifically:
 - ✅ Always: [rules]
 - ⚠️ Ask first: [rules]
 - 🚫 Never: [rules]
-
-## Open Questions
-1. [Question 1]
-2. [Question 2]
 ```
 
 ## Formatting Rules
@@ -126,7 +125,7 @@ For LLM/AI features specifically:
 - **300-line cap**: Design docs must stay under 300 lines. If a section becomes verbose, cut or move detail to an appendix or follow-up doc.
 - **Prefer concrete examples over description**: When explaining an input, output, or contract, show the actual JSON/YAML/code rather than a table describing the fields. This is more precise and often shorter.
 - **Never defer verification to the reader**: If something needs checking—API surface, library behavior, codebase structure—investigate it (`read`, `grep`, `glob`, `webfetch`, or a subagent) and resolve it before it reaches the doc.
-- **Open Questions**: In this section, **ALWAYS** use a numbered list (`1.`, `2.`, etc.). Never use bullet points. This makes it easy to reference specific questions by number during review.
+- **Inline TODOs for decisions**: When you encounter ambiguity, a fork in approach, or a choice the user must make, insert a `[TODO: decision to be made — description]` tag **inline at that exact spot** in the doc. If there are only a few plausible options, list them so the user can simply keep one. Never defer the question to a separate section—place it where the reader is already looking. Resolve TODOs you can yourself (e.g. by reading the codebase or docs) before placing them.
 
 ## Output Location
 
