@@ -1,17 +1,3 @@
-## mcpc Sessions
-
-MCP servers are accessed via `mcpc` CLI (`npm install -g @apify/mcpc`) with persistent named sessions.
-
-| Session | Server | Auth |
-|---------|--------|------|
-| `@think` | sequential_thinking (stdio) | None |
-| `@web` | web-search-prime (remote) | `ZAI_API_KEY` |
-| `@serena` | serena (local HTTP) | None |
-
-Sessions persist across calls. Use `mcpc` to list, `mcpc close @name` to clean up.
-
----
-
 You have access to some skills:
 
 - `coding-standards`: Follow coding standards and best practices.  Read this before making any more edits to code.
