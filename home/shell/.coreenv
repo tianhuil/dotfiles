@@ -12,7 +12,9 @@ fi
 export NPM_PACKAGES="$HOME/.npm-packages"
 export NODE_PATH="$NPM_PACKAGES/lib/node_modules:$NODE_PATH"
 export PATH="$PATH:$NPM_PACKAGES/bin"  # npm packages should have lower priority
-export BUN_INSTALL_CACHE_DIR=/Volumes/Workspace/.bun/cache
+if [ "$(uname)" = "Darwin" ]; then
+  export BUN_INSTALL_CACHE_DIR=/Volumes/Workspace/.bun/cache
+fi
 
 # npm user config → gitignored ~/.npmrc.secrets so `npm login` never writes
 # tokens into the stowed (tracked) ~/.npmrc
@@ -48,7 +50,7 @@ if [ -x "$(command -v go)" ]; then
 fi
 
 # icu4c (for CGO support)
-if brew --prefix icu4c &>/dev/null; then
+if command -v brew &>/dev/null && brew --prefix icu4c &>/dev/null; then
   export CGO_CPPFLAGS="-I$(brew --prefix icu4c)/include"
   export CGO_LDFLAGS="-L$(brew --prefix icu4c)/lib"
 fi
@@ -111,7 +113,10 @@ fi
 if [ -f "$HOME/.config/op/plugins.sh" ]; then
   source $HOME/.config/op/plugins.sh
 fi
-SSH_AUTH_SOCK=~/Library/Group\ Containers/2BUA8C4S2C.com.1password/t/agent.sock
+if [ "$(uname)" = "Darwin" ]; then
+  SSH_AUTH_SOCK=~/Library/Group\ Containers/2BUA8C4S2C.com.1password/t/agent.sock
+  export SSH_AUTH_SOCK
+fi
 
 # nvm — one block for both installs: script install (Ubuntu/Linux, files under
 # ~/.nvm) and Homebrew (macOS). Brew's wrapper self-creates the ~/.nvm/nvm.sh

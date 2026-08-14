@@ -12,9 +12,9 @@ if command -v eza &>/dev/null; then
   alias ll='eza -l'
   alias la='eza -la'
 else
-  alias ls='ls -h -G'
-  alias ll='ls -l'
-  alias la='ls -A'
+  alias ls='ls -h --color=auto'
+  alias ll='ls -l --color=auto'
+  alias la='ls -A --color=auto'
 fi
 alias l='ls -CF'
 alias svim='sudo vim'
