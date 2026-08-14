@@ -1,12 +1,3 @@
-## API Keys
-
-| Service | File | Env Var |
-|---------|------|---------|
-| z.ai (web-search-prime) | `~/.config/opencode/zai-api-key` | `ZAI_API_KEY` |
-| Context7 | `~/.config/opencode/context7-api-key` | `CONTEXT7_API_KEY` |
-
-Load with: `export KEY_NAME=$(tr -d '\n\r' < ~/.config/opencode/<file>)`
-
 ## mcpc Sessions
 
 MCP servers are accessed via `mcpc` CLI (`npm install -g @apify/mcpc`) with persistent named sessions.

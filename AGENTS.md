@@ -20,8 +20,13 @@ context, so invoke by name):
 - `dotfiles-omp-validation`
 - `dotfiles-typecheck`
 
-## Oh My Pi
+## API Keys
 
-This repo targets Oh My Pi (OMP), a pi fork. OMP skills live under `.omp/skills/`
-— `omp` (orientation; read OMP docs via `read("omp://<topic>")`) and
-`omp-extension-debug` (extension model-resolution debugging).
+
+| Service                 | File                                  | Env Var            |
+| ----------------------- | ------------------------------------- | ------------------ |
+| z.ai (web-search-prime) | `~/.config/opencode/zai-api-key`      | `ZAI_API_KEY`      |
+| Context7                | `~/.config/opencode/context7-api-key` | `CONTEXT7_API_KEY` |
+
+
+Load with: `export KEY_NAME=$(tr -d '\n\r' < ~/.config/opencode/<file>)`
