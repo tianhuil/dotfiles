@@ -131,8 +131,8 @@ Common issues and solutions for OpenCode configuration problems.
 1. **Verify file structure**
    ```bash
    # Check SKILL.md exists and is capitalized
-   ls -la .opencode/skills/<name>/
-   ls -la ~/.config/opencode/skills/<name>/
+   ls -la .agents/skills/<name>/
+   ls -la ~/.agents/skills/<name>/
 
    # Must be SKILL.md (all caps)
    ```
@@ -140,7 +140,7 @@ Common issues and solutions for OpenCode configuration problems.
 2. **Check frontmatter**
    ```bash
    # View first 10 lines
-   head -10 .opencode/skills/<name>/SKILL.md
+   head -10 .agents/skills/<name>/SKILL.md
 
    # Must include:
    # - name: (required)
@@ -157,10 +157,10 @@ Common issues and solutions for OpenCode configuration problems.
 4. **Check for duplicate names**
    ```bash
    # Find all skill directories
-   find .opencode ~/.config/opencode -type d -name skills -exec find {} -name SKILL.md \;
+   find .agents ~/.agents -type d -name skills -exec find {} -name SKILL.md \;
 
    # Extract skill names
-   grep -h "^name:" .opencode/skills/*/SKILL.md ~/.config/opencode/skills/*/SKILL.md
+   grep -h "^name:" .agents/skills/*/SKILL.md ~/.agents/skills/*/SKILL.md
    ```
 
 5. **Verify permissions**
@@ -184,10 +184,6 @@ Common issues and solutions for OpenCode configuration problems.
 7. **Check skill discovery path**
    ```bash
    # OpenCode searches these locations:
-   # - .opencode/skills/<name>/SKILL.md
-   # - ~/.config/opencode/skills/<name>/SKILL.md
-   # - .claude/skills/<name>/SKILL.md
-   # - ~/.claude/skills/<name>/SKILL.md
    # - .agents/skills/<name>/SKILL.md
    # - ~/.agents/skills/<name>/SKILL.md
    ```

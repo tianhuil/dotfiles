@@ -6,13 +6,13 @@ description: Create opencode skills following best practices
 
 **User-wide** (in dotfiles repo):
 ```
-./home/.opencode/skills/<skill-name>/SKILL.md
+./home/agents/.agents/skills/<skill-name>/SKILL.md
 ```
-Installed to `~/.config/opencode/skills/<skill-name>/SKILL.md`
+Installed to `~/.agents/skills/<skill-name>/SKILL.md`
 
 **Project-specific**:
 ```
-./.opencode/skills/<skill-name>/SKILL.md
+./.agents/skills/<skill-name>/SKILL.md
 ```
 
 ## Required Frontmatter
@@ -193,11 +193,5 @@ The v1 API used: `api.example.com/v1/messages`
 ## Skill Discovery Paths
 
 OpenCode searches these locations:
-- Project: `.opencode/skills/<name>/SKILL.md`
-- Global: `~/.config/opencode/skills/<name>/SKILL.md`
-- Project Claude: `.claude/skills/<name>/SKILL.md` (don't write here!)
-- Global Claude: `~/.claude/skills/<name>/SKILL.md` (don't write here!)
-- Project agents: `.agents/skills/<name>/SKILL.md` (don't write here!)
-- Global agents: `~/.agents/skills/<name>/SKILL.md` (don't write here!)
-
-For project-local paths, OpenCode walks up from CWD to git worktree.
+- Project: `.agents/skills/<name>/SKILL.md`
+- Global: `~/.agents/skills/<name>/SKILL.md`

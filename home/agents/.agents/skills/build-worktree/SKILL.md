@@ -19,7 +19,7 @@ This skill includes bash scripts that handle the mechanical orchestration (no AI
 SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 ```
 
-Or reference them by their install path at `~/.config/opencode/skills/build-worktree/`.
+Or reference them by their install path at `~/.agents/skills/build-worktree/`.
 
 ### Available Scripts
 
@@ -60,7 +60,7 @@ This is an **orchestrator** — it coordinates bash scripts and subagents. Use t
    Slugify the task: lowercase, hyphens for spaces, strip special chars, max 50 chars. Example: "Add user login" → `feat/add-user-login`
 2. **Create worktree**:
   ```bash
-   bash ~/.config/opencode/skills/build-worktree/setup.sh "$BRANCH_NAME"
+   bash ~/.agents/skills/build-worktree/setup.sh "$BRANCH_NAME"
   ```
 
 Parse the output for `BRANCH_NAME` (may have `-v2` suffix if branch existed), `BASE_BRANCH`, and `WORKTREE_PATH`. All usequent work uses these.
@@ -103,7 +103,7 @@ Discover what validation exists by checking, in order of preference:
 Then run all discovered commands in one call:
 
 ```bash
-bash ~/.config/opencode/skills/build-worktree/validate.sh "$WORKTREE_PATH" "npm test" "npm run lint" "npm run typecheck"
+bash ~/.agents/skills/build-worktree/validate.sh "$WORKTREE_PATH" "npm test" "npm run lint" "npm run typecheck"
 ```
 
 If it exits non-zero, spawn a subagent to fix the failures, commit, and re-run. Repeat until all pass **up to 3 times**.  If it continues to fail after these attempts to fix it, give up and explain what went wrong.
@@ -126,7 +126,7 @@ Skip this phase only for straightforward tasks.
 ## Phase 3: Push PR
 
 ```bash
-bash ~/.config/opencode/skills/build-worktree/push-pr.sh "$BRANCH_NAME" "$TITLE" "$BODY"
+bash ~/.agents/skills/build-worktree/push-pr.sh "$BRANCH_NAME" "$TITLE" "$BODY"
 ```
 
 If output contains `NO_REMOTE`, report that no PR is possible and stop.
@@ -138,7 +138,7 @@ The AI must compose the PR title and body (summary of changes). Include design d
 ## Phase 4: Monitor CI
 
 ```bash
-bash ~/.config/opencode/skills/build-worktree/monitor-ci.sh "$BRANCH_NAME" "$PR_NUMBER"
+bash ~/.agents/skills/build-worktree/monitor-ci.sh "$BRANCH_NAME" "$PR_NUMBER"
 ```
 
 Parse output:

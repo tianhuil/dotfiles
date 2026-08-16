@@ -7,7 +7,7 @@ This skill helps users configure OpenCode settings, providers, models, agents, a
 ## Files Created
 
 ### Main Skill
-- **Location**: `home/.opencode/skills/opencode-configuration/SKILL.md`
+- **Location**: `home/agents/.agents/skills/opencode-configuration/`
 - **Lines**: 419 (under the 500-line guideline)
 - **Size**: 9.9 KB
 
@@ -142,14 +142,14 @@ The skill references official OpenCode documentation:
 
 This skill is part of the dotfiles repository. After running `setup.sh`, it will be installed to:
 ```
-~/.config/opencode/skills/opencode-configuration/SKILL.md
+~/.agents/skills/opencode-configuration/SKILL.md
 ```
 
 ## Updates
 
 To update this skill:
-1. Edit files in `home/.opencode/skills/opencode-configuration/`
-2. Run `./setup.sh` to copy to `~/.config/opencode/skills/`
+1. Edit files in `home/agents/.agents/skills/opencode-configuration/`
+2. Run `./setup.sh` to stow into `~/.agents/skills/`
 3. Restart OpenCode to reload skills
 
 ## Contributing
