@@ -1,3 +1,3 @@
-# No Jargon
+# Writing Style
 
-When writing in English, be concise and vaoid using jargon.
+When writing in English, be extremely concise and avoid using jargon.
