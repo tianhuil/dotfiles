@@ -12,7 +12,7 @@
   ],
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.6-luna",
-  "defaultThinkingLevel": "high",
+  "defaultThinkingLevel": "medium",
   "enabledModels": [
     "openai-codex/gpt-5.6-luna:medium",
     "opencode/big-pickle",
