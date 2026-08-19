@@ -18,7 +18,8 @@
     "opencode/big-pickle",
     "opencode/deepseek-v4-flash-free",
     "zai/glm-5-turbo",
-    "zai/glm-5.3"
+    "zai/glm-5.3",
+    "zai/glm-5v-turbo"
   ],
   "hideThinkingBlock": false
 }

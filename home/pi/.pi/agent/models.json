@@ -116,6 +116,17 @@
             "max": null
           }
         },
+        "glm-5v-turbo": {
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": null,
+            "low": null,
+            "medium": null,
+            "high": "high",
+            "xhigh": null,
+            "max": null
+          }
+        },
         // GLM-5.2: reasoning_effort accepts high, max
         "glm-5.2": {
           "thinkingLevelMap": {

@@ -18,7 +18,8 @@ filters:
   - "opencode/mimo-v2.5-free"
   - "opencode/nemotron-3-ultra-free"
   - "opencode/north-mini-code-free"
-  - "zai/glm-5([^v].*|$)"  # glm-5, glm-5-turbo, glm-5.1, glm-5.2 (text only)
+  - "zai/glm-5([^v].*|$)"  # glm-5, glm-5-turbo, glm-5.1, glm-5.2, glm-5.3 (text only)
+  - "zai/glm-5v-turbo"  # vision: text, image, video, PDF
   - "zai/glm-4.7-flash"  # free
 
 providers:
