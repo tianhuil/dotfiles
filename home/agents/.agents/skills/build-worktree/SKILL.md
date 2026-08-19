@@ -2,7 +2,7 @@
 name: build-worktree
 description: Build a feature in a git worktree, validate locally, push a PR, and iterate until CI passes. Use when the user wants to implement a task in an isolated worktree with full PR lifecycle management.
 license: MIT
-compatibility: opencode
+compatibility: opencode, pi
 metadata:
   audience: developers
   workflow: git
@@ -39,7 +39,7 @@ Or reference them by their install path at `~/.agents/skills/build-worktree/`.
 
 ## Execution Model
 
-This is an **orchestrator** — it coordinates bash scripts and subagents. Use the **Task tool** for AI phases (1, 2.5, 5). Use the helper scripts for mechanical phases (0, 2, 3, 4). The default subagent type is `build`, but the user may specify a different agent type — use it if provided.
+This is an **orchestrator** — it coordinates bash scripts and delegated agents. Use the host agent's delegation mechanism for AI phases (1, 2.5, 5). The exact tool name and agent parameter differ between hosts; use the host's syntax, but always pass `WORKTREE_PATH` explicitly as `cwd`. Use the helper scripts for mechanical phases (0, 2, 3, 4). The default implementation agent is `build` or its host-equivalent (for example, `worker`); use a user-specified agent type when provided.
 
 ## Phase 0: Setup
 
@@ -69,11 +69,12 @@ Parse the output for `BRANCH_NAME` (may have `-v2` suffix if branch existed), `B
 
 ## Phase 1: Execute the Task
 
-Spawn a pagent (default: `**build**`) via the Task tool. The subagent receives:
+Spawn an implementation agent (default: `build`, `worker`, or the host-equivalent) using the host's delegation mechanism. Supply a custom prompt containing:
 
-- **Worktree path**: from Phase 0; **ALWAYS** work in the same worktree, not on the main branch / worktree.
-- **Task description**: the full task text and link to design docs, if any.
-- **Instructions**: Read AGENTS.md, README, package.json; implement the task; do NOT commit.
+- **Working directory**: pass the worktree path explicitly as the delegation tool's `cwd`; **ALWAYS** work in that worktree, not in the main branch / worktree.
+- **Task description**: the full task text and links to design docs, if any.
+- **Instructions**: Read AGENTS.md, README, and package.json; implement the task; do NOT commit.
+- **Output**: report changed files, validation commands, failures, and remaining issues.
 
 The subagent is a small autonomous unit. Its instructions:
 
@@ -86,12 +87,28 @@ To commit work in the worktree, run:
 cd $WORKTREE_PATH && git add -A && git commit -m "[[ORCA_RICH_MD:bbe96137ea6c642624fc1bc64f4941b4:inline-html:%3Ctype%3E]]: [[ORCA_RICH_MD:bbe96137ea6c642624fc1bc64f4941b4:inline-html:%3Cdescriptive%20message%3E]]"
 ```
 
-### Subagents
+### Delegated agents
 
-Speed up your work and improve quality with subagents
+Use focused prompts and pass the worktree as `cwd` on every delegation. Adapt the syntax to the host, but preserve this contract:
 
-- If there are multiple independent tasks, spawn multiple subagents in parallel. Do not commit until all subagents completed their work.
-- If there are dependent tasks, spawn subagents sequentially, passing the worktree path and task description to each. Commit after each subagent completes.
+```text
+delegate(
+  agent = "<implementation-or-review-agent>",
+  cwd = WORKTREE_PATH,
+  prompt = """
+    Goal: <specific outcome>
+    Task: <full task description>
+    Authority: <read/edit/commit/push/review permissions>
+    Context: <design docs, validation output, or review reports>
+    Success: <observable completion criteria>
+    Report: changed files, commands run, failures, and remaining issues
+  """
+)
+```
+
+- If there are multiple independent tasks, spawn multiple agents in parallel. Give each a distinct task and ensure their edits do not overlap. Do not commit until all agents complete their work.
+- If there are dependent tasks, spawn agents sequentially. Pass each agent the worktree as `cwd`, the relevant task description, and the prior agent's results. Commit after each agent completes.
+- State the agent's authority explicitly: whether it may read, edit, commit, push, or only review. Keep one writer per worktree at a time.
 
 ## Phase 2: Local Validation
 
@@ -108,11 +125,11 @@ Then run all discovered commands in one call:
 bash ~/.agents/skills/build-worktree/validate.sh "$WORKTREE_PATH" "npm test" "npm run lint" "npm run typecheck"
 ```
 
-If it exits non-zero, spawn a subagent to fix the failures, commit, and re-run. Repeat until all pass **up to 3 times**.  If it continues to fail after these attempts to fix it, give up and explain what went wrong.
+If it exits non-zero, delegate a fix agent with the worktree path passed explicitly as `cwd`. Include the validation output in its custom prompt. Ask it to fix the failures, commit, and report its changes; then re-run. Repeat until all pass **up to 3 times**.  If it continues to fail after these attempts to fix it, give up and explain what went wrong.
 
 ## Phase 2.5: Task Review (highly recommended)
 
-Spawn two review subagents **in parallel**:
+Spawn two review agents **in parallel**, each with the worktree path passed explicitly as `cwd` and a focused custom prompt. Use the host-equivalent review roles if these names are unavailable:
 
 1. `**code-quality-reviewer**` subagent — consolidated review of task completion, code quality, security, and test coverage. Pass it:
   - **Worktree path**, **Task description**
@@ -121,7 +138,7 @@ Spawn two review subagents **in parallel**:
   - **Worktree path**, **Task description**
   - It will diff against merge-base, find any referenced design docs in `notes/design/`, and compare implementation against design
 
-If either review finds issues: spawn a subagent to fix, re-run Phase 2 + Phase 2.5. Max 3 review iterations.
+If either review finds issues: delegate a fix agent with the worktree passed as `cwd`, include both review reports in its prompt, then re-run Phase 2 + Phase 2.5. Max 3 review iterations.
 
 Skip this phase only for straightforward tasks.
 
@@ -173,7 +190,7 @@ gh run view $RUN_ID --json jobs --jq '.jobs[] | select(.conclusion != "success")
 gh run view $RUN_ID --log-failed
 ```
 
-Spawn a subagent to analyze logs and fix issues in the worktree. Commit and push:
+Delegate a fix agent with the worktree passed explicitly as `cwd`. Include the failed CI logs and the allowed scope in its custom prompt. Ask it to analyze the logs, fix the issues, and report its changes. Commit and push:
 
 ```bash
 cd $WORKTREE_PATH && git add -A && git commit -m "fix: <descriptive message>" && git push
