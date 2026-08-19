@@ -10,8 +10,15 @@
     "npm:pi-web-access",
     "git:github.com/tianhuil/pi-orca"
   ],
-  "defaultProvider": "zai",
-  "defaultModel": "glm-5-turbo",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-5.6-luna",
   "defaultThinkingLevel": "high",
+  "enabledModels": [
+    "openai-codex/gpt-5.6-luna:medium",
+    "opencode/big-pickle",
+    "opencode/deepseek-v4-flash-free",
+    "zai/glm-5-turbo",
+    "zai/glm-5.3"
+  ],
   "hideThinkingBlock": false
 }
