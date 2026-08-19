@@ -11,6 +11,7 @@
 // Effort models:  deepseek-v4-flash-free (low/high/max)
 // Binary models:  north-mini-code-free, glm-5, glm-5.1, glm-5-turbo (off/high)
 // Effort models:  glm-5.2 (high/max)
+// Effort models:  gpt-5.6-sol/terra/luna (none/low/medium/high/xhigh/max)
 
 {
   "providers": {
@@ -38,6 +39,43 @@
             "high": "high",
             "xhigh": null,
             "max": null
+          }
+        }
+      }
+    },
+    "openai": {
+      "modelOverrides": {
+        "gpt-5.6-sol": {
+          "thinkingLevelMap": {
+            "off": "none",
+            "minimal": null,
+            "low": "low",
+            "medium": "medium",
+            "high": "high",
+            "xhigh": "xhigh",
+            "max": "max"
+          }
+        },
+        "gpt-5.6-terra": {
+          "thinkingLevelMap": {
+            "off": "none",
+            "minimal": null,
+            "low": "low",
+            "medium": "medium",
+            "high": "high",
+            "xhigh": "xhigh",
+            "max": "max"
+          }
+        },
+        "gpt-5.6-luna": {
+          "thinkingLevelMap": {
+            "off": "none",
+            "minimal": null,
+            "low": "low",
+            "medium": "medium",
+            "high": "high",
+            "xhigh": "xhigh",
+            "max": "max"
           }
         }
       }
