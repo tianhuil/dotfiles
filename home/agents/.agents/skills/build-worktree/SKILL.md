@@ -26,7 +26,7 @@ Or reference them by their install path at `~/.agents/skills/build-worktree/`.
 
 | Script                                     | Phase | Purpose                                                                                         |
 | ------------------------------------------ | ----- | ----------------------------------------------------------------------------------------------- |
-| `setup.sh "<branch>"`                      | 0     | Create worktree for branch. Outputs `BRANCH_NAME`, `BASE_BRANCH`, `WORKTREE_PATH`               |
+| `setup.sh "<branch>"`                      | 0     | Create worktree for branch using `wt` when available, otherwise `git worktree`. Outputs `BRANCH_NAME`, `BASE_BRANCH`, `WORKTREE_TOOL`, `WORKTREE_PATH`               |
 | `validate.sh "<worktree>" <cmd...>`        | 2     | Run validation commands in worktree. Exits 0 on pass, 1 on failure                              |
 | `push-pr.sh "<branch>" "<title>" "<body>"` | 3     | Push branch + create PR. Outputs PR URL and `PR_NUMBER`                                         |
 | `monitor-ci.sh "<branch>" "<pr_number>"`   | 4     | Wait for CI via `gh run watch`, check mergeability. Outputs `CONCLUSION`, `MERGEABLE`, `RUN_ID` |
@@ -63,7 +63,9 @@ This is an **orchestrator** — it coordinates bash scripts and subagents. Use t
    bash ~/.agents/skills/build-worktree/setup.sh "$BRANCH_NAME"
   ```
 
-Parse the output for `BRANCH_NAME` (may have `-v2` suffix if branch existed), `BASE_BRANCH`, and `WORKTREE_PATH`. All usequent work uses these.
+   `setup.sh` checks for `wt` before using it. If `wt` is unavailable, it creates the worktree with `git worktree add`.
+
+Parse the output for `BRANCH_NAME` (may have `-v2` suffix if branch existed), `BASE_BRANCH`, `WORKTREE_TOOL`, and `WORKTREE_PATH`. All subsequent work uses these.
 
 ## Phase 1: Execute the Task
 
@@ -181,7 +183,7 @@ Return to Phase 4. Max 5 CI failure iterations before stopping.
 
 ## Cleanup
 
-Do NOT remove the worktree. The user cleans up with `wt remove $BRANCH_NAME`.
+Do NOT remove the worktree. The user cleans up with `wt remove $BRANCH_NAME` when `wt` was used, or `git worktree remove <worktree-path>` with the fallback.
 
 ## Error Cases
 
@@ -189,6 +191,7 @@ Do NOT remove the worktree. The user cleans up with `wt remove $BRANCH_NAME`.
 - **Push auth/permission failure**: Stop and ask user to resolve (e.g. `gh auth login`). Do NOT try SSH, HTTPS, or remote URL changes.
 - **Branch already exists**: `setup.sh` appends `-v2`, `-v3`, etc.
 - **Worktree creation fails**: Report error and stop
+- **`wt` unavailable**: `setup.sh` uses `git worktree add`; remove the worktree later with `git worktree remove <worktree-path>`
 - **Push fails**: Report error (likely need rebase)
 - **Merge conflict**: Phase 4.5 handles rebase + force push
 - **Max CI retries (5)**: Report all accumulated failures and stop
