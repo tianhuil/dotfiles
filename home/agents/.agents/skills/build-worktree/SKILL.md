@@ -2,7 +2,7 @@
 name: build-worktree
 description: Build a feature in a git worktree, validate locally, push a PR, and iterate until CI passes. Use when the user wants to implement a task in an isolated worktree with full PR lifecycle management.
 license: MIT
-compatibility: opencode, pi
+compatibility: pi
 metadata:
   audience: developers
   workflow: git
@@ -39,7 +39,7 @@ Or reference them by their install path at `~/.agents/skills/build-worktree/`.
 
 ## Execution Model
 
-This is an **orchestrator** — it coordinates bash scripts and delegated agents. Use the host agent's delegation mechanism for AI phases (1, 2.5, 5). The exact tool name and agent parameter differ between hosts; use the host's syntax, but always pass `WORKTREE_PATH` explicitly as `cwd`. Use the helper scripts for mechanical phases (0, 2, 3, 4). The default implementation agent is `build` or its host-equivalent (for example, `worker`); use a user-specified agent type when provided.
+This is an **orchestrator** — it coordinates bash scripts and delegated agents. Use Pi's `subagent` tool for AI phases (1, 2.5, 5), and always pass `WORKTREE_PATH` explicitly as `cwd`. Use the helper scripts for mechanical phases (0, 2, 3, 4). The default implementation agent is `worker`; use a user-specified agent type when provided.
 
 ## Phase 0: Setup
 
@@ -69,7 +69,7 @@ Parse the output for `BRANCH_NAME` (may have `-v2` suffix if branch existed), `B
 
 ## Phase 1: Execute the Task
 
-Spawn an implementation agent (default: `build`, `worker`, or the host-equivalent) using the host's delegation mechanism. Supply a custom prompt containing:
+Spawn a `worker` agent (or a user-specified agent) with Pi's `subagent` tool. Supply a custom prompt containing:
 
 - **Working directory**: pass the worktree path explicitly as the delegation tool's `cwd`; **ALWAYS** work in that worktree, not in the main branch / worktree.
 - **Task description**: the full task text and links to design docs, if any.
@@ -89,21 +89,21 @@ cd $WORKTREE_PATH && git add -A && git commit -m "[[ORCA_RICH_MD:bbe96137ea6c642
 
 ### Delegated agents
 
-Use focused prompts and pass the worktree as `cwd` on every delegation. Adapt the syntax to the host, but preserve this contract:
+Use focused prompts and pass the worktree as `cwd` on every delegation. Preserve this contract:
 
 ```text
-delegate(
-  agent = "<implementation-or-review-agent>",
-  cwd = WORKTREE_PATH,
-  prompt = """
+subagent({
+  agent: "<implementation-or-review-agent>",
+  cwd: WORKTREE_PATH,
+  task: `
     Goal: <specific outcome>
     Task: <full task description>
     Authority: <read/edit/commit/push/review permissions>
     Context: <design docs, validation output, or review reports>
     Success: <observable completion criteria>
     Report: changed files, commands run, failures, and remaining issues
-  """
-)
+  `
+})
 ```
 
 - If there are multiple independent tasks, spawn multiple agents in parallel. Give each a distinct task and ensure their edits do not overlap. Do not commit until all agents complete their work.
@@ -129,14 +129,12 @@ If it exits non-zero, delegate a fix agent with the worktree path passed explici
 
 ## Phase 2.5: Task Review (highly recommended)
 
-Spawn two review agents **in parallel**, each with the worktree path passed explicitly as `cwd` and a focused custom prompt. Use the host-equivalent review roles if these names are unavailable:
+Read the default prompts from:
 
-1. `**code-quality-reviewer**` subagent — consolidated review of task completion, code quality, security, and test coverage. Pass it:
-  - **Worktree path**, **Task description**
-  - It will diff against merge-base, read changed files, check for tests, and produce a single report covering all four axes
-2. `**design-review**` subagent — verify alignment with design docs. Pass it:
-  - **Worktree path**, **Task description**
-  - It will diff against merge-base, find any referenced design docs in `notes/design/`, and compare implementation against design
+- `prompts/review-code-quality.md`
+- `prompts/review-requirements.md`
+
+Fill in their variables with the task description and worktree path, then spawn two `reviewer` agents **in parallel**. Pass the worktree path explicitly as `cwd` for each delegation.
 
 If either review finds issues: delegate a fix agent with the worktree passed as `cwd`, include both review reports in its prompt, then re-run Phase 2 + Phase 2.5. Max 3 review iterations.
 
