@@ -14,7 +14,7 @@
   "defaultModel": "gpt-5.6-luna",
   "defaultThinkingLevel": "medium",
   "enabledModels": [
-    "openai-codex/gpt-5.6-luna:medium",
+    "openai-codex/gpt-5.6*",
     "opencode/big-pickle",
     "opencode/deepseek-v4-flash-free",
     "zai/glm-5-turbo",
