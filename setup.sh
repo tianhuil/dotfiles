@@ -48,9 +48,12 @@ if [ -d ~/.config/opencode/plugins/open-queue ] && command -v bun >/dev/null 2>&
   (cd ~/.config/opencode/plugins/open-queue && bun install && bun run build)
 fi
 
-# Install pi-models-filter extension deps (js-yaml for the node-fallback YAML parser)
+# Install pi extension dependencies.
 if [ -d ~/.pi/agent/extensions/models-filter ] && command -v bun >/dev/null 2>&1; then
   (cd ~/.pi/agent/extensions/models-filter && bun install)
+fi
+if [ -f ~/.pi/agent/extensions/subagent/package-lock.json ] && command -v npm >/dev/null 2>&1; then
+  (cd ~/.pi/agent/extensions/subagent && npm ci --omit=dev)
 fi
 
 # RTK opencode integration
