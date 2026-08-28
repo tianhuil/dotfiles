@@ -131,6 +131,7 @@ const KNOWN_MODELS: Record<string, ModelMeta> = {
   "glm-5-turbo": { name: "GLM-5-Turbo", reasoning: true, input: ["text"], contextWindow: 200000, maxTokens: 131072, compat: { supportsReasoningEffort: false, thinkingFormat: "zai", zaiToolStream: true } },
   "glm-5.1": { name: "GLM-5.1", reasoning: true, input: ["text"], contextWindow: 200000, maxTokens: 131072, compat: { supportsReasoningEffort: false, thinkingFormat: "zai", zaiToolStream: true } },
   "glm-5.2": { name: "GLM-5.2", reasoning: true, thinkingLevelMap: { minimal: null, low: "high", medium: "high", high: "high", max: "max" }, input: ["text"], contextWindow: 1000000, maxTokens: 131072, compat: { supportsReasoningEffort: true, thinkingFormat: "zai", zaiToolStream: true } },
+  "glm-5.3": { name: "GLM-5.3", reasoning: true, thinkingLevelMap: { minimal: null, low: "high", medium: "high", high: "high", max: "max" }, input: ["text"], contextWindow: 1000000, maxTokens: 131072, compat: { supportsReasoningEffort: true, thinkingFormat: "zai", zaiToolStream: true } },
   "glm-5v-turbo": { name: "GLM-5V-Turbo", reasoning: true, input: ["text", "image"], contextWindow: 200000, maxTokens: 131072, compat: { supportsReasoningEffort: false, thinkingFormat: "zai", zaiToolStream: true } },
 
   // ── opencode free tier ──

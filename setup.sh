@@ -52,9 +52,6 @@ fi
 if [ -d ~/.pi/agent/extensions/models-filter ] && command -v bun >/dev/null 2>&1; then
   (cd ~/.pi/agent/extensions/models-filter && bun install)
 fi
-if [ -f ~/.pi/agent/extensions/subagent/package-lock.json ] && command -v npm >/dev/null 2>&1; then
-  (cd ~/.pi/agent/extensions/subagent && npm ci --omit=dev)
-fi
 
 # RTK opencode integration
 command -v rtk >/dev/null 2>&1 && rtk init -g --opencode
