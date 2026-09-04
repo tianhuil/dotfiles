@@ -21,7 +21,7 @@ permission allowlist to `~/.agents/skills/**` so skill scripts can run.
 
 | Origin | Included skills |
 |--------|----------------|
-| Repo-authored | `design`, `model-inventory`, `my-research`, `pi-package-publish` |
+| Repo-authored | `design`, `model-inventory`, `my-research`, `pi-package-publish`, `skill-management` |
 | Ported/customized from anthropics | `docx`, `pdf`, `pptx`, `xlsx`, `frontend-design`, `webapp-testing`, `theme-factory`, … |
 | Opencode-flavored | `bun`, `coding-standards`, `drizzle-orm`, `nextjs-frontend`, `trpc`, `web-search`, … (~30) |
 | CLI-installed (NOT in repo) | `agent-browser`, `find-skills` (vercel-labs), `research` (mattpocock) — installed by `setup_skills.sh` into `~/.agents/skills/` |
