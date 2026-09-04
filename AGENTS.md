@@ -14,7 +14,7 @@ context, so invoke by name):
 
 - `dotfiles-architecture`
 - `dotfiles-shell-config`
-- `dotfiles-opencode-skills`
+- `dotfiles-skills-management`
 - `dotfiles-agent-skills-cli`
 - `dotfiles-orca-bin`
 - `dotfiles-omp-validation`

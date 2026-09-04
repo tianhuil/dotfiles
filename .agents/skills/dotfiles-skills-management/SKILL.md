@@ -1,9 +1,9 @@
 ---
-name: dotfiles-opencode-skills
-description: Dotfiles-specific guidance for OpenCode agents and shared skills. Use when changing home/opencode/.config/opencode/agents/, opencode.json, the shared home/agents/.agents/skills/ tree, setup_skills.sh, or the Anthropic skills submodule. For general skill ownership, installation, updates, and audits, first use skill-management.
+name: dotfiles-skills-management
+description: Dotfiles-specific guidance for agent configuration and shared skills. Use when changing home/opencode/.config/opencode/agents/, opencode.json, the shared home/agents/.agents/skills/ tree, setup_skills.sh, or the Anthropic skills submodule. For general skill ownership, installation, updates, and audits, first use skill-management.
 ---
 
-# Dotfiles OpenCode skills
+# Dotfiles skill management
 
 Use `home/agents/.agents/skills/skill-management/SKILL.md` for the general workflow. This skill only records the dotfiles-specific layout and exceptions.
 
