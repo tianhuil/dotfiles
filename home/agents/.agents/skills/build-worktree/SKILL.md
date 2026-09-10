@@ -134,9 +134,21 @@ Read the default prompts from:
 - `prompts/review-code-quality.md`
 - `prompts/review-requirements.md`
 
-Fill in their variables with the task description and worktree path, then spawn two `reviewer` agents **in parallel**. Pass the worktree path explicitly as `cwd` for each delegation.
+### Review sessions
 
-If either review finds issues: delegate a fix agent with the worktree passed as `cwd`, include both review reports in its prompt, then re-run Phase 2 + Phase 2.5. Max 3 review iterations.
+There are exactly two long-lived review sessions in this phase:
+
+- **Code-quality session** — reviews using `prompts/review-code-quality.md`
+- **Requirements session** — reviews using `prompts/review-requirements.md`
+
+For the **first review round only**, create one new `reviewer` session for each type and spawn both agents **in parallel**. Record the session ID returned for each agent. Pass the worktree path explicitly as `cwd` for each delegation.
+
+If either review finds issues, delegate a fix agent with the worktree passed as `cwd`, including both review reports in its prompt. Then re-run Phase 2 and start the **second review round by resuming the existing review sessions**:
+
+- Reuse the **code-quality session ID** for `prompts/review-code-quality.md`.
+- Reuse the **requirements session ID** for `prompts/review-requirements.md`.
+
+Do not create new reviewer sessions for the second round or later rounds, and never swap the session IDs between review types. Each resumed reviewer must inspect the current diff again and report whether the previously identified issues are fixed, along with any new evidence-backed issues. Continue resuming those same two sessions for later rounds, up to 3 review iterations total.
 
 Skip this phase only for straightforward tasks.
 
