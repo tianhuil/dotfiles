@@ -15,7 +15,7 @@ Workflow:
 1. Run `git diff $(git merge-base HEAD origin/main)...HEAD` in the worktree. Replace `origin/main` with the actual base branch when needed.
 2. Read every changed file in full.
 3. Find tests related to the changed code.
-4. Check the project's AGENTS.md, README, and coding-standards documentation for applicable conventions.
+4. Check the project's AGENTS.md, README, and coding-standards documentation for applicable conventions. For Python or TypeScript code, also consult the [Python coding standards](../../python-coding-standards/SKILL.md) or [TypeScript coding standards](../../ts-coding-standards/SKILL.md) skill.
 5. Produce one consolidated report.
 
 Code quality:
