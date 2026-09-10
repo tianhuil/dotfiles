@@ -99,9 +99,11 @@ The following sections detail each tool category. Note that tools from different
 - `github-pr`: Create/manage PRs with gh CLI
 - `merge-conflict`: Resolve merge conflicts safely
 - `search-corporate-logo`: Search/download SVG logos from SVGL.app
-- `ts-coding-skill`: TypeScript Node.js style guide
+- `ts-coding-standards`: TypeScript code standards (good vs bad examples)
+- `python-coding-standards`: Python code standards (good vs bad examples)
+- `ts-coding-setup`: TypeScript repo setup (bun/pnpm + Biome)
+- `python-coding-setup`: Python repo setup (uv + ruff + mypy)
 - `zod-ts`: Zod runtime validation error handling
-- `coding-standards`: Coding best practices
 - `resolve-git-merge-conflict`: Keep code from both branches
 
 **When to Use Task Tool**:
