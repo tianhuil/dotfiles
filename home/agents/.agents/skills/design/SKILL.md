@@ -8,127 +8,44 @@ metadata:
 
 # Design
 
-You are a design specialist that creates machine-parseable design documents. Designs are both human-readable and structured for agent execution throughout the project lifecycle.
+Choose the smallest design workflow that makes the work deterministic. Designs are living contracts: an independent implementer should know what to build, an independent reviewer should know how to verify it, and acceptance should fail when required work is absent.
 
-## Core Principles
+## Choose a format
 
-### 1. Start High-Level, Iterate Down
+Use [`simple-design/SKILL.md`](./simple-design/SKILL.md) when **all** of these are true:
 
-- Begin with a concise "product brief" (1 paragraph): what problem, who users, success criteria
-- Let the AI expand this into a detailed spec
-- Use Plan Mode (read-only) to draft and refine before any code is written
-- The spec becomes a living artifact that persists between sessions
+- one component or one existing seam contains the change;
+- the work fits one implementation session and one owner;
+- there are no external integrations, generated artifacts, imported evidence, persistent-data changes, or security-sensitive claims;
+- there are few cases and no meaningful mode or compatibility matrix; and
+- a focused test can independently prove the observable behavior.
 
-### 2. Structure Like a Professional PRD/SRS
+Use [`large-design/SKILL.md`](./large-design/SKILL.md) when **any** of these are true:
 
-Six core areas from GitHub's analysis of 2,500+ agent configs:
+- multiple components, teams, sessions, agents, worktrees, or tickets are involved;
+- the change crosses a public API, process, service, deployment, or integration boundary;
+- external versions, configuration, network, platform, vendor behavior, or security assumptions matter;
+- generated files, fixtures, captured data, migrations, or other evidence need provenance or drift rules;
+- the required cases form a matrix, include multiple modes, or could be silently omitted;
+- a false-green acceptance result could hide missing behavior, data-integrity risk, or an unsafe claim; or
+- ownership, source of truth, failure classification, or completion cannot be stated compactly.
 
-| Area | What to Include |
-|------|-----------------|
-| **Commands** | Executable commands with flags: `npm test`, `pytest -v` |
-| **Testing** | Framework, test file locations, coverage expectations |
-| **Project Structure** | Explicit paths: `src/`, `tests/`, `docs/` |
-| **Code Style** | One real code snippet > three paragraphs of description |
-| **Git Workflow** | Branch naming, commit format, PR requirements |
-| **Boundaries** | What the agent should never touch |
+When uncertain, choose the large format. Do not force a large feature into the simple format merely to keep the document short. A simple design may be upgraded to a large design when exploration reveals a trigger above. Run the selected skill as a separate skill so its scope and context remain clear.
 
-### 3. Use Three-Tier Boundaries
+## Shared output rules
 
-```
-✅ Always:    Run tests before commits, follow naming conventions
-⚠️ Ask first: Database schema changes, adding dependencies
-🚫 Never:     Commit secrets, edit node_modules/, modify CI config
-```
+Both formats:
 
-### 4. Write for Chunking (LLM-Friendly)
+- start with the user problem, users, observable outcomes, success measures, and explicit exclusions;
+- use repository facts, existing seams, domain terminology, ADRs, configuration, and test commands before writing decisions;
+- use exact examples for important contracts and inline TODOs only for genuine user decisions;
+- pair every implementation step with a clear, checkable completion criterion;
+- state the highest useful test seam and verify external behavior rather than implementation details;
+- distinguish required behavior from follow-ups; and
+- use the three-tier boundaries: Always, Ask first, Never.
 
-- Each section should be self-contained and retrievable
-- Use consistent terminology—don't mix "API key", "access token", "auth credential"
-- Include feature/product names in every relevant section
-- Format code blocks explicitly—inline code gets mangled
-- Keep heading hierarchy consistent (H1→H2→H3, never skip levels)
-- Avoid pronouns: say "Update config.yaml" not "Update it and restart"
+Write the resulting document to `notes/design/[feature-name]-design.md` using kebab-case. Keep simple documents under 200 lines and large documents under 300 lines.
 
-### 5. Break Large Tasks into Modular Prompts
+## Review choice
 
-- Don't dump everything in one prompt—context window limits and "curse of instructions" degrade quality
-- Split by component: "Backend API Spec" and "Frontend UI Spec" separately
-- Use extended TOC/summaries for large specs
-- Each prompt should focus on one task/section
-
-### 6. Include Verification & Quality Gates
-
-- **Self-verification**: Ask agent to confirm all requirements are met
-- **LLM-as-a-Judge**: Use a second agent to review first agent's output
-- **Conformance tests**: YAML-based tests that any implementation must pass
-- Define success metrics explicitly—what does "good" look like?
-
-### 7. Handle LLM-Specific Concerns
-
-For LLM/AI features specifically:
-
-| Section | Key Question |
-|---------|--------------|
-| **Problem Statement** | What language-heavy workflow are we automating? |
-| **Data Strategy** | Where is "source of truth" (RAG, API, fine-tuning)? |
-| **Model Config** | Model name, temperature, top-p, system instructions |
-| **Evaluation** | Golden dataset, metrics (faithfulness, instruction compliance) |
-| **Failure Modes** | Fallback strategies, uncertainty signaling |
-| **Security** | Prompt injection prevention, PII handling |
-
-## Design Doc Template
-
-```markdown
-# Feature: [Name]
-
-## Executive Summary
-[1-2 paragraphs: what, why, success criteria]
-[TODO: decision to be made — confirm success criteria and scope boundaries]
-
-## User Stories
-- [User] can [action] so that [benefit]
-
-## Technical Design
-
-### Architecture
-[System diagram or description]
-
-### Data Model
-[Schema, types, relationships]
-[TODO: decision to be made — if multiple storage options exist, list them]
-
-### API Contracts
-[Endpoints, request/response shapes]
-[TODO: decision to be made — authentication/authorization approach: API key, session cookie, OAuth, or JWT]
-
-## Implementation Plan
-
-### Phase 1: [Name]
-- [ ] Task 1
-- [ ] Task 2
-
-### Phase 2: [Name]
-- [ ] Task 3
-
-## Acceptance Criteria
-- [ ] Criterion 1
-- [ ] Criterion 2
-
-## Boundaries
-- ✅ Always: [rules]
-- ⚠️ Ask first: [rules]
-- 🚫 Never: [rules]
-```
-
-## Formatting Rules
-
-- **300-line cap**: Design docs must stay under 300 lines. If a section becomes verbose, cut or move detail to an appendix or follow-up doc.
-- **Prefer concrete examples over description**: When explaining an input, output, or contract, show the actual JSON/YAML/code rather than a table describing the fields. This is more precise and often shorter.
-- **Never defer verification to the reader**: If something needs checking—API surface, library behavior, codebase structure—investigate it (`read`, `grep`, `glob`, `webfetch`, or a subagent) and resolve it before it reaches the doc.
-- **Inline TODOs for decisions**: When you encounter ambiguity, a fork in approach, or a choice the user must make, insert a `[TODO: decision to be made — description]` tag **inline at that exact spot** in the doc. If there are only a few plausible options, list them so the user can simply keep one. Never defer the question to a separate section—place it where the reader is already looking. Resolve TODOs you can yourself (e.g. by reading the codebase or docs) before placing them.
-
-## Output Location
-
-Place design documents in: `notes/design/`
-
-Filename format: `[feature-name]-design.md` (kebab-case)
+A focused self-check is sufficient for a low-risk simple design. Use an independent adversarial reviewer for every Critical/High-risk large design. The reviewer should attack ambiguity, missing cases, false-green paths, circular gates, silent skips, contradictory modes, unverified assumptions, unstable evidence, and design/code drift. This is separate from later implementation code review: code review cannot prove that the original design was complete.
