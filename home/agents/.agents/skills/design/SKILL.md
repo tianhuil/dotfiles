@@ -12,7 +12,7 @@ Choose the smallest design workflow that makes the work deterministic. Designs a
 
 ## Choose a format
 
-Use [`simple-design/SKILL.md`](./simple-design/SKILL.md) when **all** of these are true:
+Use [`../simple-design/SKILL.md`](../simple-design/SKILL.md) when **all** of these are true:
 
 - one component or one existing seam contains the change;
 - the work fits one implementation session and one owner;
@@ -20,7 +20,7 @@ Use [`simple-design/SKILL.md`](./simple-design/SKILL.md) when **all** of these a
 - there are few cases and no meaningful mode or compatibility matrix; and
 - a focused test can independently prove the observable behavior.
 
-Use [`large-design/SKILL.md`](./large-design/SKILL.md) when **any** of these are true:
+Use [`../large-design/SKILL.md`](../large-design/SKILL.md) when **any** of these are true:
 
 - multiple components, teams, sessions, agents, worktrees, or tickets are involved;
 - the change crosses a public API, process, service, deployment, or integration boundary;
