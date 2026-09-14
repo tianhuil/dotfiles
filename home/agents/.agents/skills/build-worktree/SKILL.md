@@ -136,6 +136,8 @@ Read the default prompts from:
 
 ### Review sessions
 
+Set the review iteration cap from the user's request when provided; otherwise use `5`. The cap includes the first review round.
+
 There are exactly two long-lived review sessions in this phase:
 
 - **Code-quality session** — reviews using `prompts/review-code-quality.md`
@@ -148,7 +150,7 @@ If either review finds issues, delegate a fix agent with the worktree passed as 
 - Reuse the **code-quality session ID** for `prompts/review-code-quality.md`.
 - Reuse the **requirements session ID** for `prompts/review-requirements.md`.
 
-Do not create new reviewer sessions for the second round or later rounds, and never swap the session IDs between review types. Each resumed reviewer must inspect the current diff again and report whether the previously identified issues are fixed, along with any new evidence-backed issues. Continue resuming those same two sessions for later rounds, up to 3 review iterations total.
+Do not create new reviewer sessions for the second round or later rounds, and never swap the session IDs between review types. Each resumed reviewer must inspect the current diff again and report whether the previously identified issues are fixed, along with any new evidence-backed issues. Continue resuming those same two sessions for later rounds, up to the configured review iteration cap.
 
 Skip this phase only for straightforward tasks.
 
