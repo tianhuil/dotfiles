@@ -34,13 +34,13 @@ When uncertain, choose the large format. Do not force a large feature into the s
 
 ## Shared output rules
 
-Use plain language and avoid jargon unless the jargon is necessary. Define each term before using it. After defining a term, use that same term consistently; do not replace it with synonyms, because synonyms can create ambiguity.
+Use plain language and avoid jargon unless the jargon is necessary. Define each term before using it. After defining a term, use that same term consistently; do not replace it with synonyms, because synonyms can create ambiguity. For every unresolved question or decision, add an inline TODO at the point where it must be resolved. Write each TODO as a question in this exact form: `[TODO: what is the ...?]`.
 
 Both formats:
 
 - start with the user problem, users, observable outcomes, success measures, and explicit exclusions;
 - use repository facts, existing seams, domain terminology, ADRs, configuration, and test commands before writing decisions;
-- use exact examples for important contracts and inline TODOs only for genuine user decisions;
+- use exact examples for important contracts and inline TODOs for genuine unresolved questions or decisions;
 - pair every implementation step with a clear, checkable completion criterion;
 - state the highest useful test seam and verify external behavior rather than implementation details;
 - distinguish required behavior from follow-ups; and

@@ -14,9 +14,9 @@ Create a design that an independent implementer can build, an independent review
 
 ### 1. Establish the brief and boundaries
 
-Use plain language and avoid jargon unless the jargon is necessary. Define each term before using it. After defining a term, use that same term consistently; do not replace it with synonyms, because synonyms can create ambiguity.
+Use plain language and avoid jargon unless the jargon is necessary. Define each term before using it. After defining a term, use that same term consistently; do not replace it with synonyms, because synonyms can create ambiguity. For every unresolved question or decision, add an inline TODO at the point where it must be resolved. Write each TODO as a question in this exact form: `[TODO: what is the ...?]`.
 
-Use Plan Mode (read-only) first. Explore the repository, existing seams, domain glossary, ADRs, configuration, and test commands before writing decisions. Resolve facts from the codebase or authoritative documentation; mark only genuine user decisions as inline TODOs.
+Use Plan Mode (read-only) first. Explore the repository, existing seams, domain glossary, ADRs, configuration, and test commands before writing decisions. Resolve repository facts before writing decisions; mark genuine unresolved questions or decisions as inline TODOs.
 
 Write:
 
@@ -182,6 +182,6 @@ Implementation is complete only when:
 ## Formatting rules
 
 - Prefer a concrete JSON/YAML/code example over paragraphs or a field-description table.
-- Put TODOs inline at the decision point: `[TODO: decision to be made — ...]`; resolve repository facts before writing TODOs.
+- Put TODOs inline at the decision point in this exact form: `[TODO: what is the ...?]`; resolve repository facts before writing TODOs.
 - Keep each section self-contained and each implementation step paired with an exhaustive, checkable completion criterion.
 - Keep one authoritative statement for each rule; link to disclosed detail instead of duplicating it.

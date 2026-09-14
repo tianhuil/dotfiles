@@ -17,7 +17,7 @@ Write one paragraph covering the problem, users, solution, observable success cr
 
 ## Scope and Decisions
 
-Use plain language and avoid jargon unless the jargon is necessary. Define each term before using it. After defining a term, use that same term consistently; do not replace it with synonyms, because synonyms can create ambiguity.
+Use plain language and avoid jargon unless the jargon is necessary. Define each term before using it. After defining a term, use that same term consistently; do not replace it with synonyms, because synonyms can create ambiguity. For every unresolved question or decision, add an inline TODO at the point where it must be resolved. Write each TODO as a question in this exact form: `[TODO: what is the ...?]`.
 
 State:
 
@@ -28,9 +28,9 @@ State:
 - the source of truth for configuration or data; and
 - any assumptions that need confirmation.
 
-Use an inline TODO at the decision point when the user must choose:
+Use an inline TODO at the decision point when a question or decision remains unresolved:
 
-`[TODO: decision to be made — choose A or B because ...]`
+`[TODO: what is the decision between A and B, and why?]`
 
 ## Technical Design
 
