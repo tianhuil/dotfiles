@@ -14,6 +14,8 @@ Create a design that an independent implementer can build, an independent review
 
 ### 1. Establish the brief and boundaries
 
+Use plain language and avoid jargon unless the jargon is necessary. Define each term before using it. After defining a term, use that same term consistently; do not replace it with synonyms, because synonyms can create ambiguity.
+
 Use Plan Mode (read-only) first. Explore the repository, existing seams, domain glossary, ADRs, configuration, and test commands before writing decisions. Resolve facts from the codebase or authoritative documentation; mark only genuine user decisions as inline TODOs.
 
 Write:

@@ -17,6 +17,8 @@ Write one paragraph covering the problem, users, solution, observable success cr
 
 ## Scope and Decisions
 
+Use plain language and avoid jargon unless the jargon is necessary. Define each term before using it. After defining a term, use that same term consistently; do not replace it with synonyms, because synonyms can create ambiguity.
+
 State:
 
 - what is in scope and explicitly out of scope;

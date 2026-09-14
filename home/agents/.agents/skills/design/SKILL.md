@@ -34,6 +34,8 @@ When uncertain, choose the large format. Do not force a large feature into the s
 
 ## Shared output rules
 
+Use plain language and avoid jargon unless the jargon is necessary. Define each term before using it. After defining a term, use that same term consistently; do not replace it with synonyms, because synonyms can create ambiguity.
+
 Both formats:
 
 - start with the user problem, users, observable outcomes, success measures, and explicit exclusions;
