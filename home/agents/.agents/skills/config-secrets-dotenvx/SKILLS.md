@@ -10,7 +10,22 @@ Use dotenvx as the single workflow for configuration and secrets. Keep one file 
 - `.env.test`
 - `.env.production`
 
-The above are default options but more environments can be created as needed. Commit these environment files. Plain configuration remains readable; secret values are encrypted in place. 
+The above are default options but more environments can be created as needed. Every file must declare the canonical deployment environment:
+
+```dotenv
+# .env.development
+APP_ENV=development
+
+# .env.test
+APP_ENV=test
+
+# .env.production
+APP_ENV=production
+```
+
+Use `APP_ENV` to identify the environment. Do not introduce ad-hoc environment selector variables or infer the deployment environment from unrelated config values. `NODE_ENV` remains the framework/runtime mode; `APP_ENV` is the application's deployment configuration.
+
+Commit these environment files. Plain configuration remains readable; secret values are encrypted in place. 
 
 > **IMPORTANT:** Never commit `.env.keys`, which contains the private decryption keys. Add both `.env.keys` and any unencrypted local override files to `.gitignore`.
 
@@ -92,6 +107,12 @@ import { z } from 'zod';
 import { ClientEnv } from './client-env';
 
 class ProcessEnv extends ClientEnv {
+  get APP_ENV(): 'development' | 'test' | 'production' {
+    return z
+      .enum(['development', 'test', 'production'], { error: 'APP_ENV' })
+      .parse(process.env.APP_ENV);
+  }
+
   get DATABASE_URL(): string {
     return z.url({ error: 'DATABASE_URL' }).parse(process.env.DATABASE_URL);
   }
@@ -231,8 +252,8 @@ Deploy again after adding or changing the variable. Vercel environment-variable 
 
 ## Change checklist
 
-1. Put every environment-specific config or secret in the matching `.env.*` file.
-2. Encrypt selected secret values with `pnpx dotenvx encrypt -f <file> -k <KEY>`.
+1. Put every environment-specific config or secret in the matching `.env.*` file, including the matching `APP_ENV` value.
+2. Encrypt selected secret values with `pnpx dotenvx encrypt -f <file> -k <KEY>`; leave `APP_ENV` unencrypted.
 3. Confirm `.env.keys` is ignored and never staged.
 4. Commit the encrypted `.env.*` diff.
 5. Load the matching private key once into GitHub or Vercel using the commands above.
