@@ -24,24 +24,24 @@ Or reference them by their install path at `~/.agents/skills/build-worktree/`.
 ### Available Scripts
 
 
-| Script                                     | Phase | Purpose                                                                                                                                                |
+| Script                                     | Step  | Purpose                                                                                                                                                |
 | ------------------------------------------ | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `setup.sh "<branch>"`                      | 0     | Create worktree for branch using `wt` when available, otherwise `git worktree`. Outputs `BRANCH_NAME`, `BASE_BRANCH`, `WORKTREE_TOOL`, `WORKTREE_PATH` |
 | `validate.sh "<worktree>" <cmd...>`        | 2     | Run validation commands in worktree. Exits 0 on pass, 1 on failure                                                                                     |
-| `push-pr.sh "<branch>" "<title>" "<body>"` | 3     | Push branch + create PR. Outputs PR URL and `PR_NUMBER`                                                                                                |
-| `monitor-ci.sh "<branch>" "<pr_number>"`   | 4     | Wait for CI via `gh run watch`, check mergeability. Outputs `CONCLUSION`, `MERGEABLE`, `RUN_ID`                                                        |
+| `push-pr.sh "<branch>" "<title>" "<body>"` | 4     | Push branch + create PR. Outputs PR URL and `PR_NUMBER`                                                                                                |
+| `monitor-ci.sh "<branch>" "<pr_number>"`   | 5     | Wait for CI via `gh run watch`, check mergeability. Outputs `CONCLUSION`, `MERGEABLE`, `RUN_ID`                                                        |
 
 
 ## Constraints
 
 1. **Never merge a PR without explicit user request.** Stop after CI passes and report the result. Wait for the user to tell you to merge.
-2. **Stay on the worktree you created in Phase 0.** Never create additional branches or worktrees. Fix issues in place.
+2. **Stay on the worktree you created in Step 0.** Never create additional branches or worktrees. Fix issues in place.
 
 ## Execution Model
 
-This is an **orchestrator** — it coordinates bash scripts and delegated agents. Use Pi's `subagent` tool for AI phases (1, 2.5, 5), and always pass `WORKTREE_PATH` explicitly as `cwd`. Use the helper scripts for mechanical phases (0, 2, 3, 4). The default implementation agent is `worker`; use a user-specified agent type when provided.
+This is an **orchestrator** — it coordinates bash scripts and delegated agents. Use Pi's `subagent` tool for AI steps (1, 2, 3, 6), and always pass `WORKTREE_PATH` explicitly as `cwd`. Use the helper scripts for mechanical steps (0, 2, 4, 5). The default implementation agent is `worker`; use a user-specified agent type when provided.
 
-## Phase 0: Setup
+## Step 0: Setup
 
 1. **Determine branch name**: Infer a prefix + slug from the task:
   - `feat/` — new feature (default if no match)
@@ -69,7 +69,7 @@ Parse the output for `BRANCH_NAME` (may have `-v2` suffix if branch existed), `B
 
 ## Agent Session Lifecycle
 
-Create `BUILD_AGENT_SESSION_ID`, `CODE_QUALITY_SESSION_ID`, and `REQUIREMENTS_SESSION_ID` once, immediately after Phase 0, and reuse them for the lifetime of this run:
+Create `BUILD_AGENT_SESSION_ID`, `CODE_QUALITY_SESSION_ID`, and `REQUIREMENTS_SESSION_ID` once, immediately after Step 0, and reuse them for the lifetime of this run:
 
 ```bash
 BUILD_AGENT_SESSION_ID="$(openssl rand -hex 16)"
@@ -77,7 +77,7 @@ CODE_QUALITY_SESSION_ID="$(openssl rand -hex 16)"
 REQUIREMENTS_SESSION_ID="$(openssl rand -hex 16)"
 ```
 
-Use `BUILD_AGENT_SESSION_ID` for the Phase 1 worker and every later fix agent. Use `CODE_QUALITY_SESSION_ID` for code-quality reviews and `REQUIREMENTS_SESSION_ID` for requirements reviews. Keep these values in the orchestrator's environment; never generate a replacement ID when retrying.
+Use `BUILD_AGENT_SESSION_ID` for the Step 1 worker and every later fix agent. Use `CODE_QUALITY_SESSION_ID` for code-quality reviews and `REQUIREMENTS_SESSION_ID` for requirements reviews. Keep these values in the orchestrator's environment; never generate a replacement ID when retrying.
 
 To start a new Pi agent, create its exact project session with `--session-id`:
 
@@ -93,7 +93,7 @@ cd "$WORKTREE_PATH" && pi --session "$BUILD_AGENT_SESSION_ID" "<follow-up task>"
 
 `--session-id` creates the session when absent; `--session` reopens the existing session. Pi documents both flags in its session guide. If using the native `subagent` tool rather than the CLI, apply the same rule through its lifecycle: record the initial child run ID for `BUILD_AGENT_SESSION_ID` and resume the latest returned run ID with `runs.run(key, { resume: id, task: ... })`. Do not launch a fresh worker for a fix.
 
-## Phase 1: Execute the Task
+## Step 1: Execute the Task
 
 Spawn a `worker` agent (or a user-specified agent) with Pi's `subagent` tool. Supply a custom prompt containing:
 
@@ -137,7 +137,7 @@ subagent({
 - If there are dependent tasks, spawn agents sequentially. Pass each agent the worktree as `cwd`, the relevant task description, and the prior agent's results. Commit after each agent completes.
 - State the agent's authority explicitly: whether it may read, edit, commit, push, or only review. Keep one writer per worktree at a time.
 
-## Phase 2: Local Validation
+## Step 2: Local Validation
 
 Discover what validation exists by checking, in order of preference:
 
@@ -154,7 +154,7 @@ bash ~/.agents/skills/build-worktree/validate.sh "$WORKTREE_PATH" "npm test" "np
 
 If it exits non-zero, continue `BUILD_AGENT_SESSION_ID` as the fix agent. Pass the worktree path as `cwd` and include the validation output in its follow-up prompt. Ask it to fix the failures, commit, and report its changes; then re-run. Repeat until all pass **up to 3 times**. If the native `subagent` tool returns a new run ID after resuming `BUILD_AGENT_SESSION_ID`, replace the saved run ID with that latest ID. If it continues to fail after these attempts to fix it, give up and explain what went wrong.
 
-## Phase 2.5: Task Review (highly recommended)
+## Step 3: Task Review (highly recommended)
 
 Read the default prompts from:
 
@@ -165,23 +165,23 @@ Read the default prompts from:
 
 Set the review iteration cap from the user's request when provided; otherwise use `5`. The cap includes the first review round.
 
-There are exactly two long-lived review sessions in this phase: `CODE_QUALITY_SESSION_ID` and `REQUIREMENTS_SESSION_ID`.
+There are exactly two long-lived review sessions in this step: `CODE_QUALITY_SESSION_ID` and `REQUIREMENTS_SESSION_ID`.
 
 - **Code-quality session** — reviews using `prompts/review-code-quality.md`
 - **Requirements session** — reviews using `prompts/review-requirements.md`
 
 For the **first review round only**, start one new `reviewer` session for each type using `CODE_QUALITY_SESSION_ID` and `REQUIREMENTS_SESSION_ID`, and spawn both agents **in parallel**. Record the returned run/session ID for `CODE_QUALITY_SESSION_ID` and `REQUIREMENTS_SESSION_ID`. Pass the worktree path explicitly as `cwd` for each delegation.
 
-If either review finds issues, continue `BUILD_AGENT_SESSION_ID` as the fix agent with the worktree passed as `cwd`, including both review reports in its follow-up prompt. Then re-run Phase 2 and start the **second review round by resuming the existing sessions**:
+If either review finds issues, continue `BUILD_AGENT_SESSION_ID` as the fix agent with the worktree passed as `cwd`, including both review reports in its follow-up prompt. Then re-run Step 2 and start the **second review round by resuming the existing sessions**:
 
 - Resume `CODE_QUALITY_SESSION_ID` for `prompts/review-code-quality.md`.
 - Resume `REQUIREMENTS_SESSION_ID` for `prompts/review-requirements.md`.
 
 Do not create new reviewer sessions for the second round or later rounds, and never swap `CODE_QUALITY_SESSION_ID` and `REQUIREMENTS_SESSION_ID`. Each resumed reviewer must inspect the current diff again and report whether the previously identified issues are fixed, along with any new evidence-backed issues. Continue resuming `CODE_QUALITY_SESSION_ID` and `REQUIREMENTS_SESSION_ID` for later rounds, up to the configured review iteration cap.
 
-Skip this phase only for straightforward tasks.
+Skip this step only for straightforward tasks.
 
-## Phase 3: Push PR
+## Step 4: Push PR
 
 ```bash
 bash ~/.agents/skills/build-worktree/push-pr.sh "$BRANCH_NAME" "$TITLE" "$BODY"
@@ -189,11 +189,11 @@ bash ~/.agents/skills/build-worktree/push-pr.sh "$BRANCH_NAME" "$TITLE" "$BODY"
 
 If output contains `NO_REMOTE`, report that no PR is possible and stop.
 
-**If `git push` fails with an auth or permission error, do NOT attempt SSH, HTTPS, credential helpers, or remote URL modifications.** Stop immediately and ask the user to resolve git push permissions (e.g. `gh auth login`). Once resolved, retry this phase.
+**If `git push` fails with an auth or permission error, do NOT attempt SSH, HTTPS, credential helpers, or remote URL modifications.** Stop immediately and ask the user to resolve git push permissions (e.g. `gh auth login`). Once resolved, retry this step.
 
 The AI must compose the PR title and body (summary of changes). Include design doc link if applicable.
 
-## Phase 4: Monitor CI
+## Step 5: Monitor CI
 
 ```bash
 bash ~/.agents/skills/build-worktree/monitor-ci.sh "$BRANCH_NAME" "$PR_NUMBER"
@@ -202,11 +202,11 @@ bash ~/.agents/skills/build-worktree/monitor-ci.sh "$BRANCH_NAME" "$PR_NUMBER"
 Parse output:
 
 - `CONCLUSION=success` → **CI PASSED**, report and stop
-- `MERGE_CONFLICT=true` → proceed to Phase 4.5
-- `CONCLUSION=<other>` → proceed to Phase 5
+- `MERGE_CONFLICT=true` → proceed to Step 5.5
+- `CONCLUSION=<other>` → proceed to Step 6
 - `TIMEOUT` → no CI run appeared, report to user
 
-## Phase 4.5: Resolve Merge Conflicts
+## Step 5.5: Resolve Merge Conflicts
 
 Use the **merge-conflict** skill. Rebase and resolve:
 
@@ -214,15 +214,15 @@ Use the **merge-conflict** skill. Rebase and resolve:
 cd $WORKTREE_PATH && git fetch origin "${BASE_BRANCH#origin/}" && git rebase "$BASE_BRANCH"
 ```
 
-After resolving conflicts, force push and return to Phase 4:
+After resolving conflicts, force push and return to Step 5:
 
 ```bash
 git push --force-with-lease origin $BRANCH_NAME
 ```
 
-## Phase 5: Fix CI Failures (Loop)
+## Step 6: Fix CI Failures (Loop)
 
-This phase requires AI to understand failure logs. Get the details:
+This step requires AI to understand failure logs. Get the details:
 
 ```bash
 gh run view $RUN_ID --json jobs --jq '.jobs[] | select(.conclusion != "success") | {name: .name, conclusion: .conclusion}'
@@ -235,7 +235,7 @@ Continue `BUILD_AGENT_SESSION_ID` as the fix agent, with the worktree passed exp
 cd $WORKTREE_PATH && git add -A && git commit -m "fix: [[ORCA_RICH_MD:aa949d50feb3508a2ff64ba077d1b4c1:inline-html:%3Cdescriptive%20message%3E]]" && git push
 ```
 
-Return to Phase 4. Max 5 CI failure iterations before stopping.
+Return to Step 5. Max 5 CI failure iterations before stopping.
 
 ## Cleanup
 
@@ -243,7 +243,7 @@ Do NOT remove the worktree. The user cleans up with `wt remove $BRANCH_NAME` whe
 
 ## Additional Work
 
-You may be given subsequent work to perform.  If you are, after each task, please re-perform steps 2 through 5 before completing.
+You may be given subsequent work to perform.  If you are, after each task, please re-perform steps 2 through 6 before completing.
 
 ## Error Cases
 
@@ -253,7 +253,7 @@ You may be given subsequent work to perform.  If you are, after each task, plea
 - **Worktree creation fails**: Report error and stop
 - `**wt` unavailable**: `setup.sh` uses `git worktree add`; remove the worktree later with `git worktree remove <worktree-path>`
 - **Push fails**: Report error (likely need rebase)
-- **Merge conflict**: Phase 4.5 handles rebase + force push
+- **Merge conflict**: Step 5.5 handles rebase + force push
 - **Max CI retries (5)**: Report all accumulated failures and stop
 
 ## Reporting
