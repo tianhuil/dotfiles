@@ -24,12 +24,12 @@ Or reference them by their install path at `~/.agents/skills/build-worktree/`.
 ### Available Scripts
 
 
-| Script                                     | Phase | Purpose                                                                                         |
-| ------------------------------------------ | ----- | ----------------------------------------------------------------------------------------------- |
-| `setup.sh "<branch>"`                      | 0     | Create worktree for branch using `wt` when available, otherwise `git worktree`. Outputs `BRANCH_NAME`, `BASE_BRANCH`, `WORKTREE_TOOL`, `WORKTREE_PATH`               |
-| `validate.sh "<worktree>" <cmd...>`        | 2     | Run validation commands in worktree. Exits 0 on pass, 1 on failure                              |
-| `push-pr.sh "<branch>" "<title>" "<body>"` | 3     | Push branch + create PR. Outputs PR URL and `PR_NUMBER`                                         |
-| `monitor-ci.sh "<branch>" "<pr_number>"`   | 4     | Wait for CI via `gh run watch`, check mergeability. Outputs `CONCLUSION`, `MERGEABLE`, `RUN_ID` |
+| Script                                     | Phase | Purpose                                                                                                                                                |
+| ------------------------------------------ | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `setup.sh "<branch>"`                      | 0     | Create worktree for branch using `wt` when available, otherwise `git worktree`. Outputs `BRANCH_NAME`, `BASE_BRANCH`, `WORKTREE_TOOL`, `WORKTREE_PATH` |
+| `validate.sh "<worktree>" <cmd...>`        | 2     | Run validation commands in worktree. Exits 0 on pass, 1 on failure                                                                                     |
+| `push-pr.sh "<branch>" "<title>" "<body>"` | 3     | Push branch + create PR. Outputs PR URL and `PR_NUMBER`                                                                                                |
+| `monitor-ci.sh "<branch>" "<pr_number>"`   | 4     | Wait for CI via `gh run watch`, check mergeability. Outputs `CONCLUSION`, `MERGEABLE`, `RUN_ID`                                                        |
 
 
 ## Constraints
@@ -205,7 +205,7 @@ gh run view $RUN_ID --log-failed
 Delegate a fix agent with the worktree passed explicitly as `cwd`. Include the failed CI logs and the allowed scope in its custom prompt. Ask it to analyze the logs, fix the issues, and report its changes. Commit and push:
 
 ```bash
-cd $WORKTREE_PATH && git add -A && git commit -m "fix: <descriptive message>" && git push
+cd $WORKTREE_PATH && git add -A && git commit -m "fix: [[ORCA_RICH_MD:aa949d50feb3508a2ff64ba077d1b4c1:inline-html:%3Cdescriptive%20message%3E]]" && git push
 ```
 
 Return to Phase 4. Max 5 CI failure iterations before stopping.
@@ -214,13 +214,17 @@ Return to Phase 4. Max 5 CI failure iterations before stopping.
 
 Do NOT remove the worktree. The user cleans up with `wt remove $BRANCH_NAME` when `wt` was used, or `git worktree remove <worktree-path>` with the fallback.
 
+## Additional Work
+
+You may be given subsequent work to perform.  If you are, after each task, please re-perform steps 2 through 5 before completing.
+
 ## Error Cases
 
 - **No remote**: `push-pr.sh` outputs `NO_REMOTE` — stop, worktree remains
 - **Push auth/permission failure**: Stop and ask user to resolve (e.g. `gh auth login`). Do NOT try SSH, HTTPS, or remote URL changes.
 - **Branch already exists**: `setup.sh` appends `-v2`, `-v3`, etc.
 - **Worktree creation fails**: Report error and stop
-- **`wt` unavailable**: `setup.sh` uses `git worktree add`; remove the worktree later with `git worktree remove <worktree-path>`
+- `**wt` unavailable**: `setup.sh` uses `git worktree add`; remove the worktree later with `git worktree remove <worktree-path>`
 - **Push fails**: Report error (likely need rebase)
 - **Merge conflict**: Phase 4.5 handles rebase + force push
 - **Max CI retries (5)**: Report all accumulated failures and stop
