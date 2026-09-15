@@ -69,7 +69,7 @@ Parse the output for `BRANCH_NAME` (may have `-v2` suffix if branch existed), `B
 
 ## Agent Session Lifecycle
 
-Create `BUILD_AGENT_SESSION_ID`, `CODE_QUALITY_SESSION_ID`, and `REQUIREMENTS_SESSION_ID` once, immediately after Step 0, and reuse them for the lifetime of this run:
+Create these Pi session IDs once, immediately after Step 0:
 
 ```bash
 BUILD_AGENT_SESSION_ID="$(openssl rand -hex 16)"
@@ -77,27 +77,33 @@ CODE_QUALITY_SESSION_ID="$(openssl rand -hex 16)"
 REQUIREMENTS_SESSION_ID="$(openssl rand -hex 16)"
 ```
 
-Use `BUILD_AGENT_SESSION_ID` for the Step 1 worker and every later fix agent. Use `CODE_QUALITY_SESSION_ID` for code-quality reviews and `REQUIREMENTS_SESSION_ID` for requirements reviews. Keep these values in the orchestrator's environment; never generate a replacement ID when retrying.
+The names describe the session's role:
 
-To start a new Pi agent, create its exact project session with `--session-id`:
+- `BUILD_AGENT_SESSION_ID`: the Step 1 worker and every later fix agent.
+- `CODE_QUALITY_SESSION_ID`: the code-quality reviewer.
+- `REQUIREMENTS_SESSION_ID`: the requirements reviewer.
+
+Keep the IDs in the orchestrator's environment and reuse them for every retry. Never generate a replacement ID for an existing session.
+
+Start a new Pi session with `--session-id`:
 
 ```bash
 cd "$WORKTREE_PATH" && pi --session-id "$BUILD_AGENT_SESSION_ID" "<initial task>"
 ```
 
-To continue `BUILD_AGENT_SESSION_ID`, use `--session` with `BUILD_AGENT_SESSION_ID` (and provide the new task or failure output):
+Continue an existing session with `--session` and its session ID:
 
 ```bash
 cd "$WORKTREE_PATH" && pi --session "$BUILD_AGENT_SESSION_ID" "<follow-up task>"
 ```
 
-`--session-id` creates the session when absent; `--session` reopens the existing session. Pi documents both flags in its session guide. If using the native `subagent` tool rather than the CLI, apply the same rule through its lifecycle: record the initial child run ID for `BUILD_AGENT_SESSION_ID` and resume the latest returned run ID with `runs.run(key, { resume: id, task: ... })`. Do not launch a fresh worker for a fix.
+`--session-id` creates the session when absent; `--session` reopens it. With the native `subagent` tool, retain the corresponding `*_SESSION_ID` as the session identity and use the tool's returned run ID only as the resume handle: `runs.run(key, { resume: latestRunId, task: ... })`. A fix agent must resume `BUILD_AGENT_SESSION_ID`, not start a new session.
 
 ## Step 1: Execute the Task
 
 Spawn a `worker` agent (or a user-specified agent) with Pi's `subagent` tool. Supply a custom prompt containing:
 
-- **Session**: start it with `BUILD_AGENT_SESSION_ID`; record the returned run/session ID associated with `BUILD_AGENT_SESSION_ID` so later fix agents continue it.
+- **Session**: start it with `BUILD_AGENT_SESSION_ID`; retain the returned run ID as the resume handle for later fix agents.
 - **Working directory**: pass the worktree path explicitly as the delegation tool's `cwd`; **ALWAYS** work in that worktree, not in the main branch / worktree.
 - **Task description**: the full task text and links to design docs, if any.
 - **Instructions**: Read AGENTS.md, README, and package.json; implement the task; do NOT commit.
@@ -152,7 +158,7 @@ Then run all discovered commands in one call:
 bash ~/.agents/skills/build-worktree/validate.sh "$WORKTREE_PATH" "npm test" "npm run lint" "npm run typecheck"
 ```
 
-If it exits non-zero, continue `BUILD_AGENT_SESSION_ID` as the fix agent. Pass the worktree path as `cwd` and include the validation output in its follow-up prompt. Ask it to fix the failures, commit, and report its changes; then re-run. Repeat until all pass **up to 3 times**. If the native `subagent` tool returns a new run ID after resuming `BUILD_AGENT_SESSION_ID`, replace the saved run ID with that latest ID. If it continues to fail after these attempts to fix it, give up and explain what went wrong.
+If it exits non-zero, continue `BUILD_AGENT_SESSION_ID` as the fix agent. Pass the worktree path as `cwd` and include the validation output in its follow-up prompt. Ask it to fix the failures, commit, and report its changes; then re-run. Repeat until all pass **up to 3 times**. If the native `subagent` tool returns a new run ID after resuming `BUILD_AGENT_SESSION_ID`, use that latest run ID for the next resume. If it continues to fail after these attempts to fix it, give up and explain what went wrong.
 
 ## Step 3: Task Review (highly recommended)
 
@@ -160,16 +166,16 @@ Skip this step only for straightforward tasks. Otherwise:
 
 1. Read `prompts/review-code-quality.md` and `prompts/review-requirements.md`.
 2. Set the review-round cap from the user's request, or use `5`.
-3. Start these two reviewer sessions in parallel, passing `WORKTREE_PATH` as `cwd`:
+3. Start these reviewer sessions in parallel, passing `WORKTREE_PATH` as `cwd`:
 
-   | Session | Prompt |
-   | --- | --- |
-   | `CODE_QUALITY_SESSION_ID` | `prompts/review-code-quality.md` |
-   | `REQUIREMENTS_SESSION_ID` | `prompts/review-requirements.md` |
+   | Reviewer | Session ID | Prompt |
+   | --- | --- | --- |
+   | Code quality | `CODE_QUALITY_SESSION_ID` | `prompts/review-code-quality.md` |
+   | Requirements | `REQUIREMENTS_SESSION_ID` | `prompts/review-requirements.md` |
 
-   Start each session only in the first round. Record the returned run/session IDs and never swap them.
-4. On each round, have both sessions inspect the current diff and report whether prior issues are fixed, plus any new evidence-backed issues.
-5. If either report finds issues, continue `BUILD_AGENT_SESSION_ID` with both reports, fix the issues, and re-run Step 2. Resume the same `CODE_QUALITY_SESSION_ID` and `REQUIREMENTS_SESSION_ID` for the next round.
+   Create each session only in the first round. Keep each session ID paired with its reviewer; never swap them.
+4. On every round, have both reviewers inspect the current diff and report whether prior issues are fixed, plus any new evidence-backed issues.
+5. If either reviewer finds issues, resume `BUILD_AGENT_SESSION_ID` with both reports, fix the issues, and re-run Step 2. Then resume the same `CODE_QUALITY_SESSION_ID` and `REQUIREMENTS_SESSION_ID` for the next round.
 6. Stop when both reviewers approve or the review-round cap is reached.
 
 ## Step 4: Push PR
