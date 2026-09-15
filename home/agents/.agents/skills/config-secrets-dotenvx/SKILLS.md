@@ -79,6 +79,8 @@ Dotenvx supplies decrypted values through `process.env`; Zod validates their sha
 - `env.ts` contains server-only values and may extend `ClientEnv`. Never import it from client code.
 - Validate on access with getters so missing or malformed values fail at the point of use.
 - Encrypt only private keys. `NEXT_PUBLIC_*` values are intentionally bundled into browser JavaScript and are not secrets.
+- The application should not use `process.env`.  It should only use the values provided by `processEnv` and `clientEnv`.
+- The environment variables / field names should remain camel case in `processEnv` and `clientEnv` (e.g. `NEXT_PUBLIC_API_BASE_URL`) for consistency.
 
 ```ts
 // src/lib/config/client-env.ts
