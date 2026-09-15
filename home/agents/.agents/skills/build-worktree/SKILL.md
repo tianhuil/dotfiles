@@ -156,30 +156,21 @@ If it exits non-zero, continue `BUILD_AGENT_SESSION_ID` as the fix agent. Pass t
 
 ## Step 3: Task Review (highly recommended)
 
-Read the default prompts from:
+Skip this step only for straightforward tasks. Otherwise:
 
-- `prompts/review-code-quality.md`
-- `prompts/review-requirements.md`
+1. Read `prompts/review-code-quality.md` and `prompts/review-requirements.md`.
+2. Set the review-round cap from the user's request, or use `5`.
+3. Start these two reviewer sessions in parallel, passing `WORKTREE_PATH` as `cwd`:
 
-### `CODE_QUALITY_SESSION_ID` and `REQUIREMENTS_SESSION_ID`
+   | Session | Prompt |
+   | --- | --- |
+   | `CODE_QUALITY_SESSION_ID` | `prompts/review-code-quality.md` |
+   | `REQUIREMENTS_SESSION_ID` | `prompts/review-requirements.md` |
 
-Set the review iteration cap from the user's request when provided; otherwise use `5`. The cap includes the first review round.
-
-There are exactly two long-lived review sessions in this step: `CODE_QUALITY_SESSION_ID` and `REQUIREMENTS_SESSION_ID`.
-
-- **Code-quality session** — reviews using `prompts/review-code-quality.md`
-- **Requirements session** — reviews using `prompts/review-requirements.md`
-
-For the **first review round only**, start one new `reviewer` session for each type using `CODE_QUALITY_SESSION_ID` and `REQUIREMENTS_SESSION_ID`, and spawn both agents **in parallel**. Record the returned run/session ID for `CODE_QUALITY_SESSION_ID` and `REQUIREMENTS_SESSION_ID`. Pass the worktree path explicitly as `cwd` for each delegation.
-
-If either review finds issues, continue `BUILD_AGENT_SESSION_ID` as the fix agent with the worktree passed as `cwd`, including both review reports in its follow-up prompt. Then re-run Step 2 and start the **second review round by resuming the existing sessions**:
-
-- Resume `CODE_QUALITY_SESSION_ID` for `prompts/review-code-quality.md`.
-- Resume `REQUIREMENTS_SESSION_ID` for `prompts/review-requirements.md`.
-
-Do not create new reviewer sessions for the second round or later rounds, and never swap `CODE_QUALITY_SESSION_ID` and `REQUIREMENTS_SESSION_ID`. Each resumed reviewer must inspect the current diff again and report whether the previously identified issues are fixed, along with any new evidence-backed issues. Continue resuming `CODE_QUALITY_SESSION_ID` and `REQUIREMENTS_SESSION_ID` for later rounds, up to the configured review iteration cap.
-
-Skip this step only for straightforward tasks.
+   Start each session only in the first round. Record the returned run/session IDs and never swap them.
+4. On each round, have both sessions inspect the current diff and report whether prior issues are fixed, plus any new evidence-backed issues.
+5. If either report finds issues, continue `BUILD_AGENT_SESSION_ID` with both reports, fix the issues, and re-run Step 2. Resume the same `CODE_QUALITY_SESSION_ID` and `REQUIREMENTS_SESSION_ID` for the next round.
+6. Stop when both reviewers approve or the review-round cap is reached.
 
 ## Step 4: Push PR
 
