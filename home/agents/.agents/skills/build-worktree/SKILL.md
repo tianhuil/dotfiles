@@ -67,10 +67,37 @@ This is an **orchestrator** — it coordinates bash scripts and delegated agents
 
 Parse the output for `BRANCH_NAME` (may have `-v2` suffix if branch existed), `BASE_BRANCH`, `WORKTREE_TOOL`, and `WORKTREE_PATH`. All subsequent work uses these.
 
+## Agent Session Lifecycle
+
+Create `BUILD_AGENT_SESSION_ID`, `CODE_QUALITY_SESSION_ID`, and `REQUIREMENTS_SESSION_ID` once, immediately after Phase 0, and reuse them for the lifetime of this run:
+
+```bash
+BUILD_AGENT_SESSION_ID="$(openssl rand -hex 16)"
+CODE_QUALITY_SESSION_ID="$(openssl rand -hex 16)"
+REQUIREMENTS_SESSION_ID="$(openssl rand -hex 16)"
+```
+
+Use `BUILD_AGENT_SESSION_ID` for the Phase 1 worker and every later fix agent. Use `CODE_QUALITY_SESSION_ID` for code-quality reviews and `REQUIREMENTS_SESSION_ID` for requirements reviews. Keep these values in the orchestrator's environment; never generate a replacement ID when retrying.
+
+To start a new Pi agent, create its exact project session with `--session-id`:
+
+```bash
+cd "$WORKTREE_PATH" && pi --session-id "$BUILD_AGENT_SESSION_ID" "<initial task>"
+```
+
+To continue `BUILD_AGENT_SESSION_ID`, use `--session` with `BUILD_AGENT_SESSION_ID` (and provide the new task or failure output):
+
+```bash
+cd "$WORKTREE_PATH" && pi --session "$BUILD_AGENT_SESSION_ID" "<follow-up task>"
+```
+
+`--session-id` creates the session when absent; `--session` reopens the existing session. Pi documents both flags in its session guide. If using the native `subagent` tool rather than the CLI, apply the same rule through its lifecycle: record the initial child run ID for `BUILD_AGENT_SESSION_ID` and resume the latest returned run ID with `runs.run(key, { resume: id, task: ... })`. Do not launch a fresh worker for a fix.
+
 ## Phase 1: Execute the Task
 
 Spawn a `worker` agent (or a user-specified agent) with Pi's `subagent` tool. Supply a custom prompt containing:
 
+- **Session**: start it with `BUILD_AGENT_SESSION_ID`; record the returned run/session ID associated with `BUILD_AGENT_SESSION_ID` so later fix agents continue it.
 - **Working directory**: pass the worktree path explicitly as the delegation tool's `cwd`; **ALWAYS** work in that worktree, not in the main branch / worktree.
 - **Task description**: the full task text and links to design docs, if any.
 - **Instructions**: Read AGENTS.md, README, and package.json; implement the task; do NOT commit.
@@ -125,7 +152,7 @@ Then run all discovered commands in one call:
 bash ~/.agents/skills/build-worktree/validate.sh "$WORKTREE_PATH" "npm test" "npm run lint" "npm run typecheck"
 ```
 
-If it exits non-zero, delegate a fix agent with the worktree path passed explicitly as `cwd`. Include the validation output in its custom prompt. Ask it to fix the failures, commit, and report its changes; then re-run. Repeat until all pass **up to 3 times**.  If it continues to fail after these attempts to fix it, give up and explain what went wrong.
+If it exits non-zero, continue `BUILD_AGENT_SESSION_ID` as the fix agent. Pass the worktree path as `cwd` and include the validation output in its follow-up prompt. Ask it to fix the failures, commit, and report its changes; then re-run. Repeat until all pass **up to 3 times**. If the native `subagent` tool returns a new run ID after resuming `BUILD_AGENT_SESSION_ID`, replace the saved run ID with that latest ID. If it continues to fail after these attempts to fix it, give up and explain what went wrong.
 
 ## Phase 2.5: Task Review (highly recommended)
 
@@ -134,23 +161,23 @@ Read the default prompts from:
 - `prompts/review-code-quality.md`
 - `prompts/review-requirements.md`
 
-### Review sessions
+### `CODE_QUALITY_SESSION_ID` and `REQUIREMENTS_SESSION_ID`
 
 Set the review iteration cap from the user's request when provided; otherwise use `5`. The cap includes the first review round.
 
-There are exactly two long-lived review sessions in this phase:
+There are exactly two long-lived review sessions in this phase: `CODE_QUALITY_SESSION_ID` and `REQUIREMENTS_SESSION_ID`.
 
 - **Code-quality session** — reviews using `prompts/review-code-quality.md`
 - **Requirements session** — reviews using `prompts/review-requirements.md`
 
-For the **first review round only**, create one new `reviewer` session for each type and spawn both agents **in parallel**. Record the session ID returned for each agent. Pass the worktree path explicitly as `cwd` for each delegation.
+For the **first review round only**, start one new `reviewer` session for each type using `CODE_QUALITY_SESSION_ID` and `REQUIREMENTS_SESSION_ID`, and spawn both agents **in parallel**. Record the returned run/session ID for `CODE_QUALITY_SESSION_ID` and `REQUIREMENTS_SESSION_ID`. Pass the worktree path explicitly as `cwd` for each delegation.
 
-If either review finds issues, delegate a fix agent with the worktree passed as `cwd`, including both review reports in its prompt. Then re-run Phase 2 and start the **second review round by resuming the existing review sessions**:
+If either review finds issues, continue `BUILD_AGENT_SESSION_ID` as the fix agent with the worktree passed as `cwd`, including both review reports in its follow-up prompt. Then re-run Phase 2 and start the **second review round by resuming the existing sessions**:
 
-- Reuse the **code-quality session ID** for `prompts/review-code-quality.md`.
-- Reuse the **requirements session ID** for `prompts/review-requirements.md`.
+- Resume `CODE_QUALITY_SESSION_ID` for `prompts/review-code-quality.md`.
+- Resume `REQUIREMENTS_SESSION_ID` for `prompts/review-requirements.md`.
 
-Do not create new reviewer sessions for the second round or later rounds, and never swap the session IDs between review types. Each resumed reviewer must inspect the current diff again and report whether the previously identified issues are fixed, along with any new evidence-backed issues. Continue resuming those same two sessions for later rounds, up to the configured review iteration cap.
+Do not create new reviewer sessions for the second round or later rounds, and never swap `CODE_QUALITY_SESSION_ID` and `REQUIREMENTS_SESSION_ID`. Each resumed reviewer must inspect the current diff again and report whether the previously identified issues are fixed, along with any new evidence-backed issues. Continue resuming `CODE_QUALITY_SESSION_ID` and `REQUIREMENTS_SESSION_ID` for later rounds, up to the configured review iteration cap.
 
 Skip this phase only for straightforward tasks.
 
@@ -202,7 +229,7 @@ gh run view $RUN_ID --json jobs --jq '.jobs[] | select(.conclusion != "success")
 gh run view $RUN_ID --log-failed
 ```
 
-Delegate a fix agent with the worktree passed explicitly as `cwd`. Include the failed CI logs and the allowed scope in its custom prompt. Ask it to analyze the logs, fix the issues, and report its changes. Commit and push:
+Continue `BUILD_AGENT_SESSION_ID` as the fix agent, with the worktree passed explicitly as `cwd`. Include the failed CI logs and the allowed scope in its follow-up prompt. Ask it to analyze the logs, fix the issues, and report its changes. Commit and push:
 
 ```bash
 cd $WORKTREE_PATH && git add -A && git commit -m "fix: [[ORCA_RICH_MD:aa949d50feb3508a2ff64ba077d1b4c1:inline-html:%3Cdescriptive%20message%3E]]" && git push
