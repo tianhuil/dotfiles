@@ -24,12 +24,12 @@ Or reference them by their install path at `~/.agents/skills/build-worktree/`.
 ### Available Scripts
 
 
-| Script                                     | Step  | Purpose                                                                                                                                                |
-| ------------------------------------------ | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `setup.sh "<branch>"`                      | 0     | Create worktree for branch using `wt` when available, otherwise `git worktree`. Outputs `BRANCH_NAME`, `BASE_BRANCH`, `WORKTREE_TOOL`, `WORKTREE_PATH` |
-| `validate.sh "<worktree>" <cmd...>`        | 2     | Run validation commands in worktree. Exits 0 on pass, 1 on failure                                                                                     |
-| `push-pr.sh "<branch>" "<title>" "<body>"` | 4     | Push branch + create PR. Outputs PR URL and `PR_NUMBER`                                                                                                |
-| `monitor-ci.sh "<branch>" "<pr_number>"`   | 5     | Wait for CI via `gh run watch`, check mergeability. Outputs `CONCLUSION`, `MERGEABLE`, `RUN_ID`                                                        |
+| Script                                     | Step | Purpose                                                                                                                                                |
+| ------------------------------------------ | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `setup.sh "<branch>"`                      | 0    | Create worktree for branch using `wt` when available, otherwise `git worktree`. Outputs `BRANCH_NAME`, `BASE_BRANCH`, `WORKTREE_TOOL`, `WORKTREE_PATH` |
+| `validate.sh "<worktree>" <cmd...>`        | 2    | Run validation commands in worktree. Exits 0 on pass, 1 on failure                                                                                     |
+| `push-pr.sh "<branch>" "<title>" "<body>"` | 4    | Push branch + create PR. Outputs PR URL and `PR_NUMBER`                                                                                                |
+| `monitor-ci.sh "<branch>" "<pr_number>"`   | 5    | Wait for CI via `gh run watch`, check mergeability. Outputs `CONCLUSION`, `MERGEABLE`, `RUN_ID`                                                        |
 
 
 ## Constraints
@@ -94,7 +94,7 @@ cd "$WORKTREE_PATH" && pi --session-id "$BUILD_AGENT_SESSION_ID" "<initial task>
 Continue an existing session with `--session` and its session ID:
 
 ```bash
-cd "$WORKTREE_PATH" && pi --session "$BUILD_AGENT_SESSION_ID" "<follow-up task>"
+cd "$WORKTREE_PATH" && pi --session "$BUILD_AGENT_SESSION_ID" "[[ORCA_RICH_MD:c77e4dd59f0ccaa6b72135807b622bfd:inline-html:%3Cfollow-up%20task%3E]]"
 ```
 
 `--session-id` creates the session when absent; `--session` reopens it. With the native `subagent` tool, retain the corresponding `*_SESSION_ID` as the session identity and use the tool's returned run ID only as the resume handle: `runs.run(key, { resume: latestRunId, task: ... })`. A fix agent must resume `BUILD_AGENT_SESSION_ID`, not start a new session.
@@ -126,7 +126,7 @@ Use focused prompts and pass the worktree as `cwd` on every delegation. Preserve
 
 ```text
 subagent({
-  agent: "<implementation-or-review-agent>",
+  agent: "[[ORCA_RICH_MD:c77e4dd59f0ccaa6b72135807b622bfd:inline-html:%3Cimplementation-or-review-agent%3E]]",
   cwd: WORKTREE_PATH,
   task: `
     Goal: <specific outcome>
@@ -162,20 +162,21 @@ If it exits non-zero, continue `BUILD_AGENT_SESSION_ID` as the fix agent. Pass t
 
 ## Step 3: Task Review (highly recommended)
 
-Skip this step only for straightforward tasks. Otherwise:
+Skip this step only for highly straightforward tasks. Otherwise:
 
 1. Read `prompts/review-code-quality.md` and `prompts/review-requirements.md`.
 2. Set the review-round cap from the user's request, or use `5`.
 3. Start these reviewer sessions in parallel, passing `WORKTREE_PATH` as `cwd`:
+  
+  | Reviewer     | Session ID                | Prompt                           |
+  | ------------ | ------------------------- | -------------------------------- |
+  | Code quality | `CODE_QUALITY_SESSION_ID` | `prompts/review-code-quality.md` |
+  | Requirements | `REQUIREMENTS_SESSION_ID` | `prompts/review-requirements.md` |
+  
 
-   | Reviewer | Session ID | Prompt |
-   | --- | --- | --- |
-   | Code quality | `CODE_QUALITY_SESSION_ID` | `prompts/review-code-quality.md` |
-   | Requirements | `REQUIREMENTS_SESSION_ID` | `prompts/review-requirements.md` |
-
-   Create each session only in the first round. Keep each session ID paired with its reviewer; never swap them.
+   Keep each session ID paired with its reviewer; never swap them.  A new session will be spawned the first time but re-used in subsequent runs.
 4. On every round, have both reviewers inspect the current diff and report whether prior issues are fixed, plus any new evidence-backed issues.
-5. If either reviewer finds issues, resume `BUILD_AGENT_SESSION_ID` with both reports, fix the issues, and re-run Step 2. Then resume the same `CODE_QUALITY_SESSION_ID` and `REQUIREMENTS_SESSION_ID` for the next round.
+5. If either reviewer finds issues, resume `BUILD_AGENT_SESSION_ID` with both reports, fix the issues, and re-run Step 2. Then resume Step 3 with the same `CODE_QUALITY_SESSION_ID` and `REQUIREMENTS_SESSION_ID` for the next round.
 6. Stop when both reviewers approve or the review-round cap is reached.
 
 ## Step 4: Push PR
@@ -236,7 +237,7 @@ Return to Step 5. Max 5 CI failure iterations before stopping.
 
 ## Cleanup
 
-Do NOT remove the worktree. The user cleans up with `wt remove $BRANCH_NAME` when `wt` was used, or `git worktree remove <worktree-path>` with the fallback.
+Do NOT remove the worktree. The user cleans up with `wt remove $BRANCH_NAME` when `wt` was used, or `git worktree remove [[ORCA_RICH_MD:c77e4dd59f0ccaa6b72135807b622bfd:inline-html:%3Cworktree-path%3E]]` with the fallback.
 
 ## Additional Work
 
@@ -248,7 +249,7 @@ You may be given subsequent work to perform.  If you are, after each task, plea
 - **Push auth/permission failure**: Stop and ask user to resolve (e.g. `gh auth login`). Do NOT try SSH, HTTPS, or remote URL changes.
 - **Branch already exists**: `setup.sh` appends `-v2`, `-v3`, etc.
 - **Worktree creation fails**: Report error and stop
-- `**wt` unavailable**: `setup.sh` uses `git worktree add`; remove the worktree later with `git worktree remove <worktree-path>`
+- `**wt` unavailable**: `setup.sh` uses `git worktree add`; remove the worktree later with `git worktree remove [[ORCA_RICH_MD:c77e4dd59f0ccaa6b72135807b622bfd:inline-html:%3Cworktree-path%3E]]`
 - **Push fails**: Report error (likely need rebase)
 - **Merge conflict**: Step 5.5 handles rebase + force push
 - **Max CI retries (5)**: Report all accumulated failures and stop
