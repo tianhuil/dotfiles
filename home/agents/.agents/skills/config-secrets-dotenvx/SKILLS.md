@@ -56,6 +56,65 @@ pnpx dotenvx run -f .env.test,.env -- <command>
 
 Use `--overload` only when the later file should win. Never use `--debug` in CI or production because it prints secret values.
 
+## Validate public and private variables with Zod
+
+Dotenvx supplies decrypted values through `process.env`; Zod validates their shape at the application boundary. Keep the public and private surfaces separate:
+
+- `client-env.ts` contains only `NEXT_PUBLIC_*` values. It is safe to import from client components.
+- `env.ts` contains server-only values and may extend `ClientEnv`. Never import it from client code.
+- Validate on access with getters so missing or malformed values fail at the point of use.
+- Encrypt only private keys. `NEXT_PUBLIC_*` values are intentionally bundled into browser JavaScript and are not secrets.
+
+```ts
+// src/lib/config/client-env.ts
+import { z } from 'zod';
+
+export class ClientEnv {
+  get NEXT_PUBLIC_APP_VERSION(): string {
+    return z
+      .string({ error: 'NEXT_PUBLIC_APP_VERSION' })
+      .parse(process.env.NEXT_PUBLIC_APP_VERSION);
+  }
+
+  get NEXT_PUBLIC_API_BASE_URL(): string {
+    return z
+      .url({ error: 'NEXT_PUBLIC_API_BASE_URL' })
+      .parse(process.env.NEXT_PUBLIC_API_BASE_URL);
+  }
+}
+
+export const clientEnv = new ClientEnv();
+```
+
+```ts
+// src/lib/config/env.ts — server-only
+import { z } from 'zod';
+import { ClientEnv } from './client-env';
+
+class ProcessEnv extends ClientEnv {
+  get DATABASE_URL(): string {
+    return z.url({ error: 'DATABASE_URL' }).parse(process.env.DATABASE_URL);
+  }
+
+  get DATABASE_POOL_SIZE(): number {
+    return z.coerce
+      .number({ error: 'DATABASE_POOL_SIZE' })
+      .int()
+      .positive()
+      .default(10)
+      .parse(process.env.DATABASE_POOL_SIZE);
+  }
+
+  get AUTH_SECRET(): string {
+    return z.string({ error: 'AUTH_SECRET' }).parse(process.env.AUTH_SECRET);
+  }
+}
+
+export const processEnv = new ProcessEnv();
+```
+
+Use `clientEnv` only for browser-safe configuration and `processEnv` for server code, route handlers, jobs, and migrations. Do not pass `processEnv` values through props or API responses unless the value is deliberately public.
+
 ## Next.js: use `@dotenvx/next-env`
 
 Next.js has special environment loading through `@next/env`. For a Next.js app, prefer `@dotenvx/next-env` over wrapping every Next command with `dotenvx run`: it is a drop-in replacement that decrypts the `.env*` files while Next loads them, so server-side code can continue using `process.env`.
