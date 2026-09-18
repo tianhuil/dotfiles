@@ -1,6 +1,6 @@
 ---
 name: ts-coding-standards
-description: TypeScript code standards as good vs bad examples — functional style, strict typing, Zod validation, docstrings, named params, imports, error handling, naming, readability. Use when writing or reviewing TypeScript code.
+description: TypeScript coding standards for any TypeScript or TSX work, including scripts, tests, config tooling, and validators. ALWAYS read and follow this skill before writing or reviewing TypeScript code—especially code that parses or validates JSON, YAML, environment variables, API responses, or other unknown data. Covers functional style, strict typing, Zod schemas, docstrings, named params, imports, error handling, naming, and readability.
 metadata:
   audience: developers
   workflow: coding
@@ -8,8 +8,16 @@ metadata:
 
 # TypeScript Coding Standards
 
+**Read this skill before writing or reviewing any TypeScript or TSX.** Apply it to application code, tests, one-off scripts, migration tools, config validators, and generated-code helpers—not only reusable modules.
+
 Good vs bad examples for writing clean, functional, type-safe TypeScript.
 For repo tooling (package manager, Biome, tsconfig), see the `ts-coding-setup` skill.
+
+## Fast rules
+
+- **Runtime validation:** When data enters as `unknown`—including parsed JSON/YAML, environment variables, files, API responses, or CLI input—define a Zod schema and derive the TypeScript type from it. Do not hand-roll a parallel `assert*`/`isRecord` validator unless Zod is genuinely unavailable and the exception is documented.
+- **Type safety:** Keep the boundary typed; do not use casts to silence errors.
+- **Before finishing:** Run the narrowest relevant typecheck and tests, and fix type errors rather than weakening the check.
 
 ## Functional Style
 
