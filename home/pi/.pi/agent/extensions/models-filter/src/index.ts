@@ -502,7 +502,6 @@ async function resolveRegistrations(
   let modelsDev: Record<string, ModelsDevProvider> | null = null;
   try {
     modelsDev = await fetchModelsDev();
-    console.info(`[models-filter] models.dev: ${Object.keys(modelsDev).length} providers loaded`);
   } catch (error) {
     console.warn(`[models-filter] models.dev fetch failed (${errorMessage(error)}); using live catalog + static fallback`);
   }
@@ -527,10 +526,8 @@ async function resolveRegistrations(
 
       // Also fetch live catalog for IDs not in models.dev
       let liveIds: string[] = [];
-      let liveOk = false;
       try {
         liveIds = await fetchLiveCatalog(overrideBaseUrl, apiKey);
-        liveOk = true;
       } catch (error) {
         console.warn(`[models-filter] ${providerId}: live catalog fetch failed (${errorMessage(error)})`);
       }
@@ -569,8 +566,6 @@ async function resolveRegistrations(
       // pi's own stored auth handles credentials for providers not in config.yml.
       if (override?.apiKey) registration.apiKey = override.apiKey;
 
-      const source = Object.keys(mdModels).length > 0 ? "models.dev" : liveOk ? `${liveIds.length} live` : "static fallback";
-      console.info(`[models-filter] ${providerId}: ${kept.length}/${allIds.size} (${source}): ${kept.join(", ")}`);
       return [providerId, registration];
     }),
   );
@@ -617,7 +612,6 @@ async function bootstrap(pi: PiApi): Promise<void> {
       for (const [providerId, registration] of Object.entries(cached.providers)) {
         pi.registerProvider(providerId, registration);
       }
-      console.info(`[models-filter] cache hit: ${Object.keys(cached.providers).length} provider(s) registered from cache`);
       return;
     }
 
@@ -627,8 +621,6 @@ async function bootstrap(pi: PiApi): Promise<void> {
       const registration = buildFallbackRegistration(providerId, rules, config);
       if (registration) {
         pi.registerProvider(providerId, registration);
-        const count = (registration.models as unknown[]).length;
-        console.info(`[models-filter] ${providerId}: static fallback (${count} models)`);
       }
     }
 
@@ -640,7 +632,6 @@ async function bootstrap(pi: PiApi): Promise<void> {
         pi.registerProvider(providerId, registration);
       }
       writeCache({ fetchedAt: Date.now(), fingerprint, providers: registrations });
-      console.info("[models-filter] cache refreshed");
     } catch (error) {
       console.warn(`[models-filter] refresh failed (${errorMessage(error)}); keeping static fallback`);
     }
