@@ -1,6 +1,6 @@
 ---
 name: ts-coding-standards
-description: TypeScript coding standards for any TypeScript or TSX work, including scripts, tests, config tooling, and validators. ALWAYS read and follow this skill before writing or reviewing TypeScript code—especially code that parses or validates JSON, YAML, environment variables, API responses, or other unknown data. Covers functional style, strict typing, Zod schemas, docstrings, named params, imports, error handling, naming, and readability.
+description: TypeScript coding standards for any TypeScript or TSX work, including scripts, tests, config tooling, and validators. ALWAYS read and follow this skill before writing or reviewing TypeScript code—especially code that parses or validates CLI input, JSON, YAML, environment variables, API responses, or other unknown data. Covers functional style, strict typing, Commander CLI validation, Zod schemas, docstrings, named params, imports, error handling, naming, and readability.
 metadata:
   audience: developers
   workflow: coding
@@ -15,7 +15,8 @@ For repo tooling (package manager, Biome, tsconfig), see the `ts-coding-setup` s
 
 ## Fast rules
 
-- **Runtime validation:** When data enters as `unknown`—including parsed JSON/YAML, environment variables, files, API responses, or CLI input—define a Zod schema and derive the TypeScript type from it. Do not hand-roll a parallel `assert*`/`isRecord` validator unless Zod is genuinely unavailable and the exception is documented.
+- **CLI validation:** For CLI input, use `commander.js` option parsers, choices, required options, and related validation. Read the `commander-js` skill before building or reviewing a Commander CLI.
+- **Runtime validation:** For non-CLI data entering as `unknown`—including parsed JSON/YAML, environment variables, files, and API responses—define a Zod schema and derive the TypeScript type from it. Do not hand-roll a parallel `assert*`/`isRecord` validator unless Zod is genuinely unavailable and the exception is documented.
 - **Type safety:** Keep the boundary typed; do not use casts to silence errors.
 - **Before finishing:** Run the narrowest relevant typecheck and tests, and fix type errors rather than weakening the check.
 
@@ -187,7 +188,9 @@ return todos.map((todo) => <Todo done={todoSet.has(todo.id)} />);
 const street = user?.address?.street;
 ```
 
-### Zod for validation
+### Zod for non-CLI validation
+
+Use Zod for non-CLI unknown input such as JSON, YAML, environment variables, files, and API responses. Use Commander validation for CLI arguments and options.
 
 ```ts
 // ✅ Correct
