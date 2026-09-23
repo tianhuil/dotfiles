@@ -32,21 +32,9 @@ Use [`../large-design/SKILL.md`](../large-design/SKILL.md) when **any** of these
 
 When uncertain, choose the large format. Do not force a large feature into the simple format merely to keep the document short. A simple design may be upgraded to a large design when exploration reveals a trigger above. Run the selected skill as a separate skill so its scope and context remain clear.
 
-## Shared output rules
+## Shared rules
 
-Use plain language and avoid jargon unless the jargon is necessary. Define each term before using it. After defining a term, use that same term consistently; do not replace it with synonyms, because synonyms can create ambiguity. For every unresolved question or decision, add an inline TODO at the point where it must be resolved. Write each TODO as a question in this exact form: `[TODO: what is the ...?]`.
-
-Both formats:
-
-- start with the user problem, users, observable outcomes, success measures, and explicit exclusions;
-- use repository facts, existing seams, domain terminology, ADRs, configuration, and test commands before writing decisions;
-- use exact examples for important contracts and inline TODOs for genuine unresolved questions or decisions;
-- pair every implementation step with a clear, checkable completion criterion;
-- state the highest useful test seam and verify external behavior rather than implementation details;
-- distinguish required behavior from follow-ups; and
-- use the three-tier boundaries: Always, Ask first, Never.
-
-Write the resulting document to `notes/design/[feature-name]-design.md` using kebab-case. Keep simple documents under 200 lines and large documents under 300 lines.
+Apply [`common-rules.md`](common-rules.md) to either format.
 
 ## Review choice
 

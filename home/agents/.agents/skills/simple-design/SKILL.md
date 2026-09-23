@@ -17,7 +17,7 @@ Write one paragraph covering the problem, users, solution, observable success cr
 
 ## Scope and Decisions
 
-Use plain language and avoid jargon unless the jargon is necessary. Define each term before using it. After defining a term, use that same term consistently; do not replace it with synonyms, because synonyms can create ambiguity. For every unresolved question or decision, add an inline TODO at the point where it must be resolved. Write each TODO as a question in this exact form: `[TODO: what is the ...?]`.
+Apply [`../design/common-rules.md`](../design/common-rules.md).
 
 State:
 
@@ -27,10 +27,6 @@ State:
 - the component that owns each important behavior;
 - the source of truth for configuration or data; and
 - any assumptions that need confirmation.
-
-Use an inline TODO at the decision point when a question or decision remains unresolved:
-
-`[TODO: what is the decision between A and B, and why?]`
 
 ## Technical Design
 
@@ -78,12 +74,6 @@ For this feature, state what happens when relevant dependencies are unavailable,
 
 Record external assumptions with their version and a probe or authoritative source. If the feature has modes, include a compact table of mode behavior, defaults, invalid values, and precedence.
 
-## Boundaries
-
-- ✅ **Always:** run focused tests; use the existing seam; update the design when a requirement changes.
-- ⚠️ **Ask first:** add dependencies, change persistent data, alter public APIs, or expand scope.
-- 🚫 **Never:** commit secrets, claim an untested case passes, or silently replace the required integration with a substitute.
-
 ## Final Check
 
 Before approval, confirm:
@@ -97,6 +87,3 @@ Before approval, confirm:
 
 For a simple design, a second-agent review is optional. Use the large-design format when any criterion is difficult to answer or the feature has cross-system, generated-data, security, evidence, multi-mode, or multi-session risk.
 
-## Output
-
-Save the document as `notes/design/[feature-name]-design.md` in kebab-case. Keep it concise, self-contained, and under 200 lines.
