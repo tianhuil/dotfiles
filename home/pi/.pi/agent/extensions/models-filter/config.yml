@@ -15,12 +15,9 @@
 filters:
   - "opencode/big-pickle"
   - "opencode/deepseek-v4-flash-free"
-  - "opencode/mimo-v2.5-free"
-  - "opencode/nemotron-3-ultra-free"
-  - "opencode/north-mini-code-free"
-  - "zai/glm-5([^v].*|$)"  # glm-5, glm-5-turbo, glm-5.1, glm-5.2, glm-5.3 (text only)
-  - "zai/glm-5v-turbo"  # vision: text, image, video, PDF
-  - "zai/glm-4.7-flash"  # free
+  - 'zai/glm-5\.3(-.*)?'  # GLM-5.3 and variants
+  - "zai/glm-4.7-flash"  # best free model
+  - 'openai-codex/gpt-6-(luna|sol)'
 
 providers:
   opencode:

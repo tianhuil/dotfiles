@@ -9,9 +9,8 @@
 // distinct effort tier.
 //
 // Effort models:  deepseek-v4-flash-free (low/high/max)
-// Binary models:  north-mini-code-free, glm-5, glm-5.1, glm-5-turbo (off/high)
-// Effort models:  glm-5.2, glm-5.3 (high/max)
-// Effort models:  gpt-5.6-sol/terra/luna (none/low/medium/high/xhigh/max)
+// Binary models:  glm-4.7-flash (off/high)
+// Effort models:  glm-5.3* (low/high/max), gpt-6-sol/luna (none/low/medium/high/xhigh/max)
 
 {
   "providers": {
@@ -28,24 +27,12 @@
             "xhigh": null,
             "max": "max"
           }
-        },
-        // Cohere North Mini: binary reasoning; "none" disables, anything else enables
-        "north-mini-code-free": {
-          "thinkingLevelMap": {
-            "off": "none",
-            "minimal": null,
-            "low": null,
-            "medium": null,
-            "high": "high",
-            "xhigh": null,
-            "max": null
-          }
         }
       }
     },
     "openai": {
       "modelOverrides": {
-        "gpt-5.6-sol": {
+        "gpt-6-sol": {
           "thinkingLevelMap": {
             "off": "none",
             "minimal": null,
@@ -56,18 +43,7 @@
             "max": "max"
           }
         },
-        "gpt-5.6-terra": {
-          "thinkingLevelMap": {
-            "off": "none",
-            "minimal": null,
-            "low": "low",
-            "medium": "medium",
-            "high": "high",
-            "xhigh": "xhigh",
-            "max": "max"
-          }
-        },
-        "gpt-5.6-luna": {
+        "gpt-6-luna": {
           "thinkingLevelMap": {
             "off": "none",
             "minimal": null,
@@ -82,72 +58,50 @@
     },
     "zai": {
       "modelOverrides": {
-        // GLM-5 family (binary): zai thinking format, supportsReasoningEffort: false
-        "glm-5": {
-          "thinkingLevelMap": {
-            "off": null,
-            "minimal": null,
-            "low": null,
-            "medium": null,
-            "high": "high",
-            "xhigh": null,
-            "max": null
-          }
-        },
-        "glm-5.1": {
-          "thinkingLevelMap": {
-            "off": null,
-            "minimal": null,
-            "low": null,
-            "medium": null,
-            "high": "high",
-            "xhigh": null,
-            "max": null
-          }
-        },
-        "glm-5-turbo": {
-          "thinkingLevelMap": {
-            "off": null,
-            "minimal": null,
-            "low": null,
-            "medium": null,
-            "high": "high",
-            "xhigh": null,
-            "max": null
-          }
-        },
-        "glm-5v-turbo": {
-          "thinkingLevelMap": {
-            "off": null,
-            "minimal": null,
-            "low": null,
-            "medium": null,
-            "high": "high",
-            "xhigh": null,
-            "max": null
-          }
-        },
-        // GLM-5.2: reasoning_effort accepts high, max
-        "glm-5.2": {
-          "thinkingLevelMap": {
-            "off": null,
-            "minimal": null,
-            "low": null,
-            "medium": null,
-            "high": "high",
-            "xhigh": null,
-            "max": "max"
-          }
-        },
+        // GLM-5.3 family: reasoning_effort accepts low, high, max.
         "glm-5.3": {
           "thinkingLevelMap": {
             "off": null,
             "minimal": null,
-            "low": null,
+            "low": "low",
             "medium": null,
             "high": "high",
             "xhigh": null,
             "max": "max"
+          }
+        },
+        "glm-5.3-flash": {
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": null,
+            "low": "low",
+            "medium": null,
+            "high": "high",
+            "xhigh": null,
+            "max": "max"
+          }
+        },
+        "glm-5.3-flashx": {
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": null,
+            "low": "low",
+            "medium": null,
+            "high": "high",
+            "xhigh": null,
+            "max": "max"
+          }
+        },
+        // GLM-4.7 Flash: toggle-only reasoning.
+        "glm-4.7-flash": {
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": null,
+            "low": null,
+            "medium": null,
+            "high": "high",
+            "xhigh": null,
+            "max": null
           }
         }
       }
