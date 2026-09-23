@@ -56,18 +56,33 @@ const allUsers = [...oldUsers, newUser];
 oldUsers.push(newUser);
 ```
 
-Prefer a ternary over `let` + reassignment:
+Use a ternary for a simple two-way choice. For multiple branches, use a `switch` inside a `const` IIFE; return each value directly. Keep any required mutation inside that IIFE rather than exposing a top-level `let`:
 
 ```ts
-// ✅ Correct
+// ✅ Correct — simple two-way choice
 const x = y === 1 ? 2 : 3;
 
-// ❌ Incorrect
-let x = 2;
-if (y === 1) {
-  x = 2;
+// ✅ Correct — multiple branches
+const files = (() => {
+  switch (profile) {
+    case "apple":
+      return ["packages/contract-tests/src/apple.test.ts"];
+    case "github":
+      return ["packages/contract-tests/src/github.test.ts"];
+    case "google":
+    case undefined:
+      return ["packages/contract-tests/src/phase0.test.ts", "packages/contract-tests/src/http.test.ts"];
+    default:
+      return [];
+  }
+})();
+
+// ❌ Incorrect — top-level `let` plus reassignment
+let files: string[];
+if (profile === "apple") {
+  files = ["packages/contract-tests/src/apple.test.ts"];
 } else {
-  x = 3;
+  files = [];
 }
 ```
 
@@ -360,7 +375,7 @@ function process(data: Data) {
 }
 ```
 
-Prefer `switch` over chained `if/else if`; flatten compound conditionals:
+Prefer `switch` over chained `if/else if`; for a derived value with multiple branches, wrap that `switch` in a `const` IIFE and return branch values directly. Flatten compound conditionals:
 
 ```ts
 if (a && b) return 1;
