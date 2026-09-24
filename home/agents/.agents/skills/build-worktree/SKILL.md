@@ -30,11 +30,12 @@ Or reference them by their install path at `~/.agents/skills/build-worktree/`.
 | `validate.sh "<worktree>" <cmd...>`        | 2    | Run validation commands in worktree. Exits 0 on pass, 1 on failure                                                                                     |
 | `push-pr.sh "<branch>" "<title>" "<body>"` | 4    | Push branch + create PR. Outputs PR URL and `PR_NUMBER`                                                                                                |
 | `monitor-ci.sh "<branch>" "<pr_number>"`   | 5    | Wait for CI via `gh run watch`, check mergeability. Outputs `CONCLUSION`, `MERGEABLE`, `RUN_ID`                                                        |
+| `gh pr merge`                               | 7    | Merge PR only when explicitly requested                                                          |
 
 
 ## Constraints
 
-1. **Never merge a PR without explicit user request.** Stop after CI passes and report the result. Wait for the user to tell you to merge.
+1. **Do not merge by default.** Merge only when the user explicitly requests merging as part of this task. Otherwise stop after CI passes and report the result.
 2. **Stay on the worktree you created in Step 0.** Never create additional branches or worktrees. Fix issues in place.
 
 ## Execution Model
@@ -199,7 +200,7 @@ bash ~/.agents/skills/build-worktree/monitor-ci.sh "$BRANCH_NAME" "$PR_NUMBER"
 
 Parse output:
 
-- `CONCLUSION=success` → **CI PASSED**, report and stop
+- `CONCLUSION=success` → **CI PASSED**; proceed to Step 7 only if user explicitly requested merging, otherwise report and stop
 - `MERGE_CONFLICT=true` → proceed to Step 5.5
 - `CONCLUSION=<other>` → proceed to Step 6
 - `TIMEOUT` → no CI run appeared, report to user
@@ -234,6 +235,18 @@ cd $WORKTREE_PATH && git add -A && git commit -m "fix: [[ORCA_RICH_MD:aa949d50fe
 ```
 
 Return to Step 5. Max 5 CI failure iterations before stopping.
+
+## Step 7: Merge (Only on Explicit Request)
+
+Run this step only when the user explicitly requested merging as part of this task. Otherwise do not merge; stop after Step 5 reports CI passed.
+
+Confirm CI passed and PR is mergeable, then merge using GitHub CLI:
+
+```bash
+gh pr merge "$PR_NUMBER" --merge
+```
+
+If merge fails or PR is not mergeable, stop and report the error. Do not change merge strategy or force a merge without user approval. Report the resulting merge status.
 
 ## Cleanup
 
