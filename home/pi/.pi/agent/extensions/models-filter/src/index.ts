@@ -63,7 +63,6 @@ async function parseYaml(text: string): Promise<unknown> {
 
 interface PiApi {
   registerProvider(name: string, config: Record<string, unknown>): void;
-  unregisterProvider?(name: string): void;
 }
 
 interface FilterRule {
@@ -612,9 +611,6 @@ async function bootstrap(pi: PiApi): Promise<void> {
   try {
     const config = await loadConfig();
     const rules = compileRules(config.filters);
-    // Remove unwanted provider registered by the Orca package.
-    pi.unregisterProvider?.("pi-orca-zen");
-
     if (rules.length === 0) {
       console.warn("[models-filter] no filter rules; nothing to do");
       return;
