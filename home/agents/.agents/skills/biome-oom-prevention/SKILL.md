@@ -40,7 +40,7 @@ Treat OOM as a **scan-boundary** bug first: Biome is usually parsing files it sh
    ```
 
    Use the repository's existing schema URL and conventions. Add matching `.gitignore` entries; VCS integration is a second boundary, not a replacement for explicit Biome exclusions.
-4. **Narrow the command.** Test a source directory or changed-file list instead of `.`. In a monorepo, run each package from its own Biome project or pass package paths. Avoid linting output while a build is writing it.
+4. **Narrow the command.** Prefer Biome's VCS filters over scanning `.` when checking a subset: `biome check --staged` for pre-commit work, or `biome check --changed --since=<REF>` for committed changes since a base ref. `--changed` excludes staged and unstaged changes; `--staged` is unavailable with `biome ci`. Check exact behavior for installed version with `biome check -h` (or `biome lint -h`). Otherwise test a source directory or changed-file list. In a monorepo, run each package from its own Biome project or pass package paths. Avoid linting output while a build is writing it.
 5. **Remove graph multipliers.** If memory remains high, temporarily disable experimental project-wide type or graph analysis and project rules, then rerun the same command. Re-enable one feature at a time after the scan is stable. Do not hide real lint failures by disabling ordinary rules.
 6. **Profile with supported logging.** Check available flags first:
 
