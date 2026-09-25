@@ -254,7 +254,7 @@ Do NOT remove the worktree. The user cleans up with `wt remove $BRANCH_NAME` whe
 
 ## Additional Work
 
-You may be given subsequent work to perform.  If you are, after each task, please re-perform steps 2 through 6 before completing.
+After creating the PR, keep this Pi session working in `WORKTREE_PATH`. If the user gives follow-up work in this session, do it in the same worktree and branch; do not return to or switch branches in the primary checkout. After each follow-up task, re-perform Steps 2 through 6 before completing.
 
 ## Error Cases
 
