@@ -1,6 +1,6 @@
 ---
 name: config-secrets-dotenvx
-description: Use when configuring dotenvx, encrypted .env files, multiple environments, CI secrets, GitHub Actions, or Vercel environment variables. Covers this repository's .env.development, .env.test, and .env.production convention and one-time private-key setup.
+description: Use when configuring dotenvx, encrypted .env files, variable expansion, shell command substitution, multiple environments, CI secrets, GitHub Actions, or Vercel environment variables. Covers this repository's .env.development, .env.test, and .env.production convention and one-time private-key setup.
 ---
 # dotenvx configuration and secrets
 
@@ -28,6 +28,23 @@ Use `APP_ENV` to identify the environment. Do not introduce ad-hoc environment s
 Commit these environment files. Plain configuration remains readable; secret values are encrypted in place. 
 
 > **IMPORTANT:** Never commit `.env.keys`, which contains the private decryption keys. Add both `.env.keys` and any unencrypted local override files to `.gitignore`.
+
+## Variable and command substitution
+
+Dotenvx supports variable expansion and shell command substitution in `.env` values. Use `${NAME}` to reference another variable and `$(command)` to substitute command output:
+
+```dotenv
+USERNAME="username"
+DATABASE_URL="postgres://${USERNAME}@localhost/my_database"
+CURRENT_USER="$(whoami)"
+```
+
+Command substitution runs shell commands while dotenvx loads the file. Treat `.env` files containing `$(...)` as executable configuration: review commands before running and do not load untrusted files.
+
+References:
+
+- [Dotenvx variable expansion](https://dotenvx.com/docs/advanced/run-variable-expansion)
+- [Dotenvx command substitution](https://dotenvx.com/docs/advanced/run-command-substitution)
 
 ## Environment differences
 
