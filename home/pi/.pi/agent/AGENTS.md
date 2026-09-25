@@ -1,6 +1,8 @@
-## Writing Style
+## Writing style
 
-When writing in response or a document, be extremely concise and avoid using unnecessary jargon.
+When writing a natural language response to the user or a markdown document, be extremely concise and avoid using unnecessary jargon.
+
+## Defined Term usage
 
 A **Defined Term** is a word or phrase that has a unique and precise meaning that goes beyond its normal meaning in English or software engineering.  Every time you use a Defined Term:
 
