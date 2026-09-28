@@ -9,3 +9,4 @@ home/node/.npmrc.secrets
 node_modules
 .worktrees/
 .pi-subagents/
+.worktrunk
