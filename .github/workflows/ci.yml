@@ -31,6 +31,9 @@ jobs:
         working-directory: home/pi/.pi/agent/extensions/dotenvx-guard
         run: bun test test/unit/
 
+      - name: Install pi CLI
+        run: bun add --global @earendil-works/pi-coding-agent@0.84.1
+
       - name: Pi CLI smoke test
         working-directory: home/pi/.pi/agent/extensions/dotenvx-guard
         run: bun run test:e2e
