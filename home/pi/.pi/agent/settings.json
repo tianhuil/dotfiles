@@ -1,16 +1,16 @@
 {
-  "lastChangelogVersion": "0.84.1",
+  "lastChangelogVersion": "0.87.1",
   "theme": "dark",
   "packages": [
     "npm:pi-upgrade",
     "npm:@plannotator/pi-extension",
     "npm:@thunstack/auto-compact",
     "git:github.com/MasuRii/pi-rtk-optimizer",
-    "npm:pi-subagents",
     "npm:pi-web-access",
     "git:github.com/tianhuil/pi-orca",
     "git:github.com/tianhuil/pi-dotenvx",
-    "git:github.com/jonjonrankin/pi-caveman"
+    "git:github.com/jonjonrankin/pi-caveman",
+    "npm:pi-subagents"
   ],
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-6-luna",
