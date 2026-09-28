@@ -30,7 +30,7 @@
         }
       }
     },
-    "openai": {
+    "openai-codex": {
       "modelOverrides": {
         "gpt-6-sol": {
           "thinkingLevelMap": {
