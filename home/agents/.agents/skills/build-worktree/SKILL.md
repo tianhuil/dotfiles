@@ -9,7 +9,7 @@ metadata:
 ---
 # Build PR in Git Worktree
 
-Complete a task in an isolated git worktree, validate it, push a PR, and iterate until CI passes.
+Complete a task in an isolated worktree, validate it, push a PR, and iterate until CI passes. Follow `git-orca-worktrees` for worktree creation and cleanup: Orca by default, plain Git fallback.
 
 ## Helper Scripts
 
@@ -26,7 +26,7 @@ Or reference them by their install path at `~/.agents/skills/build-worktree/`.
 
 | Script                                     | Step | Purpose                                                                                                                                                |
 | ------------------------------------------ | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `setup.sh "<branch>"`                      | 0    | Create worktree for branch using `wt` when available, otherwise `git worktree`. Outputs `BRANCH_NAME`, `BASE_BRANCH`, `WORKTREE_TOOL`, `WORKTREE_PATH` |
+| `git-orca-worktrees/setup.sh "<name>"`      | 0    | Create Orca worktree, falling back to plain Git. Outputs `BRANCH_NAME`, `BASE_BRANCH`, `WORKTREE_TOOL`, `WORKTREE_PATH`, and Orca `WORKTREE_ID` |
 | `validate.sh "<worktree>" <cmd...>`        | 2    | Run validation commands in worktree. Exits 0 on pass, 1 on failure                                                                                     |
 | `push-pr.sh "<branch>" "<title>" "<body>"` | 4    | Push branch + create PR. Outputs PR URL and `PR_NUMBER`                                                                                                |
 | `monitor-ci.sh "<branch>" "<pr_number>"`   | 5    | Wait for CI via `gh run watch`, check mergeability. Outputs `CONCLUSION`, `MERGEABLE`, `RUN_ID`                                                        |
@@ -60,11 +60,12 @@ This is an **orchestrator** — it coordinates bash scripts and delegated agents
 
    Slugify the task: lowercase, hyphens for spaces, strip special chars, max 50 chars. Example: "Add user login" → `feat/add-user-login`
 2. **Create worktree**:
-  ```bash
-   bash ~/.agents/skills/build-worktree/setup.sh "$BRANCH_NAME"
-  ```
 
-   `setup.sh` checks for `wt` before using it. If `wt` is unavailable, it creates the worktree with `git worktree add`.
+   ```bash
+   bash ~/.agents/skills/git-orca-worktrees/setup.sh "$BRANCH_NAME"
+   ```
+
+   This helper owns Orca-first creation and Git fallback. Follow `git-orca-worktrees` for its behavior and output fields. Use `WORKTREE_PATH` as the checkout; retain `WORKTREE_ID` for Orca operations.
 
 Parse the output for `BRANCH_NAME` (may have `-v2` suffix if branch existed), `BASE_BRANCH`, `WORKTREE_TOOL`, and `WORKTREE_PATH`. All subsequent work uses these.
 
@@ -250,7 +251,7 @@ If merge fails or PR is not mergeable, stop and report the error. Do not change 
 
 ## Cleanup
 
-Do NOT remove the worktree. The user cleans up with `wt remove $BRANCH_NAME` when `wt` was used, or `git worktree remove [[ORCA_RICH_MD:c77e4dd59f0ccaa6b72135807b622bfd:inline-html:%3Cworktree-path%3E]]` with the fallback.
+Do NOT remove the worktree. User handles cleanup; follow `git-orca-worktrees` for correct removal command by worktree type.
 
 ## Additional Work
 
@@ -262,7 +263,7 @@ After creating the PR, keep this Pi session working in `WORKTREE_PATH`. If the u
 - **Push auth/permission failure**: Stop and ask user to resolve (e.g. `gh auth login`). Do NOT try SSH, HTTPS, or remote URL changes.
 - **Branch already exists**: `setup.sh` appends `-v2`, `-v3`, etc.
 - **Worktree creation fails**: Report error and stop
-- `**wt` unavailable**: `setup.sh` uses `git worktree add`; remove the worktree later with `git worktree remove [[ORCA_RICH_MD:c77e4dd59f0ccaa6b72135807b622bfd:inline-html:%3Cworktree-path%3E]]`
+- **Orca unavailable or repo unregistered**: shared `git-orca-worktrees/setup.sh` falls back to `git worktree add`; cleanup follows `git-orca-worktrees`.
 - **Push fails**: Report error (likely need rebase)
 - **Merge conflict**: Step 5.5 handles rebase + force push
 - **Max CI retries (5)**: Report all accumulated failures and stop

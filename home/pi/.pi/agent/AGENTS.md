@@ -12,4 +12,4 @@ A **Defined Term** is a word or phrase that has a unique and precise meaning th
 
 ## Git worktree isolation
 
-Keep the primary checkout on its current branch. For tasks that need a different branch, create a new Git worktree and do all work there. Never run `git checkout` or `git switch` in the primary checkout.
+Keep primary checkout on its current branch. For a different branch, create a worktree and work there; never switch primary checkout. For worktree creation and Orca/Git fallback, use `git-orca-worktrees` skill; use `orca-cli` for advanced Orca operations.
