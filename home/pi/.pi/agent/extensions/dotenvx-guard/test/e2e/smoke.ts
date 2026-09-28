@@ -1,11 +1,11 @@
 import { spawn } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { mkdtemp, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
 const extensionDir = path.resolve(import.meta.dir, "../..");
-const extensionEntry = path.join(extensionDir, "src", "index.ts");
+const extensionEntry = path.join(import.meta.dir, "smoke-probe.ts");
 const repoRoot = path.resolve(extensionDir, "../../../../../../");
 const timeoutMs = 60_000;
 
@@ -30,10 +30,6 @@ function findPiBinary(): string {
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);
 }
-
-const source = readFileSync(extensionEntry, "utf8");
-assert(/pi\.registerTool\s*\(/.test(source), "Extension source does not register a tool");
-assert(/name:\s*["']dotenvx_info["']/.test(source), "Extension does not register dotenvx_info tool");
 
 const piBinary = findPiBinary();
 const cwd = await mkdtemp(path.join(os.tmpdir(), "dotenvx-guard-pi-smoke-"));
@@ -123,16 +119,18 @@ try {
   const commandsResponse = frames.find((frame) => frame.type === "response" && frame.id === "smoke-commands");
   assert(commandsResponse?.success === true, `RPC get_commands failed: ${JSON.stringify(commandsResponse ?? frames)}`);
 
-  // rpc.md documents get_commands, not a tool-catalog command. The CLI is
-  // launched with dotenvx_info in its --tools allowlist; source assertions
-  // above verify that this loaded extension registers that exact tool name.
-  // Together, successful RPC startup and no extension_error check runtime wiring.
-  const namesInFrames = JSON.stringify(frames);
-  if (namesInFrames.includes("dotenvx_info")) {
-    console.log("PASS: pi RPC loaded dotenvx_info and exposed its name in RPC output");
-  } else {
-    console.log("PASS: pi RPC initialized with dotenvx_info allowlisted; extension loaded without errors");
-  }
+  // rpc.md documents get_commands, while custom tools are available through
+  // ExtensionAPI.getAllTools(). The smoke probe checks that runtime list and
+  // only then exposes this marker command through the documented RPC frame.
+  const commands = commandsResponse.data && typeof commandsResponse.data === "object"
+    ? (commandsResponse.data as { commands?: unknown }).commands
+    : undefined;
+  const registrationMarker = Array.isArray(commands)
+    ? commands.find((command) => typeof command === "object" && command !== null && (command as { name?: unknown }).name === "dotenvx-info-smoke") as { description?: unknown } | undefined
+    : undefined;
+  assert(typeof registrationMarker?.description === "string" && registrationMarker.description.includes("dotenvx_info"),
+    `Pi did not expose dotenvx_info in runtime tool list: ${JSON.stringify(commandsResponse)}`);
+  console.log("PASS: pi RPC runtime tool list contained dotenvx_info");
   console.log(`Pi binary: ${piBinary}`);
   console.log(`Pi args: ${args.join(" ")}`);
 } finally {

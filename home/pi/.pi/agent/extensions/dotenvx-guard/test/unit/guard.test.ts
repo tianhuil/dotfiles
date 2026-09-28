@@ -52,6 +52,16 @@ describe("isProtectedPath", () => {
     expect(isProtectedPath(alias, cwd)).toBe(true);
   });
 
+  test("resolves a missing child through a symlinked protected directory", async () => {
+    const cwd = await makeTempDir();
+    const protectedDir = path.join(await makeTempDir(), "protected");
+    await mkdir(protectedDir);
+    const alias = path.join(cwd, "ordinary-data");
+    await symlink(protectedDir, alias);
+
+    expect(isProtectedPath(path.join(alias, "newfile"), cwd, [], [protectedDir])).toBe(true);
+  });
+
   test("does not protect ordinary dotenv files or unrelated paths", async () => {
     const cwd = await makeTempDir();
 
@@ -103,13 +113,19 @@ describe("redactSecrets", () => {
     expect(redactSecrets(text)).toBe("DOTENV_PRIVATE_KEY_DEVELOPMENT=[redacted:dotenvx-key]");
   });
 
-  test("leaves ordinary text, short values, and encrypted values untouched", () => {
+  test("redacts short private-key values but leaves ordinary short and encrypted values untouched", () => {
     const text = [
       "normal text",
-      "DOTENV_PRIVATE_KEY_DEVELOPMENT=short",
+      "DOTENV_PRIVATE_KEY_X=abc123",
+      "SHORT_VALUE=abc123",
       "API_KEY=encrypted:AREALLYFAKEVALUEFORTESTS",
     ].join("\n");
-    expect(redactSecrets(text)).toBe(text);
+    expect(redactSecrets(text)).toBe([
+      "normal text",
+      "DOTENV_PRIVATE_KEY_X=[redacted:dotenvx-key]",
+      "SHORT_VALUE=abc123",
+      "API_KEY=encrypted:AREALLYFAKEVALUEFORTESTS",
+    ].join("\n"));
   });
 });
 
@@ -135,3 +151,22 @@ describe("collectSafeInfo", () => {
     expect(json).not.toContain("AREALLYFAKEVALUEFORTESTS");
   });
 });
+  test("reports metadata for a symlinked .env.keys", async () => {
+    const cwd = await makeTempDir();
+    const realDir = await makeTempDir();
+    const realKeys = path.join(realDir, "real.keys");
+    await writeFile(realKeys, "DOTENV_PRIVATE_KEY_DEVELOPMENT=key_" + "C".repeat(44) + "\n");
+    await symlink(realKeys, path.join(cwd, ".env.keys"));
+    await writeFile(path.join(cwd, ".env.development"), "APP_ENV=development\n");
+
+    const result = await collectSafeInfo(cwd);
+    expect(result.privateKeysFile).toBeDefined();
+    expect(result.privateKeysFile?.count).toBe(1);
+    expect(result.privateKeysFile?.entryNames).toEqual(["DOTENV_PRIVATE_KEY_DEVELOPMENT"]);
+    expect(JSON.stringify(result)).not.toContain("key_C");
+  });
+
+  test("redaction does not swallow the line after an empty private-key assignment", () => {
+    const text = "DOTENV_PRIVATE_KEY_DEVELOPMENT=\nNEXT=ordinary\n";
+    expect(redactSecrets(text)).toBe("DOTENV_PRIVATE_KEY_DEVELOPMENT=\nNEXT=ordinary\n");
+  });

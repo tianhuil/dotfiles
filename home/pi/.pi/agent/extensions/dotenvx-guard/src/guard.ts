@@ -1,5 +1,5 @@
 import { realpathSync } from "node:fs";
-import { lstat, readFile, readdir } from "node:fs/promises";
+import { readFile, readdir, stat } from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
 
@@ -39,7 +39,19 @@ function canonicalize(input: string): string {
   try {
     return realpathSync(absolute);
   } catch {
-    return path.normalize(absolute);
+    const missingSuffix: string[] = [];
+    let ancestor = absolute;
+    while (true) {
+      const parent = path.dirname(ancestor);
+      if (parent === ancestor) return path.normalize(absolute);
+      missingSuffix.unshift(path.basename(ancestor));
+      ancestor = parent;
+      try {
+        return path.join(realpathSync(ancestor), ...missingSuffix);
+      } catch {
+        // Keep walking until an existing ancestor can be canonicalized.
+      }
+    }
   }
 }
 
@@ -99,7 +111,7 @@ export function bashReferencesProtected(command: string, protectedNames: string[
 
 const PRIVATE_KEY_LINE = /^\s*(DOTENV_PRIVATE_KEY_[A-Z0-9_]+)\s*=\s*(.*)$/i;
 const KEY_TOKEN = /key_[A-Za-z0-9+/=]{40,}/g;
-const PRIVATE_KEY_VALUE = /(^\s*DOTENV_PRIVATE_KEY_[A-Z0-9_]+\s*=\s*)[^\r\n]{20,}/gim;
+const PRIVATE_KEY_VALUE = /(^[ \t]*DOTENV_PRIVATE_KEY_[A-Z0-9_]+[ \t]*=[ \t]*)(\S[^\r\n]*)/gim;
 
 /** Remove recognizable dotenvx secrets from text returned by tools. */
 export function redactSecrets(text: string): string {
@@ -129,8 +141,9 @@ function hasEncryptedEntries(text: string): boolean {
 
 async function getPrivateKeyMetadata(filePath: string): Promise<PrivateKeyMetadata | undefined> {
   try {
-    const stat = await lstat(filePath);
-    if (!stat.isFile()) return undefined;
+    // stat (not lstat): a symlink to a regular keys file is still a keys file.
+    const info = await stat(filePath);
+    if (!info.isFile()) return undefined;
     const content = await readFile(filePath, "utf8");
     const names: string[] = [];
     for (const line of content.split(/\r?\n/)) {
@@ -139,8 +152,8 @@ async function getPrivateKeyMetadata(filePath: string): Promise<PrivateKeyMetada
     }
     return {
       name: path.basename(filePath),
-      size: stat.size,
-      modifiedAt: stat.mtime.toISOString(),
+      size: info.size,
+      modifiedAt: info.mtime.toISOString(),
       count: names.length,
       entryNames: names,
     };
@@ -178,7 +191,7 @@ export async function collectSafeInfo(cwd: string): Promise<SafeInfo> {
   const homeKeysPath = path.join(os.homedir(), ".dotenvx", ".env.keys");
   let dotenvxHomeKeysExists = false;
   try {
-    dotenvxHomeKeysExists = (await lstat(homeKeysPath)).isFile();
+    dotenvxHomeKeysExists = (await stat(homeKeysPath)).isFile();
   } catch {
     // Missing home key file is safe metadata.
   }
