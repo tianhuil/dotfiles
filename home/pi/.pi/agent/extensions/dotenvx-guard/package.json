@@ -1,0 +1,13 @@
+{
+  "name": "pi-dotenvx-guard",
+  "private": true,
+  "description": "Guard dotenvx private key files in pi",
+  "scripts": {
+    "test": "bun test test/unit/",
+    "test:unit": "bun test test/unit/",
+    "test:e2e": "bun run test/e2e/smoke.ts"
+  },
+  "pi": {
+    "extensions": ["./src/index.ts"]
+  }
+}
