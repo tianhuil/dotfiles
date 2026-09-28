@@ -9,11 +9,12 @@
     "npm:pi-subagents",
     "npm:pi-web-access",
     "git:github.com/tianhuil/pi-orca",
+    "git:github.com/tianhuil/pi-dotenvx",
     "git:github.com/jonjonrankin/pi-caveman"
   ],
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-6-luna",
-  "defaultThinkingLevel": "medium",
+  "defaultThinkingLevel": "off",
   "enabledModels": [
     "openai-codex/gpt-6-luna",
     "openai-codex/gpt-6-sol",
