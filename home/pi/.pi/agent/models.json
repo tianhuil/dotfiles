@@ -34,7 +34,7 @@
       "modelOverrides": {
         "gpt-6-sol": {
           "thinkingLevelMap": {
-            "off": "none",
+            "off": null,
             "minimal": null,
             "low": "low",
             "medium": "medium",
@@ -45,7 +45,7 @@
         },
         "gpt-6-luna": {
           "thinkingLevelMap": {
-            "off": "none",
+            "off": null,
             "minimal": null,
             "low": "low",
             "medium": "medium",
