@@ -15,7 +15,7 @@ command -v stow >/dev/null || { echo "Install stow first: brew install stow"; ex
 # local-only: e.g. `env` holds a gitignored secret (.env.local) and is absent
 # in a fresh clone on any platform — stowing it would abort otherwise.
 cd "$SCRIPT_DIR/home"
-ALL_PKGS=(shell git ssh node bun tmux stubby bin scripts cursor zellij worktrunk opencode env omp pi agents)
+ALL_PKGS=(shell git ssh node bun tmux stubby bin scripts cursor zellij worktrunk opencode env omp pi agents claude)
 PKGS=()
 for pkg in "${ALL_PKGS[@]}"; do
   [ -d "$pkg" ] && PKGS+=("$pkg")
