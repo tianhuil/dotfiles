@@ -41,6 +41,7 @@ REMOTE_SKILLS=(
   "mattpocock/skills:*"
   "stablyai/orca:orca-cli"
   "stablyai/orca:orchestration"
+  "stablyai/orca:orca-per-workspace-env"
   "vercel-labs/agent-browser:agent-browser"
   "vercel-labs/skills:find-skills"
 )
