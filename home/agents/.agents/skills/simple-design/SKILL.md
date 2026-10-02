@@ -59,14 +59,16 @@ Keep the plan narrow. Do not add abstractions, dependencies, or unrelated refact
 
 ## Acceptance Criteria
 
-Each criterion must describe externally visible behavior and a concrete proof:
+Each criterion must describe externally visible behavior and how it is checked, using the typed `verify:` field from the common rules (`cmd:` wherever possible):
 
-- [ ] `<named input>` produces `<observable result>`; verified by `<test or command>`.
-- [ ] Invalid or missing input produces `<named error or behavior>`; verified by `<test or command>`.
-- [ ] The focused test crosses the intended boundary rather than only calling an internal implementation.
-- [ ] Documentation and code agree.
+- [ ] A-01 `<named input>` produces `<observable result>` — verify: cmd: `<command>`
+- [ ] A-02 Invalid or missing input produces `<named error or behavior>` — verify: cmd: `<command>`
+- [ ] A-03 The focused test crosses the intended boundary and fails when the behavior is removed — verify: cmd: `<test command>` (also run once with the behavior removed)
+- [ ] A-04 Documentation matches the implemented behavior — verify: review: the documented inputs, outputs, and errors match the code and tests
 
 If there is a fixed set of cases, list every case by stable name. Do not derive the set from whatever the implementation happens to expose.
+
+If the change is user-visible, add the **Acceptance Environment** and a short **Owner Acceptance Script** from the common rules (often one to three steps). Name any protected paths (tests or expected files the builder must not weaken).
 
 ## Failure and Assumption Notes
 
@@ -82,7 +84,9 @@ Before approval, confirm:
 - every important contract has an example;
 - ownership, source of truth, and verification are clear;
 - required cases are named;
-- relevant failure states and assumptions are classified; and
+- relevant failure states and assumptions are classified;
+- every checklist item has a typed `verify:` (`cmd:` wherever the check can be automated) and no `[TODO:` markers remain;
+- user-visible changes name where the owner will check them (Acceptance Environment); and
 - the acceptance criteria pass without relying on self-comparison.
 
 For a simple design, a second-agent review is optional. Use the large-design format when any criterion is difficult to answer or the feature has cross-system, generated-data, security, evidence, multi-mode, or multi-session risk.

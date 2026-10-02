@@ -38,7 +38,8 @@ Every noun (profile, manifest, policy, fixture, event, adapter, record, configur
 Add these tables or equivalent structured sections:
 
 - **Ownership:** requirement/behavior, owner, authoritative input, verification location.
-- **Required-case manifest:** stable ID, expected behavior, dependencies, evidence, and blocking severity. The denominator is design-owned, never derived from implemented files.
+- **Required-case manifest:** stable ID, expected behavior, dependencies, evidence, and blocking severity. The denominator is design-owned, never derived from implemented files. When the manifest has more than about ten rows or a gate will read it, keep it as a machine-readable file (YAML or JSON) that the design links to and the gate loads, so a missing case fails in code rather than depending on a reader noticing. Give each case the work unit it belongs to (for example a `phase` or `unit` field, at the same level the work is split into PRs), so the cases for one unit can be selected and counted.
+- **Protected paths:** the gate, manifest, required-case, golden/expected, and acceptance-test files that decide completion (see common rules). Write and approve them in the first work unit, before feature implementation.
 - **External-assumption register:** dependency and pinned version, configuration/network/security condition, probe or authoritative citation, result, and blocked/unsupported policy.
 - **Mode matrix:** every mode × relevant control, including defaults, invalid values, precedence, and failure semantics.
 - **Evidence register:** source, capture method, timestamp/version, transformation, validation, runtime relationship, retention, and owner.
@@ -55,7 +56,9 @@ A new capability, limitation, exception, owner, or status discovered during impl
 
 Break large work into modular, independently verifiable units. Each unit states deliverables, exclusions, prerequisites, dependencies, completion criteria, review boundary, and follow-up owner. Keep unrelated work from waiting behind an unresolved deep rewrite. State one-writer/worktree ownership and integration order when concurrent work is possible.
 
-Define review policy: pre-review checks, required reviewers, blocking severities, maximum rounds, escalation path, approval authority, and the event that makes completion permanent. Use critical/high findings as blockers unless the design explicitly justifies otherwise; record medium/low follow-ups with an owner and target.
+Define review policy: pre-review checks, required reviewers, blocking severities, maximum rounds, escalation path, approval authority, and the event that makes completion permanent. Use critical/high findings as blockers unless the design explicitly justifies otherwise; record medium/low follow-ups with an owner and target. Reaching the round limit with blockers left means the unit is blocked and escalates to the approval authority; it never counts as done.
+
+Name a human approval point for each phase. Individual PRs may merge once implementation review marks them ready, including an agent-run acceptance check for user-visible changes. The phase itself is complete only after the owner runs the Owner Acceptance Script in the Acceptance Environment on the main branch and checks the phase's `owner:` items; the next phase does not start before then, and failures become fix work in the same phase. Agents may prepare and verify; they do not self-approve a phase.
 
 ### 5. Run independent adversarial review
 
@@ -103,7 +106,18 @@ Follow [`../design/common-rules.md`](../design/common-rules.md). Disclose branch
 
 ## Implementation Plan
 ### Phase 1: [Name]
-- [ ] Deliverable — completion criterion and verification command
+- [ ] P1-01 Deliverable — done when: <observable result> — verify: cmd: `<command>` — covers: R-001; manifest: unit=P1
+- [ ] P1-02 Decision recorded — done when: <criterion> — verify: review: <what the reviewer judges>
+- [ ] P1-03 Works with real accounts — done when: <observable result> — verify: owner: <step the owner performs>
+
+## Protected Paths
+[Gate, manifest, required-case, golden/expected, and acceptance-test files; written and approved first; builders may not weaken them]
+
+## Acceptance Environment
+[How to start the system; exact URLs, hosts, and ports the owner uses; required env files]
+
+## Owner Acceptance Script
+1. <step in the Acceptance Environment> — expected: <result>
 
 ## Acceptance Matrix and Completion Gate
 [Independent boundary tests, required commands, named results, exit semantics]
@@ -143,10 +157,13 @@ Mark every applicable rule `pass`, `gap`, or `N/A`; do not infer an answer from 
 14. Design and code/documentation changes are synchronized in one change.
 15. Work units define scope, dependencies, deliverables, completion, and review boundaries.
 16. Review defines checks, reviewers, blocking severity, round limit, escalation, and final approval.
+17. Protected paths are listed, and the gate cannot be satisfied by editing them.
+18. The Acceptance Environment names the URLs the owner actually uses, and the Owner Acceptance Script covers every user-visible path in scope.
+19. Every checklist item has a typed `verify:` (common rules), `cmd:` wherever the check can be automated, and no `[TODO:` markers remain.
 
 ## Completion gate
 
-Approval is `REVISE` if any Critical, High, or coverage gap remains. Approval is `APPROVE` only when every applicable completeness rule passes, all deferred items have an owner and explicit non-blocking status, and the review record names the approving authority.
+Approval is `REVISE` if any Critical, High, or coverage gap remains. Approval is `APPROVE` only when every applicable completeness rule passes, all deferred items have an owner and explicit non-blocking status, and the review record names the approving authority. Implementation starts only after the owner adds `Approved-by: <owner> <date>` to the document.
 
 Implementation is complete only when:
 
@@ -155,7 +172,9 @@ Implementation is complete only when:
 - blocked/unsupported cases carry the prescribed evidence and do not inherit pass;
 - generated artifacts regenerate cleanly and imported evidence passes schema, provenance, and stability checks;
 - code, design, manifests, generated artifacts, and status are synchronized;
-- required checks pass in a clean, reproducible environment; and
+- required checks pass in a clean, reproducible environment;
+- no protected path was weakened, and every ticked checklist item has reviewer-confirmed evidence;
+- the Owner Acceptance Script passed in the Acceptance Environment: run by an agent with a real browser and recorded step by step for each user-visible PR, and run by the owner on the main branch before the phase counts as complete; and
 - the completion record names the version/commit, commands, results, classifications, residual risks, follow-ups, and approval authority.
 
 ## Review questions

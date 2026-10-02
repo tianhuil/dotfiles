@@ -18,7 +18,17 @@ if ! git push -u origin "$BRANCH_NAME" >"$PUSH_LOG" 2>&1; then
 fi
 rm -f "$PUSH_LOG"
 
-PR_URL=$(gh pr create --title "$TITLE" --body "$BODY" 2>&1)
+# PR_DRAFT=1 opens a draft PR (used for BLOCKED or unreviewed work).
+DRAFT_ARGS=()
+if [ "${PR_DRAFT:-0}" = "1" ]; then
+    DRAFT_ARGS=(--draft)
+fi
+
+if ! PR_URL=$(gh pr create ${DRAFT_ARGS[@]+"${DRAFT_ARGS[@]}"} --head "$BRANCH_NAME" --title "$TITLE" --body "$BODY" 2>&1); then
+    # Most often the PR already exists; SKILL.md Step 4 updates it instead.
+    echo "$PR_URL"
+    exit 1
+fi
 
 echo "$PR_URL"
 

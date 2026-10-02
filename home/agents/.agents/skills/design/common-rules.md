@@ -8,6 +8,8 @@ Use plain language and avoid jargon unless necessary. Define each term before us
 
 Start with the user problem, users, observable outcomes, success measures, and explicit exclusions. Use exact examples for important contracts. Distinguish required behavior from follow-ups.
 
+When rewriting or replacing an existing design, read it and any review comments on it first. Carry every prior decision forward, or record in the new document why it changed. Mark the old document superseded with a link to the new one.
+
 ## Contracts and verification
 
 - Pair every implementation step with a clear, checkable completion criterion.
@@ -15,6 +17,45 @@ Start with the user problem, users, observable outcomes, success measures, and e
 - Give every important behavior one owner and source of truth.
 - Classify relevant failure states and external assumptions.
 - Keep acceptance criteria reproducible and independently verifiable.
+
+Checklist items are the unit of completion. A task names its work unit: either a heading (done when every checklist item under it is met) or a single checklist item (done when it and any items nested under it are met). Write each item in this form so a reviewer knows how to check it:
+
+```markdown
+- [ ] <ID> <deliverable> — done when: <observable result> — verify: <type>: <how> — covers: <R-IDs, manifest cases>
+```
+
+`verify:` names the kind of evidence. Use `cmd:` whenever the check can be automated; use the others only when it cannot:
+
+| Type | Example | The reviewer |
+| --- | --- | --- |
+| `cmd:` | ``cmd: `pnpm test:cell --framework authjs --profile google` `` | runs it and records the decisive output line |
+| `browser:` | `browser: Owner Acceptance Script step 3` | performs the step in the Acceptance Environment and records what it saw |
+| `ci:` | `ci: profile-tests (google)` | cites that job's result for the exact commit under review |
+| `review:` | `review: decision recorded with alternatives and rationale` | judges the work against the stated criterion, quoting `file:line` and saying why it is or is not met |
+| `owner:` | `owner: sign-in works against a real Microsoft tenant` | cannot verify it; the item stays unticked and goes on the owner's checklist at the next approval point |
+
+Do not dress up a judgment as a command: a `grep` that only proves a word exists is not evidence that research, a decision, or documentation is right. Use `review:` with a concrete criterion instead.
+
+- `<ID>` is stable and unique in the document (for example `P1-03`). Never renumber or reuse an ID; add new ones at the end.
+- `covers:` is optional. It links the item to the requirement-table rows (`R-…`) and required-case manifest entries it satisfies. Those tables are traceability and evidence for checklist items, not a second list of things to complete.
+- Items without an ID (older documents) are identified by position under their heading, for example `§1.1.3#2`.
+
+Only a reviewer-confirmed MET item may be ticked; `owner:` items are ticked only by the owner. Implementers never choose which items are ticked; the ticking is a separate, mechanically checked commit made after review.
+
+## Acceptance environment and owner check
+
+Every design that changes user-visible or integration behavior includes two short sections:
+
+- **Acceptance Environment:** how to start the system and the exact URLs, hosts, and ports the owner actually uses (for example a remote or Tailscale origin, not only `localhost` on the agent's machine). Take these from the repository's `AGENTS.md` when it defines them. Acceptance runs there.
+- **Owner Acceptance Script:** 1–8 numbered steps a person can run in under ten minutes, or an agent can run with a real browser, each with its expected result. Agents run it before a user-visible change is ready to merge; the owner runs it at the design's approval points. CI passing does not replace it.
+
+## Protected paths
+
+List the files that decide whether the work is done: gates, manifests, required-case lists, golden or expected files, and acceptance tests. Builders must not weaken them (remove cases, add skips, lower thresholds, or edit expected values to match new output) unless the design names that exact change as a deliverable. When the work is large, write and approve these files before implementation starts.
+
+## Ready to build
+
+A design is ready for implementation only when no `[TODO:` markers remain and, for large designs, the owner has added a line `Approved-by: <owner> <date>` (a reviewer's `APPROVE` verdict is input to that decision, not a substitute for it). Implementation skills check this before starting.
 
 ## Boundaries
 

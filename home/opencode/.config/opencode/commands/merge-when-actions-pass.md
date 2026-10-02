@@ -11,11 +11,12 @@ This command ensures the working tree is clean and all changes are pushed, then 
 1. **Check for uncommitted changes**: Run `git status --porcelain` — if any output, stop and tell the user to commit first
 2. **Check for unpushed changes**: Compare local and remote branch — if they differ, stop and tell the user to push first
 3. **Find the PR**: Use `gh` to find the PR for the current branch
-4. **Get the latest workflow run**: Use `gh run list` to get the most recent run for the current branch
+   - If the PR is a draft, or its body has a build-worktree `Status:` line that is anything other than `READY @ <sha>` with `<sha>` equal to the PR's current head commit, stop and show the user the status and blockers; do not merge. (A newer commit than the reviewed one means it was not reviewed.) PRs with no `Status:` line are not affected.
+4. **Get the workflow run for this commit**: Use `gh run list --commit $(git rev-parse HEAD)` so an earlier commit's run is never mistaken for this one; wait until one exists
 5. **Poll Actions status**: Poll the workflow run status every 10 seconds until it completes (`status` is not `in_progress` or `queued`)
 6. **Check result**: If the run `conclusion` is not `success`, show failed jobs and stop — the user should fix and re-run this command
 7. **Determine primary branch**: Use `gh repo view --json defaultBranchRef` to get the primary branch
-8. **Squash merge**: Use `gh pr merge --squash` to merge the PR
+8. **Squash merge**: Use `gh pr merge --squash --match-head-commit $(git rev-parse HEAD)` so only the commit that passed is merged
 
 ## Commands to Use
 
@@ -32,23 +33,26 @@ git rev-parse --abbrev-ref HEAD
 # Find the PR for the current branch
 gh pr list --head $(git rev-parse --abbrev-ref HEAD) --json number --jq '.[0].number'
 
+# Check draft / build-worktree status (stop unless ok is true)
+gh pr view <number> --json isDraft,body,headRefOid --jq '(.body | [capture("Status\\**:\\**[ \\t]*(?<rest>[^\\n]*)")] | .[0].rest) as $s | ($s // "" | [capture("^READY @ (?<sha>[0-9a-f]{40})\\s*$")] | .[0].sha) as $sha | {isDraft, status: $s, ok: ((.isDraft | not) and ($s == null or ($sha != null and $sha == .headRefOid)))}'
+
 # Get the default/primary branch name
 gh repo view --json defaultBranchRef --jq '.defaultBranchRef.name'
 
 # Get latest workflow run status for current branch
-gh run list --branch $(git rev-parse --abbrev-ref HEAD) --limit 1 --json databaseId,status,conclusion --jq '.[0]'
+gh run list --branch $(git rev-parse --abbrev-ref HEAD) --commit $(git rev-parse HEAD) --limit 1 --json databaseId,status,conclusion --jq '.[0]'
 
 # Poll: check if run is still in_progress or queued (repeat every 10 seconds until status is "completed")
-gh run list --branch $(git rev-parse --abbrev-ref HEAD) --limit 1 --json status,conclusion --jq '.[0] | {status, conclusion}'
+gh run list --branch $(git rev-parse --abbrev-ref HEAD) --commit $(git rev-parse HEAD) --limit 1 --json status,conclusion --jq '.[0] | {status, conclusion}'
 # If status is "in_progress" or "queued", wait 10 seconds and poll again
 # If status is "completed" and conclusion is "success", proceed to merge
 # If status is "completed" and conclusion is not "success", show failures and stop
 
 # View failed jobs if run failed
-gh run view $(gh run list --branch $(git rev-parse --abbrev-ref HEAD) --limit 1 --json databaseId --jq '.[0].databaseId') --json jobs --jq '.jobs[] | select(.conclusion != "success") | {name: .name, conclusion: .conclusion}'
+gh run view $(gh run list --branch $(git rev-parse --abbrev-ref HEAD) --commit $(git rev-parse HEAD) --limit 1 --json databaseId --jq '.[0].databaseId') --json jobs --jq '.jobs[] | select(.conclusion != "success") | {name: .name, conclusion: .conclusion}'
 
 # View logs for failed jobs
-gh run view $(gh run list --branch $(git rev-parse --abbrev-ref HEAD) --limit 1 --json databaseId --jq '.[0].databaseId') --log-failed
+gh run view $(gh run list --branch $(git rev-parse --abbrev-ref HEAD) --commit $(git rev-parse HEAD) --limit 1 --json databaseId --jq '.[0].databaseId') --log-failed
 
 # Squash merge the PR
 gh pr merge $(gh pr list --head $(git rev-parse --abbrev-ref HEAD) --json number --jq '.[0].number') --squash
@@ -77,14 +81,14 @@ git log @{u}..HEAD --oneline
 ### Actions Polling Loop
 Poll the latest workflow run every 10 seconds:
 ```bash
-gh run list --branch $(git rev-parse --abbrev-ref HEAD) --limit 1 --json status,conclusion --jq '.[0] | {status, conclusion}'
+gh run list --branch $(git rev-parse --abbrev-ref HEAD) --commit $(git rev-parse HEAD) --limit 1 --json status,conclusion --jq '.[0] | {status, conclusion}'
 ```
 - If `status` is `"in_progress"` or `"queued"`: run `sleep 10`, then poll again
 - If `status` is `"completed"` and `conclusion` is `"success"`: proceed to merge
 - If `status` is `"completed"` and `conclusion` is not `"success"`: Show the failed jobs and logs, then "Actions failed. Fix the issues, push, and run this command again." — **STOP**
 
 ### Merge
-- If all checks pass: squash merge the PR with `gh pr merge --squash`
+- If all checks pass: squash merge the PR with `gh pr merge --squash --match-head-commit $(git rev-parse HEAD)`
 
 ## Error Cases
 
@@ -92,5 +96,6 @@ gh run list --branch $(git rev-parse --abbrev-ref HEAD) --limit 1 --json status,
 - **Unpushed commits**: Stop — tell user to push first
 - **No upstream set**: Stop — tell user to push the branch first
 - **No PR found**: Stop — tell user to create a PR first
+- **Draft PR, or build-worktree status not READY**: Stop — show the PR status and the blockers listed in its body
 - **Actions failed**: Stop — show logs and tell user to fix and retry
 - **Merge conflict**: `gh pr merge` will fail — show the error to the user
