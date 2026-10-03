@@ -2,7 +2,6 @@
 name: bun
 description: Provides guidance for using Bun as a JavaScript runtime, bundler, package manager, and test runner. Use when working with TypeScript/JavaScript projects to replace Node.js, npm, pnpm, vite, or other tooling.
 license: MIT
-compatibility: opencode
 metadata:
   audience: users
   workflow: general

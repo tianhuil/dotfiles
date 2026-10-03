@@ -2,7 +2,6 @@
 name: cold-email-copywriting
 description: Teaches how to write high-performing cold emails using research-backed principles, frameworks, and personalization strategies. Use when drafting cold emails or cold email sequences for B2B/B2C outreach, lead generation, partnership requests, recruiting, or any unsolicited email to start a conversation.
 license: MIT
-compatibility: opencode
 metadata:
   audience: users
   workflow: general

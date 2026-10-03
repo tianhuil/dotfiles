@@ -2,7 +2,6 @@
 name: nextjs-frontend
 description: Develops React and Next.js front-end applications with shadcn/ui components, following modern best practices for App Router, server components, client-side data fetching, and design systems. Use when building or modifying Next.js front-end applications.
 license: MIT
-compatibility: opencode
 metadata:
   audience: developers
   workflow: application-development
