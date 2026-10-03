@@ -30,13 +30,14 @@ To add a new **remote** skill, append `"<owner>/<repo>:<skill>"` to `REMOTE_SKIL
 re-run `./setup.sh`. The CLI installs under the `cline` agent alias (its global dir
 is `~/.agents/skills/`; pi has no alias but reads that dir).
 
-To add a new **repo-versioned** skill (shared by pi and opencode):
+To add a new **repo-versioned** skill (shared by pi, opencode, and Claude Code):
 
 1. Add the dir under `home/agents/.agents/skills/<name>/SKILL.md` (see the
    dotfiles-opencode-skills skill for the catalog and editing rules).
 2. Re-run `./setup.sh` — stow exposes it at `~/.agents/skills/<name>`; the
    setup_skills.sh cleanup loop derives names from the repo (any dir with a SKILL.md),
-   so nothing else needs editing.
+   so nothing else needs editing. `setup_links.sh` then links it into
+   `~/.claude/skills/<name>` (it does the same for CLI-installed remote skills).
 
 **Rule of thumb:** if a skill can be installed via the `skills` CLI, keep it
 CLI-installed (`REMOTE_SKILLS` entry, lock-tracked) — never vendor it into the repo.

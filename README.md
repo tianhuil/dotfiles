@@ -13,8 +13,14 @@ This repository includes OpenCode agents and skills for AI-assisted development:
 - **Agents**: Located in `home/opencode/.config/opencode/agents/`, stowed to `~/.config/opencode/agents/`
 - **Skills**: Shared skills live in `home/agents/.agents/skills/` (the single source of
   truth, stowed to `~/.agents/skills/`); both pi and opencode read that directory
-  natively. The opencode package carries no skills dir — `agent-browser`/`find-skills`
+  natively, and `setup_links.sh` symlinks each skill into `~/.claude/skills/` for
+  Claude Code. The opencode package carries no skills dir — `agent-browser`/`find-skills`
   are CLI-installed by `setup_skills.sh` (see [AGENTS.md](AGENTS.md)).
+- **Commands**: Shared slash commands live in `home/agents/.agents/commands/` (stowed to
+  `~/.agents/commands/`); `setup_links.sh` symlinks each into `~/.claude/commands/`,
+  `~/.pi/agent/prompts/`, and `~/.config/opencode/commands/`. Use only `description` /
+  `argument-hint` frontmatter and `$ARGUMENTS` (no `$1`, `` !`cmd` ``, or `@file`) so they
+  work in all three. opencode-only commands stay in `home/opencode/.config/opencode/commands/`.
 
 The skill directory includes:
 

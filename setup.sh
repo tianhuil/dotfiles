@@ -22,6 +22,10 @@ for pkg in "${ALL_PKGS[@]}"; do
 done
 stow --restow "${PKGS[@]}"
 
+# Link the shared ~/.agents skills/commands into each harness's own dirs
+# (Claude Code doesn't read ~/.agents; nothing reads ~/.agents/commands natively).
+"$SCRIPT_DIR/setup_links.sh"
+
 # npm writes auth tokens to its user config on `npm login`; keep them out of the
 # stowed (tracked) .npmrc. NPM_CONFIG_USERCONFIG in .coreenv redirects npm's user
 # config to the gitignored ~/.npmrc.secrets; this strip is defense-in-depth for

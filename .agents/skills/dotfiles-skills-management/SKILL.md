@@ -12,7 +12,10 @@ Use `home/agents/.agents/skills/skill-management/SKILL.md` for the general workf
 - OpenCode agents live in `home/opencode/.config/opencode/agents/`.
 - Shared repo-owned skills live in `home/agents/.agents/skills/`.
 - `home/agents/.agents/skills/` is the source of truth; GNU Stow exposes it at `~/.agents/skills/`.
-- Both pi and OpenCode discover shared skills from `~/.agents/skills/`.
+- Both pi and OpenCode discover shared skills from `~/.agents/skills/`. Claude Code does not, so `setup_links.sh` (run by `setup.sh` after stow) symlinks each skill into `~/.claude/skills/`.
+- Shared slash commands live in `home/agents/.agents/commands/`; `setup_links.sh` symlinks each into `~/.claude/commands/`, `~/.pi/agent/prompts/`, and `~/.config/opencode/commands/`. Keep them portable: `description`/`argument-hint` frontmatter and `$ARGUMENTS` only (`$1` is 0-based in Claude, 1-based in pi; pi expands neither `` !`cmd` `` nor `@file`). opencode-only commands stay in `home/opencode/.config/opencode/commands/`.
+- `~/.claude/CLAUDE.md` is linked to `~/.pi/agent/AGENTS.md` (the shared global instructions).
+- This repo's project skills (`.agents/skills/`) reach Claude through the committed symlink `.claude/skills -> ../.agents/skills`.
 - Do not edit live files under `~/.agents/skills/`; edit the repository source.
 - The OpenCode package intentionally has no duplicate skills directory.
 
