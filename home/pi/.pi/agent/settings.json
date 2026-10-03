@@ -12,9 +12,9 @@
     "git:github.com/jonjonrankin/pi-caveman",
     "npm:pi-subagents"
   ],
-  "defaultProvider": "zai",
-  "defaultModel": "glm-5.3",
-  "defaultThinkingLevel": "high",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-6-luna",
+  "defaultThinkingLevel": "medium",
   "enabledModels": [
     "openai-codex/gpt-6-luna",
     "openai-codex/gpt-6-sol",
