@@ -501,6 +501,10 @@ test('create and retrieve post', async () => {
 });
 ```
 
+## Testing
+
+For server procedure tests and frontend tests using MSW or `msw-trpc`, see the [tRPC testing skill](../trpc-testing/SKILL.md).
+
 ## Error Handling
 
 ### Throw TRPC Errors
