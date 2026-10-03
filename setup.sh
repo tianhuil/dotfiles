@@ -43,6 +43,9 @@ touch "$HOME/.npmrc.secrets"
 # (an absolute path here would leak this box's HOME into the repo file)
 git config --global core.excludesfile '~/.gitignore_global'
 
+# Claude Code default permission mode (see setup_claude.sh for why it's not stowed)
+"$SCRIPT_DIR/setup_claude.sh"
+
 # Init submodules
 cd "$SCRIPT_DIR"
 git submodule update --init --recursive
