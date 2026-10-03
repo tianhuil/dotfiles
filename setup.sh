@@ -52,6 +52,20 @@ CLAUDE_SETTINGS_SRC="$SCRIPT_DIR/home/claude/.claude/settings.json"
 mkdir -p "$(dirname "$CLAUDE_SETTINGS")"
 [ -L "$CLAUDE_SETTINGS" ] && rm -f "$CLAUDE_SETTINGS"   # drop a stale stow symlink
 [ -f "$CLAUDE_SETTINGS" ] || echo '{}' > "$CLAUDE_SETTINGS"
+# Drift report (before merging, so live edits about to be overwritten are visible).
+# Copy anything worth keeping into the repo file. Orca-managed keys are skipped.
+jq -rn --slurpfile live "$CLAUDE_SETTINGS" --slurpfile repo "$CLAUDE_SETTINGS_SRC" '
+  def leaves(p): if type == "object" and length > 0
+    then to_entries[] as $e | $e.value | leaves(p + [$e.key])
+    else {path: p, value: .} end;
+  def at(p): try getpath(p) catch null;
+  ($live[0] | del(.hooks, .statusLine)) as $l | $repo[0] as $r
+  | ($l | leaves([]) | select(.path as $p | $r | at($p) == null)
+      | "  untracked:   \(.path | join(".")) = \(.value | tojson)"),
+    ($r | leaves([]) | (.path as $p | $l | at($p)) as $v
+      | select($v != null and $v != .value)
+      | "  overwritten: \(.path | join(".")) = \($v | tojson) -> \(.value | tojson)")
+' | { grep . && echo "  (Claude settings drift vs home/claude/.claude/settings.json)"; } >&2 || true
 jq -s '.[0] * .[1]' "$CLAUDE_SETTINGS" "$CLAUDE_SETTINGS_SRC" > "$CLAUDE_SETTINGS.tmp"
 mv "$CLAUDE_SETTINGS.tmp" "$CLAUDE_SETTINGS"
 
