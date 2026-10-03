@@ -15,7 +15,7 @@ command -v stow >/dev/null || { echo "Install stow first: brew install stow"; ex
 # local-only: e.g. `env` holds a gitignored secret (.env.local) and is absent
 # in a fresh clone on any platform — stowing it would abort otherwise.
 cd "$SCRIPT_DIR/home"
-ALL_PKGS=(shell git ssh node bun tmux stubby bin scripts cursor zellij worktrunk opencode env omp pi agents claude)
+ALL_PKGS=(shell git ssh node bun tmux stubby bin scripts cursor zellij worktrunk opencode env omp pi agents)
 PKGS=()
 for pkg in "${ALL_PKGS[@]}"; do
   [ -d "$pkg" ] && PKGS+=("$pkg")
@@ -42,32 +42,6 @@ touch "$HOME/.npmrc.secrets"
 # git expands ~ itself, so keep the value neutral across machines
 # (an absolute path here would leak this box's HOME into the repo file)
 git config --global core.excludesfile '~/.gitignore_global'
-
-# Claude Code settings: merge, don't stow. Orca (and Claude itself) rewrite
-# ~/.claude/settings.json with their own hooks/statusLine, replacing any symlink,
-# so the claude package ignores settings.json and its keys are deep-merged in here
-# (repo values win; everything else in the live file is preserved).
-CLAUDE_SETTINGS="$HOME/.claude/settings.json"
-CLAUDE_SETTINGS_SRC="$SCRIPT_DIR/home/claude/.claude/settings.json"
-mkdir -p "$(dirname "$CLAUDE_SETTINGS")"
-[ -L "$CLAUDE_SETTINGS" ] && rm -f "$CLAUDE_SETTINGS"   # drop a stale stow symlink
-[ -f "$CLAUDE_SETTINGS" ] || echo '{}' > "$CLAUDE_SETTINGS"
-# Drift report (before merging, so live edits about to be overwritten are visible).
-# Copy anything worth keeping into the repo file. Orca-managed keys are skipped.
-jq -rn --slurpfile live "$CLAUDE_SETTINGS" --slurpfile repo "$CLAUDE_SETTINGS_SRC" '
-  def leaves(p): if type == "object" and length > 0
-    then to_entries[] as $e | $e.value | leaves(p + [$e.key])
-    else {path: p, value: .} end;
-  def at(p): try getpath(p) catch null;
-  ($live[0] | del(.hooks, .statusLine)) as $l | $repo[0] as $r
-  | ($l | leaves([]) | select(.path as $p | $r | at($p) == null)
-      | "  untracked:   \(.path | join(".")) = \(.value | tojson)"),
-    ($r | leaves([]) | (.path as $p | $l | at($p)) as $v
-      | select($v != null and $v != .value)
-      | "  overwritten: \(.path | join(".")) = \($v | tojson) -> \(.value | tojson)")
-' | { grep . && echo "  (Claude settings drift vs home/claude/.claude/settings.json)"; } >&2 || true
-jq -s '.[0] * .[1]' "$CLAUDE_SETTINGS" "$CLAUDE_SETTINGS_SRC" > "$CLAUDE_SETTINGS.tmp"
-mv "$CLAUDE_SETTINGS.tmp" "$CLAUDE_SETTINGS"
 
 # Init submodules
 cd "$SCRIPT_DIR"

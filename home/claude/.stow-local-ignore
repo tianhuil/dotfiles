@@ -1,3 +1,0 @@
-# settings.json is merged into ~/.claude/settings.json by setup.sh, not stowed:
-# Orca/Claude rewrite that file and would replace a stow symlink.
-^/\.claude/settings\.json$
