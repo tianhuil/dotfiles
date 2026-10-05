@@ -214,14 +214,20 @@ If it exits non-zero, continue `BUILD_AGENT_SESSION_ID` as the fix agent. Pass t
 
 Always run this step. Skip it only when the user explicitly says to; the status then stays `IN_PROGRESS` (unreviewed), never `READY`.
 
-1. Read `prompts/review-code-quality.md` and `prompts/review-requirements.md`. Fill every placeholder, including `TASK_DESCRIPTION` (the user's full task text, unedited), `BASE_BRANCH`, `EXPECTED_BRANCH`, and `EXPECTED_HEAD` (`git -C "$WORKTREE_PATH" rev-parse HEAD` after the latest commit) and the Step 0.5 values. Pass design docs and requirement IDs as given; do not summarize or restate them.
+Resolve all prompt paths relative to this skill's directory—the directory containing this `SKILL.md`—not the repository or worktree root. For example:
+
+```bash
+SKILL_DIR="$(dirname "$(realpath ~/.agents/skills/build-worktree/SKILL.md)")"
+```
+
+1. Read `"$SKILL_DIR/prompts/review-code-quality.md"` and `"$SKILL_DIR/prompts/review-requirements.md"`. Fill every placeholder, including `TASK_DESCRIPTION` (the user's full task text, unedited), `BASE_BRANCH`, `EXPECTED_BRANCH`, and `EXPECTED_HEAD` (`git -C "$WORKTREE_PATH" rev-parse HEAD` after the latest commit) and the Step 0.5 values. Pass design docs and requirement IDs as given; do not summarize or restate them.
 2. Set the review-round cap from the user's request, or use `5`. The count carries across re-entries from Steps 5.5 and 6; it does not reset.
 3. Start these reviewer sessions in parallel (only the requirements reviewer for docs-only changes), passing `WORKTREE_PATH` as `cwd`, with shell access and a stronger model tier than the worker (see Execution Model):
   
   | Reviewer     | Agent            | Session ID                | Prompt                           |
   | ------------ | ---------------- | ------------------------- | -------------------------------- |
-  | Code quality | `build-reviewer` | `CODE_QUALITY_SESSION_ID` | `prompts/review-code-quality.md` |
-  | Requirements | `build-reviewer` | `REQUIREMENTS_SESSION_ID` | `prompts/review-requirements.md` |
+  | Code quality | `build-reviewer` | `CODE_QUALITY_SESSION_ID` | `"$SKILL_DIR/prompts/review-code-quality.md"` |
+  | Requirements | `build-reviewer` | `REQUIREMENTS_SESSION_ID` | `"$SKILL_DIR/prompts/review-requirements.md"` |
   
 
    Keep each session ID paired with its reviewer; never swap them.  A new session will be spawned the first time but re-used in subsequent runs.
