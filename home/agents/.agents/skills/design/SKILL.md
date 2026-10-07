@@ -10,6 +10,12 @@ metadata:
 
 Choose the smallest design workflow that makes the work deterministic. Designs are living contracts: an independent implementer should know what to build, an independent reviewer should know how to verify it, and acceptance should fail when required work is absent.
 
+## Choose a workflow
+
+Use [`../prototype-design/SKILL.md`](../prototype-design/SKILL.md) when a major technical uncertainty—such as external API behavior, dependency compatibility, or integration feasibility—can be reduced by building and running a small disposable prototype alongside the design. It still uses the simple/large format selection below.
+
+Otherwise, use this design workflow directly.
+
 ## Choose a format
 
 Use [`../simple-design/SKILL.md`](../simple-design/SKILL.md) when **all** of these are true:
