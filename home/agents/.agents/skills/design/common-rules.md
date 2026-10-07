@@ -10,6 +10,16 @@ Start with the user problem, users, observable outcomes, success measures, and e
 
 When rewriting or replacing an existing design, read it and any review comments on it first. Carry every prior decision forward, or record in the new document why it changed. Mark the old document superseded with a link to the new one.
 
+## Style
+
+- **YAGNI**: Do not design for future scale, additional cloud providers, or alternative database backends. Assume the current stack and load will remain fixed, unless told otherwise.  As an example:
+  - **Anti-Pattern (Over-engineered):** *"We will implement an abstract* `NotificationStrategyFactory` *that dynamically instantiates SMS, Email, and Webhook providers based on a YAML policy configuration..."*
+  - **Preferred Pattern (Minimal):** *"We will add a single function* `send_email_notification(user_id, message)` *in* `services/[notifications.py](http://notifications.py)` *using the SendGrid SDK."*
+- **Simple:** Design this feature assuming it will be implemented by a single software engineer in less than 2 hours. Prioritize directness over theoretical abstraction. For example, do not implement these things unless asked:
+  - No event buses / pub-sub unless processing asynchronous background queues.
+  - No custom abstract base classes or multi-layered interfaces for single implementations.
+  - No multi-tenant support, dynamic plugin systems, or speculative extensibility.
+
 ## Contracts and verification
 
 - Pair every implementation step with a clear, checkable completion criterion.
@@ -26,13 +36,15 @@ Checklist items are the unit of completion. A task names its work unit: either a
 
 `verify:` names the kind of evidence. Use `cmd:` whenever the check can be automated; use the others only when it cannot:
 
-| Type | Example | The reviewer |
-| --- | --- | --- |
-| `cmd:` | ``cmd: `pnpm test:cell --framework authjs --profile google` `` | runs it and records the decisive output line |
-| `browser:` | `browser: Owner Acceptance Script step 3` | performs the step in the Acceptance Environment and records what it saw |
-| `ci:` | `ci: profile-tests (google)` | cites that job's result for the exact commit under review |
-| `review:` | `review: decision recorded with alternatives and rationale` | judges the work against the stated criterion, quoting `file:line` and saying why it is or is not met |
-| `owner:` | `owner: sign-in works against a real Microsoft tenant` | cannot verify it; the item stays unticked and goes on the owner's checklist at the next approval point |
+
+| Type       | Example                                                     | The reviewer                                                                                           |
+| ---------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `cmd:`     | `cmd: `pnpm test:cell --framework authjs --profile google`` | runs it and records the decisive output line                                                           |
+| `browser:` | `browser: Owner Acceptance Script step 3`                   | performs the step in the Acceptance Environment and records what it saw                                |
+| `ci:`      | `ci: profile-tests (google)`                                | cites that job's result for the exact commit under review                                              |
+| `review:`  | `review: decision recorded with alternatives and rationale` | judges the work against the stated criterion, quoting `file:line` and saying why it is or is not met   |
+| `owner:`   | `owner: sign-in works against a real Microsoft tenant`      | cannot verify it; the item stays unticked and goes on the owner's checklist at the next approval point |
+
 
 Do not dress up a judgment as a command: a `grep` that only proves a word exists is not evidence that research, a decision, or documentation is right. Use `review:` with a concrete criterion instead.
 
