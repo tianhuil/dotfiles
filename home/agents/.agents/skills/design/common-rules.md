@@ -15,7 +15,7 @@ When rewriting or replacing an existing design, read it and any review comments 
 - **YAGNI**: Do not design for future scale, additional cloud providers, or alternative database backends. Assume the current stack and load will remain fixed, unless told otherwise.  As an example:
   - **Anti-Pattern (Over-engineered):** *"We will implement an abstract* `NotificationStrategyFactory` *that dynamically instantiates SMS, Email, and Webhook providers based on a YAML policy configuration..."*
   - **Preferred Pattern (Minimal):** *"We will add a single function* `send_email_notification(user_id, message)` *in* `services/[notifications.py](http://notifications.py)` *using the SendGrid SDK."*
-- **Simple:** Design this feature assuming it will be implemented by a single software engineer in less than 2 hours. Prioritize directness over theoretical abstraction. For example, do not implement these things unless asked:
+- **Simplicity:** Design this feature assuming it will be implemented by a single software engineer in less than 2 hours. Prioritize directness over theoretical abstraction. For example, do not implement these things unless asked:
   - No event buses / pub-sub unless processing asynchronous background queues.
   - No custom abstract base classes or multi-layered interfaces for single implementations.
   - No multi-tenant support, dynamic plugin systems, or speculative extensibility.

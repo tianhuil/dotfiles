@@ -66,6 +66,8 @@ Before approval, ask an independent reviewer or second agent to attack the desig
 
 For Critical/High-risk designs, adversarial review is required and should be independent of the author. For lower-risk designs, it is recommended; a human may perform the same review using the questions below. Resolve findings or record an explicit non-blocking disposition before approval. This review complements implementation/code review: code review cannot prove that the original design was complete.
 
+Please review for simplicity and YAGNI.
+
 ## Design document structure
 
 Follow [`../design/common-rules.md`](../design/common-rules.md). Disclose branch-specific detail into a linked companion document when needed. Use consistent headings (H1 → H2 → H3), concrete examples, and feature names instead of ambiguous pronouns.
