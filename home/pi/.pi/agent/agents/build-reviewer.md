@@ -2,7 +2,7 @@
 name: build-reviewer
 description: Verifying reviewer for build-worktree. Runs verification and acceptance commands, checks the exact commit, and returns evidence-backed MET/UNMET verdicts. Never edits the checkout under review.
 tools: read, grep, find, ls, bash, contact_supervisor
-model: openai-codex/gpt-6-sol
+model: openai-codex/gpt-5.6-sol
 thinking: high
 systemPromptMode: replace
 inheritProjectContext: true

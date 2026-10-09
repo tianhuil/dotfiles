@@ -111,7 +111,7 @@ const PROVIDER_CATALOGS: Record<string, { url: string; api: string }> = {
 // Codex exposes model discovery through an OAuth-only endpoint. Keep this
 // allowlisted subset static so filtering never falls back to the full catalog.
 const STATIC_PROVIDER_MODELS: Record<string, string[]> = {
-  "openai-codex": ["gpt-6-luna", "gpt-6-sol"],
+  "openai-codex": ["gpt-5.6-luna", "gpt-5.6-sol"],
 };
 
 // ── Static fallback metadata ───────────────────────────────────────────────
@@ -141,8 +141,8 @@ const KNOWN_MODELS: Record<string, ModelMeta> = {
   "glm-5.3-flash": { name: "GLM-5.3-Flash", reasoning: true, thinkingLevelMap: { minimal: null, low: "low", medium: null, high: "high", xhigh: null, max: "max" }, input: ["text", "image"], contextWindow: 1000000, maxTokens: 131072, compat: { supportsReasoningEffort: true, thinkingFormat: "zai", zaiToolStream: true } },
   "glm-5.3-flashx": { name: "GLM-5.3-FlashX", reasoning: true, thinkingLevelMap: { minimal: null, low: "low", medium: null, high: "high", xhigh: null, max: "max" }, input: ["text", "image"], contextWindow: 1000000, maxTokens: 131072, compat: { supportsReasoningEffort: true, thinkingFormat: "zai", zaiToolStream: true } },
   "glm-5v-turbo": { name: "GLM-5V-Turbo", reasoning: true, input: ["text", "image"], contextWindow: 200000, maxTokens: 131072, compat: { supportsReasoningEffort: false, thinkingFormat: "zai", zaiToolStream: true } },
-  "gpt-6-luna": { name: "GPT-6 Luna", reasoning: true, input: ["text", "image"], contextWindow: 272000, maxTokens: 128000 },
-  "gpt-6-sol": { name: "GPT-6 Sol", reasoning: true, input: ["text", "image"], contextWindow: 272000, maxTokens: 128000 },
+  "gpt-5.6-luna": { name: "GPT-5.6 Luna", reasoning: true, input: ["text", "image"], contextWindow: 272000, maxTokens: 128000 },
+  "gpt-5.6-sol": { name: "GPT-5.6 Sol", reasoning: true, input: ["text", "image"], contextWindow: 272000, maxTokens: 128000 },
 
   // ── opencode free tier ──
   "big-pickle": { name: "Big Pickle", reasoning: true, input: ["text"], contextWindow: 200000, maxTokens: 32000 },

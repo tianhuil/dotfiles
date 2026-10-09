@@ -17,7 +17,7 @@ filters:
   - "opencode/deepseek-v4-flash-free"
   - 'zai/glm-5\.3(-.*)?'  # GLM-5.3 and variants
   - "zai/glm-4.7-flash"  # best free model
-  - 'openai-codex/gpt-6-(luna|sol)'
+  - 'openai-codex/gpt-5\.6-(luna|sol)'
 
 providers:
   opencode:

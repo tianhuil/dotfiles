@@ -10,7 +10,7 @@
 //
 // Effort models:  deepseek-v4-flash-free (low/high/max)
 // Binary models:  glm-4.7-flash (off/high)
-// Effort models:  glm-5.3* (low/high/max), gpt-6-sol/luna (none/low/medium/high/xhigh/max)
+// Effort models:  glm-5.3* (low/high/max), gpt-5.6-sol/luna (none/low/medium/high/xhigh/max)
 
 {
   "providers": {
@@ -32,7 +32,7 @@
     },
     "openai-codex": {
       "modelOverrides": {
-        "gpt-6-sol": {
+        "gpt-5.6-sol": {
           "thinkingLevelMap": {
             "off": null,
             "minimal": null,
@@ -43,7 +43,7 @@
             "max": "max"
           }
         },
-        "gpt-6-luna": {
+        "gpt-5.6-luna": {
           "thinkingLevelMap": {
             "off": null,
             "minimal": null,
