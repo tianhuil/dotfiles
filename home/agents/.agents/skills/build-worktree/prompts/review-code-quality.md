@@ -38,7 +38,7 @@ Security:
 - Risky or inappropriate dependencies
 - Sensitive data exposed through logs or responses
 
-Only report real, evidence-backed concerns. Skip web-specific checks when the code has no web surface.
+Only report real, evidence-backed concerns. Scope findings to defects caused by this diff or defects that prevent the captured task contract from passing. Label pre-existing defects, adjacent improvements, cleanup, preferences, and new requirements as follow-up notes; they must not create a fix round. Skip web-specific checks when the code has no web surface.
 
 Test coverage:
 
@@ -59,7 +59,10 @@ Return this format:
 Checkout: <pwd> <branch> <HEAD>  (matches expected: yes/no)
 
 ### Code Quality Findings
-- [finding with file:line reference] or "No code quality concerns found."
+- [in-scope finding with file:line reference] or "No in-scope code quality concerns found."
+
+### Follow-up Notes
+- [out-of-scope concern] or "None."
 
 ### Security Findings
 - [finding with file:line reference] or "No security concerns found."

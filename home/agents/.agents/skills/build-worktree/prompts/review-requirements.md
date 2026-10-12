@@ -18,7 +18,7 @@ Repository verify command: VERIFY_COMMAND
 Acceptance procedure (end-to-end, real environment): ACCEPTANCE_PROCEDURE
 Protected paths (gates, manifests, required-case lists, acceptance tests) this change must not weaken: PROTECTED_PATHS
 
-Do not assess general code quality or security; a separate reviewer covers them. You DO own: completeness, whether each requirement is proven by executed evidence, and whether the tests and gates could fail.
+Do not assess general code quality or security; a separate reviewer covers them. You DO own: completeness, whether each requirement is proven by executed evidence, and whether the tests and gates could fail. Keep scope locked to the task contract: a finding must show that this diff misses, regresses, or cannot verify a captured requirement. Pre-existing defects, adjacent improvements, cleanup, preferences, and new requirements are follow-up notes, not blockers or fix-round triggers.
 
 Workflow:
 
@@ -82,7 +82,10 @@ Manifest cases: <covered> of <total> (or "none")
 <protected-path changes and their disposition, or "No protected paths changed.">
 
 ### Findings
-- [severity] [ID] file:line — finding → smallest fix   (or "No requirements gaps found.")
+- [severity] [ID] file:line — in-scope finding → smallest fix   (or "No requirements gaps found.")
+
+### Follow-up Notes
+- [out-of-scope concern] or "None."
 
 ### Not verified
 - <anything you could not observe directly> (or "Nothing.")
