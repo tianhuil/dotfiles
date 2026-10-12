@@ -18,15 +18,26 @@ Keep three classes separate:
    - Run `npx skills list` and `pi list` when available.
    - Identify which skills are authored locally and which were installed externally.
 2. Choose one source of truth per class:
-   - For `npx skills` project installs, commit `skills-lock.json` and restore it with `npx skills experimental_install`.
+   - For `npx skills` project installs, commit `skills-lock.json` and use these commands:
+     ```bash
+     npx skills experimental_install
+     npx skills update -p -y
+     ```
+   - `package.json`: add only optional convenience scripts:
+     ```json
+     {
+       "scripts": {
+         "skills:update": "skills update -p -y",
+         "skills:install": "skills experimental_install"
+       }
+     }
+     ```
    - For Pi packages, commit project `.pi/settings.json` when the package should be shared. Pin Git refs or npm versions when reproducibility matters.
    - For local skills, commit the reviewed `SKILL.md` and supporting files.
 3. Keep generated files out of Git. Put repository-authored skills in a clearly named allowlisted directory such as `.agents/skills/local/<name>/` when the harness recursively discovers skills. Keep generated agent symlinks ignored.
 4. Install only the requested external skills. Prefer explicit skill selection over installing an entire repository when the CLI supports `--skill`.
 5. Review every external `SKILL.md` and executable before use. Skills can direct the agent to run arbitrary commands.
 6. Update through the owning tool, then inspect the diff:
-   - `npx skills update -p -y` for project skills.
-   - `npx skills experimental_install` to restore the lockfile.
    - `pi update --extensions` or `pi update <package>` for Pi packages.
 7. Verify discovery from the actual project directory. Check that local and external skills have unique names and that their `SKILL.md` files have valid frontmatter.
 
