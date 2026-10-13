@@ -5,6 +5,10 @@
 if [ -n "${ORCA_CLI_COMMAND:-}" ]; then
   exec "$ORCA_CLI_COMMAND" "$@"
 fi
+# Dev checkout: orca-cli skill resolves orca-dev when ORCA_DEV_REPO_ROOT is set.
+if [ -n "${ORCA_DEV_REPO_ROOT:-}" ] && command -v orca-dev >/dev/null 2>&1; then
+  exec orca-dev "$@"
+fi
 for candidate in \
   /Applications/Orca.app/Contents/Resources/bin/orca \
   orca-ide \
