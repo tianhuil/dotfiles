@@ -24,4 +24,4 @@ Keep primary checkout on its current branch. For a different branch, create a wo
 
 ## Subagent
 
-When running sub-agents in pi, default to using gpt luna 6 with medium effort unless there is a compelling reason not to or the user says to use something else.
+When running sub-agents in pi, default to using `gpt-5.6-luna` with medium effort unless there is a compelling reason not to or the user says to use something else.
