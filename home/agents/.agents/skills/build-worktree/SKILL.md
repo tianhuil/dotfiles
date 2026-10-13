@@ -39,8 +39,9 @@ Or reference them by their install path at `~/.agents/skills/build-worktree/`.
 2. **Stay on the worktree you created in Step 0.** Never create additional branches or worktrees, except the disposable detached worktrees reviewers create and remove for absence checks. Fix issues in place.
 3. **Fail closed.** Missing evidence means not done. Never waive a failing check as "environmental", "flaky", "known OOM", or "unrelated". Clean up only processes you started, re-run once, and if it still fails, set status `BLOCKED` and escalate to the user.
 4. **Nobody grades their own work.** Workers never choose which design checkboxes get ticked (Step 3.5 does that mechanically), never weaken protected paths (gates, manifests, required-case lists, golden/expected files, acceptance tests: removing cases, adding skips, loosening assertions or thresholds, or editing expected values to match new output) unless the design or the user's task names that change, and never decide the task is complete. Adding cases and regenerating generated files are allowed; the requirements reviewer checks every protected-path change. Reviewers decide; the orchestrator records.
-5. **The orchestrator does not edit project files.** Every change to the worktree is made by a delegated agent, so the reviewers always review someone else's work. The orchestrator may run read-only commands, the helper scripts, and verification commands.
-6. **Report what was not verified.** Every report and PR body lists anything that could not be observed directly.
+5. **Scope is locked.** Fix only findings required by the captured task contract, caused by the diff, or required to make its declared verification pass. Treat pre-existing defects, adjacent improvements, cleanup, reviewer preferences, and new requirements as follow-up notes; do not change them in this PR. If a fix would alter `DESIGN_SCOPE`, `REQUIREMENT_IDS`, `MANIFEST_CASES`, `ACCEPTANCE_PROCEDURE`, or `PROTECTED_PATHS`, stop and ask the user rather than expanding scope. A user-approved scope change starts a new contract capture and review cycle.
+6. **The orchestrator does not edit project files.** Every change to the worktree is made by a delegated agent, so the reviewers always review someone else's work. The orchestrator may run read-only commands, the helper scripts, and verification commands.
+7. **Report what was not verified.** Every report and PR body lists anything that could not be observed directly.
 
 ## Execution Model
 
@@ -232,7 +233,7 @@ SKILL_DIR="$(dirname "$(realpath ~/.agents/skills/build-worktree/SKILL.md)")"
 
    Keep each session ID paired with its reviewer; never swap them.  A new session will be spawned the first time but re-used in subsequent runs.
 4. On every round, have both reviewers inspect the current diff and report whether prior issues are fixed, plus any new evidence-backed issues. Give them the new `EXPECTED_HEAD` each round; a report against a different commit does not count.
-5. If either reviewer finds issues, resume `BUILD_AGENT_SESSION_ID` with both reports, fix the issues, and re-run Step 2. Then resume Step 3 with the same `CODE_QUALITY_SESSION_ID` and `REQUIREMENTS_SESSION_ID` for the next round. Do not accept a fix agent's claim that something is fixed; the next review round checks it.
+5. If either reviewer finds in-scope issues, resume `BUILD_AGENT_SESSION_ID` with both reports, fix only those issues, and re-run Step 2. Then resume Step 3 with the same `CODE_QUALITY_SESSION_ID` and `REQUIREMENTS_SESSION_ID` for the next round. Do not accept a fix agent's claim that something is fixed; the next review round checks it. Reviewers must label out-of-scope findings as follow-up notes; they do not trigger edits or another review round.
 6. When both reviewers approve after more than one round, run one **final full review** with a fresh requirements-reviewer session (new session ID) against the final `HEAD`, including the absence check. Resumed reviewers tend to check only their earlier findings; the fresh one reviews the whole change. Its FAIL starts another round. If round 1 passed, it already was a fresh full review; skip this.
 7. Stop when both reviewers and the final full review pass on the same `HEAD`, or when the review-round cap is reached. **Reaching the cap with any FAIL or UNVERIFIED sets status `BLOCKED`.** Do not continue to a ready PR or a merge.
 
@@ -337,7 +338,7 @@ gh run view $RUN_ID --json jobs --jq '.jobs[] | select(.conclusion != "success")
 gh run view $RUN_ID --log-failed
 ```
 
-Continue `BUILD_AGENT_SESSION_ID` as the fix agent, with the worktree passed explicitly as `cwd`. Include the failed CI logs and the allowed scope in its follow-up prompt. Ask it to analyze the logs, fix the issues, and report its changes. Commit the reported files (as in Step 1) and push:
+Continue `BUILD_AGENT_SESSION_ID` as the fix agent, with the worktree passed explicitly as `cwd`. Include the failed CI logs and the locked contract in its follow-up prompt. Ask it to fix only failures caused by this branch or required by the task; pre-existing or adjacent failures become `BLOCKED` follow-up notes, not scope expansion. Ask it to report its changes. Commit the reported files (as in Step 1) and push:
 
 ```bash
 cd "$WORKTREE_PATH" && git add -- <reported files> && git status --porcelain
