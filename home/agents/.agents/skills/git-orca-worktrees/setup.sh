@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-NAME="${1:?Usage: setup.sh <worktree-name>}"
+NAME="${1:?Usage: setup.sh <worktree-name> [--no-parent]}"
+shift || true
+PARENT_FLAG=(--parent-worktree active)
+if [ "${1:-}" = "--no-parent" ]; then
+    PARENT_FLAG=(--no-parent)
+fi
 
 resolve_orca() {
     if [ -n "${ORCA_CLI_COMMAND:-}" ]; then
@@ -47,14 +52,15 @@ fallback_git() {
 resolve_orca
 if command -v "${ORCA_CMD[0]}" >/dev/null 2>&1 &&
     "${ORCA_CMD[@]}" worktree current --json >/dev/null 2>&1; then
-    if output=$("${ORCA_CMD[@]}" worktree create --name "$NAME" --setup skip --json); then
+    if output=$("${ORCA_CMD[@]}" worktree create --name "$NAME" "${PARENT_FLAG[@]}" --setup skip --json); then
         if command -v jq >/dev/null 2>&1 && jq -e '.result.worktree.path and .result.worktree.id' >/dev/null <<< "$output"; then
             printf '%s\n' "$output" | jq -r '
                 "WORKTREE_TOOL=orca",
                 "BRANCH_NAME=" + (.result.worktree.branch // "" | sub("^refs/heads/"; "")),
                 "BASE_BRANCH=" + (.result.worktree.baseRef // ""),
                 "WORKTREE_PATH=" + .result.worktree.path,
-                "WORKTREE_ID=" + .result.worktree.id
+                "WORKTREE_ID=" + .result.worktree.id,
+                "PARENT_WORKTREE_ID=" + (.result.worktree.parentWorktreeId // "")
             '
             exit 0
         fi
