@@ -10,7 +10,8 @@
     "git:github.com/tianhuil/pi-orca",
     "git:github.com/tianhuil/pi-dotenvx",
     "git:github.com/jonjonrankin/pi-caveman",
-    "npm:pi-subagents"
+    "npm:pi-subagents",
+    "npm:@lanlance/pi-btw"
   ],
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.6-luna",
