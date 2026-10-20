@@ -7,3 +7,8 @@ allowBuilds:
 overrides:
   sharp: ^0.35.0
   adm-zip: ^0.6.0
+# Dependabot alert 27 (sprintf-js CVE-2026-97058, DoS) is dismissed as
+# tolerable_risk: no patched sprintf-js release exists upstream, and both
+# chains (mammoth->argparse, onnxruntime-node->global-agent->roarr) are
+# dev-only transitive deps of @oh-my-pi/pi-coding-agent used for typecheck.
+# Revisit when sprintf-js or mammoth ships a fix.
