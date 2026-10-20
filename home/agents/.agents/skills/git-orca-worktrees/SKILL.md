@@ -10,8 +10,10 @@ description: >-
 Create worktrees through shared setup script; it uses Orca in the current Orca workspace, then falls back to plain Git when Orca is unavailable or repo is unregistered:
 
 ```sh
-~/.agents/skills/git-orca-worktrees/setup.sh <name> [--no-parent]
+~/.agents/skills/git-orca-worktrees/setup.sh [name] [--no-parent]
 ```
+
+`<name>` is optional. Omitted, it derives a worktree name (and thus branch name) from the latest commit subject on HEAD: lowercased, non-alphanumerics collapsed to dashes, capped at 48 characters. Orca prefixes the user namespace (e.g. `tianhuil/<name>`); the Git fallback uses `<name>` directly and dedups collisions with `-v2` suffixes. Pass an explicit `<name>` to override.
 
 By default the Orca path passes `--parent-worktree active`, so the new workspace is an explicit child of the current Orca workspace. Pass `--no-parent` for an independent top-level workspace (`--no-parent` only sets Orca lineage; base branch is unaffected). The Git fallback has no parent concept and creates an independent worktree.
 

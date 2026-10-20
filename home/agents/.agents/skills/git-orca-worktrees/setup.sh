@@ -1,11 +1,31 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-NAME="${1:?Usage: setup.sh <worktree-name> [--no-parent]}"
-shift || true
 PARENT_FLAG=(--parent-worktree active)
-if [ "${1:-}" = "--no-parent" ]; then
-    PARENT_FLAG=(--no-parent)
+ARGS=()
+for arg in "$@"; do
+    case "$arg" in
+        --no-parent) PARENT_FLAG=(--no-parent) ;;
+        *) ARGS+=("$arg") ;;
+    esac
+done
+NAME="${ARGS[0]:-}"
+
+# With no <name>, derive one from the latest commit subject: lowercase,
+# non-alphanumerics collapsed to dashes, capped at 48 chars.
+derive_name() {
+    local subject slug
+    subject=$(git log -1 --pretty=%s 2>/dev/null || true)
+    if [ -z "$subject" ]; then
+        echo "ERROR: no <name> given and no commits on HEAD to derive from" >&2
+        exit 1
+    fi
+    slug=$(printf '%s' "$subject" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//')
+    printf '%s' "${slug:0:48}" | sed -E 's/-+$//'
+}
+if [ -z "$NAME" ]; then
+    NAME=$(derive_name)
+    echo "NOTE: name derived from latest commit subject: $NAME" >&2
 fi
 
 resolve_orca() {
