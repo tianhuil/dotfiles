@@ -20,6 +20,30 @@ PKGS=()
 for pkg in "${ALL_PKGS[@]}"; do
   [ -d "$pkg" ] && PKGS+=("$pkg")
 done
+
+# Host Clones can move between machines. Remove stale symlinks created by an
+# older clone path so Stow can recreate them from this clone.
+python3 - "$SCRIPT_DIR/home" "$HOME" "${PKGS[@]}" <<'PY'
+import os
+import sys
+
+home_dir, target_dir, *packages = sys.argv[1:]
+for package in packages:
+    package_dir = os.path.join(home_dir, package)
+    for root, _dirs, files in os.walk(package_dir):
+        for name in files:
+            source = os.path.join(root, name)
+            relative = os.path.relpath(source, package_dir)
+            target = os.path.join(target_dir, relative)
+            if not os.path.islink(target):
+                continue
+            if os.path.realpath(target) == os.path.realpath(source):
+                continue
+            if "/dotfiles/" in os.path.realpath(target):
+                os.unlink(target)
+                print(f"Removed stale link {target}")
+PY
+
 stow --restow "${PKGS[@]}"
 
 # Link the shared ~/.agents skills/commands into each harness's own dirs
