@@ -20,9 +20,9 @@ Use only when local `main` contains commits that should become a GitHub PR targe
 
    This skill handles only local `main` against `origin/main`; do not adapt it to another branch or remote.
 
-2. If status is non-empty and the user has not indicated that they want to commit changes, stop and show changes. Ask whether they want to commit them first. If the user already indicated that intent, obtain any needed commit message, create the commit, and re-check. Never stash or discard changes.
+2. If status is non-empty, stop and show changes. Ask only whether the user intends to commit them (`yes`/`no`). If `no`, stop. If `yes`, generate the commit message yourself, incorporating any guidance the user provided. Never ask the user for a commit message. Never stash or discard changes.
 
-3. Inspect the commits and generate shell-safe values from them (never ask the user):
+3. Inspect the commits and generate all shell-safe text inputs yourself, incorporating any guidance the user provided (never ask the user for them):
 
    ```bash
    git fetch origin main
