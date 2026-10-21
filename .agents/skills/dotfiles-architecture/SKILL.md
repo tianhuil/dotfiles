@@ -11,15 +11,16 @@ place where dotfiles content is edited. The **Mirror Remote** is
 
 A **Host Clone** is `~/dotfiles` on a machine. It is a read-only clone of the
 Mirror Remote; GNU Stow links its files into `$HOME`. Do not edit a Host Clone
-or the public repository directly. The existing `setup.sh` in the Host Clone
-is unchanged.
+or the public repository directly. The deploy script runs the setup script in
+a Host Clone (`setup.sh`, falling back to `setup_links.sh` where there is no
+`setup.sh`).
 
 ## GNU Stow directory
 
 The `dotfiles/home` folder is the **Stow root**. It contains per-package
 subdirectories (`shell/`, `git/`, `ssh/`, `opencode/`, and so on), each
-mirroring `$HOME` internally. Running the unchanged `setup.sh` in a Host Clone
-invokes `stow` to symlink each package's files into `$HOME`.
+mirroring `$HOME` internally. Running the setup script in a Host Clone
+(`setup.sh`, or `setup_links.sh` where there is no `setup.sh`) invokes `stow` to symlink each package's files into `$HOME`.
 
 ```
 dotfiles/home/            ← Stow root
@@ -53,9 +54,10 @@ submodule initialization, plugin builds, and RTK integration.
 The deploy script requires a clean tree and `HEAD == origin/main`, checks
 commits since the **Deploy Marker**, runs the Mixed Commit guard, and pushes
 the `dotfiles/` subtree to the Mirror Remote. It then moves the Deploy Marker,
-fast-forwards the Host Clones, and runs their unchanged `setup.sh`. Use
+fast-forwards the Host Clones, and runs their setup script (`setup.sh`, or
+`setup_links.sh` where there is no `setup.sh`). Use
 `--dry-run` to perform the checks without pushing or updating a Host Clone.
 
 For workspace review, use `git diff` and `git status`. Adding a package or a
-new file may require `setup.sh` to be run by deployment; ordinary edits do not
+new file may require the setup script to be run by deployment; ordinary edits do not
 require a local Stow command.
