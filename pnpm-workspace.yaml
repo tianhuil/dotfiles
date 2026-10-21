@@ -3,12 +3,12 @@ allowBuilds:
   protobufjs: set this to true or false
 # pnpm 11 settings (the package.json "pnpm" field is no longer read).
 # Force patched versions of transitive dev deps flagged by Dependabot
-# (sharp < 0.35.0 libvips CVEs; adm-zip < 0.6.0 ZIP memory-allocation DoS).
+# (sharp < 0.35.0 libvips CVEs; adm-zip < 0.6.0 ZIP memory-allocation DoS;
+# sprintf-js <= 1.1.2 CVE-2026-97058 DoS).
 overrides:
   sharp: ^0.35.0
   adm-zip: ^0.6.0
-# Dependabot alert 27 (sprintf-js CVE-2026-97058, DoS) is dismissed as
-# tolerable_risk: no patched sprintf-js release exists upstream, and both
-# chains (mammoth->argparse, onnxruntime-node->global-agent->roarr) are
-# dev-only transitive deps of @oh-my-pi/pi-coding-agent used for typecheck.
-# Revisit when sprintf-js or mammoth ships a fix.
+  sprintf-js: ^1.1.3
+# Dependabot alert 27 was dismissed as tolerable_risk while sprintf-js had no
+# patched release. Its mammoth->argparse chain now resolves to patched
+# sprintf-js 1.1.3; the onnxruntime-node->global-agent->roarr chain already did.
