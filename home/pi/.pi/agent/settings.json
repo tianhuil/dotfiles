@@ -10,7 +10,7 @@
     "git:github.com/tianhuil/pi-orca",
     "git:github.com/tianhuil/pi-dotenvx",
     "git:github.com/jonjonrankin/pi-caveman",
-    "npm:pi-subagents",
+    "npm:pi-subagents@^0.78.0",
     "npm:@lanlance/pi-btw"
   ],
   "defaultProvider": "openai-codex",
