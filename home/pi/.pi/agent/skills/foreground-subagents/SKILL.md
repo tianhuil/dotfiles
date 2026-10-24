@@ -1,16 +1,16 @@
 ---
 name: foreground-subagents
-description: When delegating work to Pi subagents, run every child in foreground so parent waits for its result; use for any subagent, workflow, review, or validation delegation.
+description: Fallback for Pi subagents when background execution fails or cannot deliver completion; use foreground execution only after reporting the exact failure.
 ---
 
 # Foreground subagents
 
-Run every delegated child in foreground.
+Use foreground execution only as fallback when background execution fails or cannot deliver completion.
 
-- Direct `subagent` calls: set `async: false`.
-- Workflow child runs: set their execution mode to foreground/blocking when the workflow API exposes it; prefer direct calls when it does not.
-- Wait for each result before continuing parent work.
-- Do not use `bg_wait` to compensate for a background launch.
-- If foreground launch fails, stop and report exact error. Do not silently retry in background.
+- Prefer background execution for delegated children.
+- Direct `subagent` calls: use `async: false` only after reporting the exact background failure.
+- Workflow child runs: use foreground/blocking mode only when background mode is unavailable or failed.
+- Preserve explicit user requests for foreground execution.
+- Do not silently retry a failed foreground launch in background.
 
-Apply this policy to scouts, writers, reviewers, gates, and validation agents. Preserve explicit user requests that require background execution.
+Apply this fallback to scouts, writers, reviewers, gates, and validation agents.
