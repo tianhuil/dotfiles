@@ -50,6 +50,44 @@ References:
 
 Encode every config difference between environments in the corresponding `.env.*` file. Do not hide environment-specific values in application code, CI YAML, Vercel settings, or ad-hoc shell conditionals. This follows [The Twelve-Factor App](https://12factor.net/config): deploy-specific configuration belongs in the environment, separate from code.
 
+## Monorepos
+
+Keep one shared `.env.keys` at repository root. Place each workspace's environment files beside that workspace's code, for example:
+
+```text
+repo/
+  .env.keys
+  apps/
+    web/
+      .env.development
+      .env.test
+  packages/
+    worker/
+      .env.production
+```
+
+From a workspace directory, point `-f` at the workspace file and `-fk` at the root directory containing `.env.keys`:
+
+```sh
+cd apps/web
+pnpx dotenvx run -f .env.development -fk ../.. -- pnpm dev
+pnpx dotenvx run -f .env.test -fk ../.. -- pnpm test
+```
+
+`-fk` accepts either the directory containing `.env.keys` or the `.env.keys` file itself:
+
+```sh
+pnpx dotenvx run -f .env.development -fk ../../.env.keys -- pnpm dev
+```
+
+When using a dotenvx convention, point `-f` at the workspace directory; convention files resolve there. Keep `-fk` pointed at the repository root:
+
+```sh
+pnpx dotenvx run -f . -fk ../.. --convention=nextjs -- pnpm dev
+```
+
+This layout lets workspaces own their environment files while sharing private decryption keys. Keep the root `.env.keys` ignored and never commit it.
+
 ## Create or update an environment file
 
 Use pnpm by default. Install dotenvx as a project dependency, then invoke it with `pnpx`:
