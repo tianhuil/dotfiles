@@ -102,3 +102,7 @@ When a check sits on a later rung than it needs (an e2e test that checks logic, 
 - A test that only passes because of its mock usually tests the mock, not the system. If it relies on mocked server, database, browser, transport, or configuration behavior, move it to a **Wiring Test** and use real dependencies wherever practical. Do not make the mock more elaborate to preserve it.
 - Exceptions are narrow: use mocks or fakes for unavailable third-party services, nondeterministic inputs, or failure paths the real dependency cannot safely produce. Keep the mocked contract small and test the integration with at least one real-stack path when feasible.
 - **Move in both directions**: migrate mock-dependent integration tests to Wiring Tests; migrate Wiring Tests that mostly check branching, parsing, validation, permissions, state transitions, or data transforms to Unit Tests. Extract pure logic, unit-test its rules, and retain only a thin Wiring Test for connection proof.
+
+## 9. Miscellaneous rules
+
+- Do not test whether a file is Git-committed, whether a path appears in Git status, or any other incidental Git state. Those checks test the checkout, not application behavior. If code intentionally integrates with Git, test its observable behavior using controlled fixture repositories or an explicit Git boundary.
