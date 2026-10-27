@@ -103,6 +103,10 @@ When a check sits on a later rung than it needs (an e2e test that checks logic, 
 - Exceptions are narrow: use mocks or fakes for unavailable third-party services, nondeterministic inputs, or failure paths the real dependency cannot safely produce. Keep the mocked contract small and test the integration with at least one real-stack path when feasible.
 - **Move in both directions**: migrate mock-dependent integration tests to Wiring Tests; migrate Wiring Tests that mostly check branching, parsing, validation, permissions, state transitions, or data transforms to Unit Tests. Extract pure logic, unit-test its rules, and retain only a thin Wiring Test for connection proof.
 
-## 9. Miscellaneous rules
+## 9. Document external service behavior with research
+
+When the main objective is to document external server behavior, use the [`my-research`](../my-research/SKILL.md) skill to create or update a research note in `notes/research/`. Do not write a test for this because the external service's behavior is unlikely to change. Record the service, API version, relevant documented behavior, request and response examples, authentication assumptions, failure semantics, source URLs, and access dates. Update the note when the dependency or API version changes. Treat the note as evidence for external behavior; treat local tests as evidence for our code.
+
+## 10. Miscellaneous rules
 
 - Do not test whether a file is Git-committed, whether a path appears in Git status, or any other incidental Git state. Those checks test the checkout, not application behavior. If code intentionally integrates with Git, test its observable behavior using controlled fixture repositories or an explicit Git boundary.
