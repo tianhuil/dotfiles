@@ -2,6 +2,27 @@
 name: fast-testing
 description: Keep tests fast and cheap by preferring unit tests over e2e, and choose where each test belongs. Use when planning, writing, reviewing, or moving tests, when a design or task needs a verification plan, or when a test needs a Postgres database.
 ---
+# TODO
+
+Rename this to evidence-philosophy.
+
+Link to /home/michael/orca/projects/workspace/dotfiles/home/agents/.agents/skills/trpc-testing/[SKILL.md](http://SKILL.md) 
+
+This is the order for preferred testing.  The objective is fast (quick feedback cycles), concise (no more tests than needed), testing while being secure (code functions properly)
+
+For all logic you want to test, choose this as waterfall (first one is preferred):
+
+1. Narrow Strong typing + Functional Code to catch first order bugs: don't use `as any`, make types narrow, use `.map` and `.filter` and `.flatMap` with only `const` no `let`.  This catches logic
+2. Unit testing: some things don't test well in. types: nested `if` statements, boolean logic (`||` and `&&`), boolean DB queries, anything with `while` or `for` loops or `let`.
+3. Custom lint rules: sometimes we want to disallow entire classes of behavior that are normally fine.  One example was Mongo ObjectIds should be compared with `.equals()` rather than `===.`  Use custom lint rules [https://biomejs.dev/linter/plugins/](https://biomejs.dev/linter/plugins/) in TS.  
+4. React Testing Library for component integration testing on front-end.
+5. E2E tests.  Use this as below (sparingly).  Context listed below.
+
+## Evidence
+
+1. For a UX change: storybook for all UX with screenshot on PR
+2. If there is a workflow on a web app, screen shot the journey and save to PR
+3. If there is a CLI: reproduce a cli run and save the text onto the PR
 
 # Fast Testing
 
