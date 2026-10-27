@@ -40,7 +40,7 @@ For each behavior, take the first rung that can prove it:
 4. **Component Test.** Front-end behavior that only shows up when components render together.
    - **What**: a form submit calls the right mutation; loading, error and empty states render; a user event changes what is shown.
    - **Query like a user**: find elements by role and label text rather than test IDs or class names, so the test survives markup refactors.
-   - **Mock the server, not the hooks**: intercept at the network boundary with the `trpc-testing` skill (MSW or msw-trpc).
+   - **Mock the server, not the hooks**: for a Component Test, intercept at the network boundary with the `trpc-testing` skill (MSW or msw-trpc). This proves component behavior without pretending to prove the real server; use a Wiring Test for that.
    - **Pull logic out**: extract formatting and derived state into pure functions and give them Unit Tests instead.
 5. **Wiring Test.** Only for behavior that lives between processes, where no fake can stand in:
    - a route reaches its handler
@@ -96,3 +96,9 @@ When a check sits on a later rung than it needs (an e2e test that checks logic, 
 1. **CI**: passing tests are the first evidence the PR does what it claims.
 2. **UI change**: a Storybook story for each variant, with a screenshot of each on the PR.
 3. **CLI change**: run the happy path(s) and paste the command and output into the PR.
+
+## 8. Treat mocking as a test smell
+
+- A test that only passes because of its mock usually tests the mock, not the system. If it relies on mocked server, database, browser, transport, or configuration behavior, move it to a **Wiring Test** and use real dependencies wherever practical. Do not make the mock more elaborate to preserve it.
+- Exceptions are narrow: use mocks or fakes for unavailable third-party services, nondeterministic inputs, or failure paths the real dependency cannot safely produce. Keep the mocked contract small and test the integration with at least one real-stack path when feasible.
+- **Move in both directions**: migrate mock-dependent integration tests to Wiring Tests; migrate Wiring Tests that mostly check branching, parsing, validation, permissions, state transitions, or data transforms to Unit Tests. Extract pure logic, unit-test its rules, and retain only a thin Wiring Test for connection proof.
