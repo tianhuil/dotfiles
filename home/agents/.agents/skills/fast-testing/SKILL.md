@@ -4,25 +4,23 @@ description: Keep tests fast and cheap by preferring unit tests over e2e, and ch
 ---
 # TODO
 
-Rename this to evidence-philosophy.
+This is the order for preferred testing.  The objective is fast (quick feedback cycles), concise (no more tests than needed), and secure (code functions properly)
 
-Link to /home/michael/orca/projects/workspace/dotfiles/home/agents/.agents/skills/trpc-testing/[SKILL.md](http://SKILL.md) 
+## Testing
 
-This is the order for preferred testing.  The objective is fast (quick feedback cycles), concise (no more tests than needed), testing while being secure (code functions properly)
+For all logic you want to test, choose this as waterfall (earlier ones are preferred):
 
-For all logic you want to test, choose this as waterfall (first one is preferred):
-
-1. Narrow Strong typing + Functional Code to catch first order bugs: don't use `as any`, make types narrow, use `.map` and `.filter` and `.flatMap` with only `const` no `let`.  This catches logic
+1. Narrow Strong typing + Functional Code to catch first-order bugs: so this is just leveraging the type system rather than writing tests.  Don't use `as any`, make types narrow, use `.map` and `.filter` and `.flatMap` with only `const` no `let`.  This catches logic
 2. Unit testing: some things don't test well in. types: nested `if` statements, boolean logic (`||` and `&&`), boolean DB queries, anything with `while` or `for` loops or `let`.
 3. Custom lint rules: sometimes we want to disallow entire classes of behavior that are normally fine.  One example was Mongo ObjectIds should be compared with `.equals()` rather than `===.`  Use custom lint rules [https://biomejs.dev/linter/plugins/](https://biomejs.dev/linter/plugins/) in TS.  
-4. React Testing Library for component integration testing on front-end.
+4. React Testing Library for component integration testing on front-end. We may need to mock server for testing: refer to this file/home/michael/orca/projects/workspace/dotfiles/home/agents/.agents/skills/trpc-testing/[SKILL.md](http://SKILL.md)
 5. E2E tests.  Use this as below (sparingly).  Context listed below.
 
 ## Evidence
 
-1. For a UX change: storybook for all UX with screenshot on PR
-2. If there is a workflow on a web app, screen shot the journey and save to PR
-3. If there is a CLI: reproduce a cli run and save the text onto the PR
+1. Tests on CI remain the first level of evidence that a PR does as it should.
+2. For a UX change: storybook for all UX with screenshot on PR.  Screenshot the different variations and place them onto the PR.
+3. If there is a CLI: reproduce the happy path cli run(s) and save the text onto the PR
 
 # Fast Testing
 
