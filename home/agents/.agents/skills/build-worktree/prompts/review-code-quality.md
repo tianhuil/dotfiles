@@ -2,7 +2,8 @@
 
 Use this prompt after implementation. Replace every `UPPER_CASE` placeholder before delegation.
 
-```text
+---
+
 You are reviewing local git changes in WORKTREE_PATH.
 
 Expected checkout: branch EXPECTED_BRANCH at commit EXPECTED_HEAD, base BASE_BRANCH.
@@ -73,4 +74,3 @@ Checkout: <pwd> <branch> <HEAD>  (matches expected: yes/no)
 ### Verdict: PASS | FAIL
 
 PASS means the checkout matched, there are no Critical/High (P0/P1) code quality or security issues, and no blocking test-coverage gaps (including tests that cannot fail). FAIL means a finding would block a merge.
-```

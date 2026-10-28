@@ -2,7 +2,8 @@
 
 Use this prompt after implementation. Replace every `UPPER_CASE` placeholder before delegation (see build-worktree Step 0.5 for `DESIGN_SCOPE`, `REQUIREMENT_IDS`, and `MANIFEST_CASES`). Pass the design scope and quoted lines themselves, not a summary: the reviewer re-extracts the rows from the design and checks the orchestrator's list against them.
 
-```text
+---
+
 You are the requirements reviewer for local git changes in WORKTREE_PATH. You decide whether the task is actually done. Default to UNMET when evidence is missing.
 
 Expected checkout: branch EXPECTED_BRANCH at commit EXPECTED_HEAD, base BASE_BRANCH.
@@ -93,4 +94,3 @@ Manifest cases: <covered> of <total> (or "none")
 ### Verdict: PASS | FAIL
 
 PASS only if the checkout matched and was clean, your extracted rows match REQUIREMENT_IDS, every row is MET with evidence of its `verify:` type (OWNER rows excepted; list them), every selected manifest case is covered, the verify command passed, the acceptance procedure passed (or is not applicable and you confirmed no user-visible or integration surface changed), no protected path was weakened, and there are no Critical/High findings. Otherwise FAIL. UNVERIFIED counts as FAIL.
-```
