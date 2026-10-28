@@ -11,6 +11,8 @@ metadata:
 
 Complete a task in an isolated worktree, validate it, push a PR, and iterate until CI passes. Follow `git-orca-worktrees` for worktree creation and cleanup: Orca by default, plain Git fallback.
 
+Design documents follow [Common design rules](../design/common-rules.md). Apply that skill instead of repeating its writing, checklist, acceptance, protected-path, and readiness rules here.
+
 ## Helper Scripts
 
 This skill includes bash scripts that handle the mechanical orchestration (no AI needed). Run them via:
@@ -38,10 +40,9 @@ Or reference them by their install path at `~/.agents/skills/build-worktree/`.
 1. **Do not merge by default.** Merge only when the user explicitly requests merging as part of this task, and only when the build status is `READY` (Step 3.5). Otherwise stop after CI passes and report the result.
 2. **Stay on the worktree you created in Step 0.** Never create additional branches or worktrees, except the disposable detached worktrees reviewers create and remove for absence checks. Fix issues in place.
 3. **Fail closed.** Missing evidence means not done. Never waive a failing check as "environmental", "flaky", "known OOM", or "unrelated". Clean up only processes you started, re-run once, and if it still fails, set status `BLOCKED` and escalate to the user.
-4. **Nobody grades their own work.** Workers never choose which design checkboxes get ticked (Step 3.5 does that mechanically), never weaken protected paths (gates, manifests, required-case lists, golden/expected files, acceptance tests: removing cases, adding skips, loosening assertions or thresholds, or editing expected values to match new output) unless the design or the user's task names that change, and never decide the task is complete. Adding cases and regenerating generated files are allowed; the requirements reviewer checks every protected-path change. Reviewers decide; the orchestrator records.
+4. **Workers preserve checklist integrity.** They do not weaken protected paths by removing cases, adding skips, loosening assertions or thresholds, or editing expected values to match new output unless the task names that change. Reviewers decide; the separate readiness commit records the result. Apply checklist-ticking rules from [Common design rules](../design/common-rules.md).
 5. **Scope is locked.** Fix only findings required by the captured task contract, caused by the diff, or required to make its declared verification pass. Treat pre-existing defects, adjacent improvements, cleanup, reviewer preferences, and new requirements as follow-up notes; do not change them in this PR. If a fix would alter `DESIGN_SCOPE`, `REQUIREMENT_IDS`, `MANIFEST_CASES`, `ACCEPTANCE_PROCEDURE`, or `PROTECTED_PATHS`, stop and ask the user rather than expanding scope. A user-approved scope change starts a new contract capture and review cycle.
 6. **The orchestrator does not edit project files.** Every change to the worktree is made by a delegated agent, so the reviewers always review someone else's work. The orchestrator may run read-only commands, the helper scripts, and verification commands.
-7. **Report what was not verified.** Every report and PR body lists anything that could not be observed directly.
 
 ## Execution Model
 
@@ -96,17 +97,12 @@ Parse the output for `BRANCH_NAME` (may have `-v2` suffix if branch existed), `B
 
 Before any implementation, collect the contract the reviewers will enforce. Read the repository's `AGENTS.md` and README in the worktree, and every design doc linked by the task.
 
-1. **Design readiness.** For each design the task *implements* (not docs the task itself edits, such as a task to resolve a design's TODOs), run `grep -n "\[TODO:" <design-doc>`. Any hit means the design is not ready: stop, report the open TODOs, and ask the user. For a large design (one with a Review Record section), also require an owner approval line, `Approved-by: <owner> <date>` (`grep -n "^Approved-by:" <design-doc>`). A reviewer's APPROVE verdict does not count. If it is missing, stop and ask the owner to approve the design.
-2. **Scope and requirement rows.** These decide what "done" means, so they are copied, never summarized.
-   - `DESIGN_SCOPE`: the design file and the work unit this task implements. A work unit is either a heading (for example `### Phase 1.2`) or a single checklist item (for example `1.1.3` or `P1-03`). If the task links a design but does not name the unit, or the unit does not exist, stop and ask the user.
-   - `REQUIREMENT_IDS`: for a heading, every checklist line (`- [ ]` or `- [x]`) under it, down to the next heading of the same or higher level; for a single item, that line plus any lines nested under it. Quote each line in full with its ID. Lines without an ID get a positional ID, `§<heading>#<n>` (for example `§Phase 1.2#3`), counted in document order. Record the total (for example "7 items").
-   - No design: the rows are the user's task text, split into its individual asks and quoted verbatim (`TASK#1`, `TASK#2`, …). Do not rephrase or add your own.
-   - `MANIFEST_CASES`: if the design has a required-case manifest, the manifest file and the selector for this unit's cases (for example `phase1-manifest.json`, `phase == "1.2"`), with their count. When the manifest only tags a coarser unit than this task (cases tagged `1.1`, task `1.1.3`), record "checked at completion of `<coarser unit>`". The PR that completes that coarser unit (its last item) uses the full selector. Otherwise "none".
+1. **Design contract.** Apply [Common design rules](../design/common-rules.md). For each design the task implements, verify readiness before implementation. Capture `DESIGN_SCOPE`, `REQUIREMENT_IDS`, and `MANIFEST_CASES` verbatim from the design; for a task without a design, capture each ask verbatim as `TASK#1`, `TASK#2`, and so on. If the task links a design but does not name an existing work unit, stop and ask the user.
 3. **Verify command.** Use the single verify command the repository's `AGENTS.md` defines (for example `pnpm verify`). If none is defined, derive the command list from CI (Step 2) and say in the final report that the repository lacks one.
 4. **Acceptance procedure.** From the design's Owner Acceptance Script and Acceptance Environment, or the repository's `AGENTS.md`, record how to check the change end to end in the environment the user actually uses (real URLs, real browser). For changes with no user-visible or integration surface, record "not applicable" and why; the requirements reviewer must confirm that from the diff. If the procedure needs a browser, probe for it in the worktree now (for example `command -v agent-browser && agent-browser --version`, or the repository's browser test command). If the probe fails, set status `BLOCKED` ("owner acceptance required: no browser tool") now rather than spending review rounds.
 
    Changes to CI workflow files can only be proven by a CI run. For those rows, push a draft PR (Step 4) before review; the requirements reviewer then cites the CI run for `EXPECTED_HEAD` (`gh run list --commit <sha> --json conclusion,headSha`) as executed evidence.
-5. **Protected paths.** Record the gate, manifest, required-case, golden/expected, and acceptance-test paths from the design and `AGENTS.md`, as single-quoted git pathspecs (for example `':(glob)**/*.test.ts' 'scripts/verify.ts'`) so deleted files still match.
+5. **Protected paths.** Record paths named by the design and `AGENTS.md` as single-quoted git pathspecs (for example `':(glob)**/*.test.ts' 'scripts/verify.ts'`) so deleted files still match. Apply their protection rules from [Common design rules](../design/common-rules.md).
 
 Keep these items in the orchestrator's environment as `DESIGN_DOCS`, `DESIGN_SCOPE`, `REQUIREMENT_IDS`, `MANIFEST_CASES`, `VERIFY_COMMAND`, `ACCEPTANCE_PROCEDURE`, and `PROTECTED_PATHS`. Pass them to every worker and reviewer.
 
@@ -385,7 +381,6 @@ After creating the PR, keep this Pi session working in `WORKTREE_PATH`. If the u
 - **Merge conflict**: Step 5.5 handles rebase + force push
 - **Max CI retries (5)**: Report all accumulated failures and stop
 - **Review cap reached with blockers**: status `BLOCKED`; draft PR only; report the open findings
-- **Design not ready** (`[TODO:` markers or no `APPROVE`): stop before Step 1 and ask the user
 - **Verify or acceptance cannot run**: status `BLOCKED`; report the exact error; never report it as passed
 
 ## Reporting

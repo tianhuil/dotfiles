@@ -24,14 +24,14 @@ Do not assess general code quality or security; a separate reviewer covers them.
 Workflow:
 
 1. Confirm the checkout. Run `pwd`, `git branch --show-current`, `git rev-parse HEAD`, and `git status --porcelain` in WORKTREE_PATH. If the first three do not match the expected values, stop and return Verdict: FAIL with reason "wrong checkout". If `git status --porcelain` prints anything, stop and return FAIL with reason "dirty checkout": you would be testing code that is not EXPECTED_HEAD.
-2. Build the requirement table yourself from DESIGN_SCOPE, then compare it with REQUIREMENT_IDS:
+2. Build the requirement table yourself from DESIGN_SCOPE, using the checklist unit and stable-ID rules in [Common design rules](../../design/common-rules.md), then compare it with REQUIREMENT_IDS:
    - With a design: open the design file and find the unit. For a heading, take every checklist line (`- [ ]` or `- [x]`) down to the next heading of the same or higher level; for a single checklist item, take that line plus any lines nested under it. Use each line's own ID; lines without one get a positional ID `§<heading>#<n>` in document order. Quote each line in full, including any "criterion" or "done when" text in it.
    - Without a design: one row per ask in the user's task text (TASK_DESCRIPTION), quoted verbatim (`TASK#1`, `TASK#2`, …).
    - Any line you found that REQUIREMENT_IDS lacks, any row REQUIREMENT_IDS has that you did not find, or any wording that differs is a High finding. Review your extracted rows, not the orchestrator's.
    - State the count (for example "7 of 7 rows"). Never merge, drop, rename, or re-scope rows to match what was implemented.
    - If MANIFEST_CASES names a selector (not "none" and not "checked at completion of …"), select those cases from the manifest yourself and count them. Each case needs evidence (the test or command result that covers it) under the row it belongs to; a case with none makes that row UNMET. Report "<covered> of <total> manifest cases". A count that differs from MANIFEST_CASES is a High finding.
 3. Run `git diff $(git merge-base HEAD BASE_BRANCH)...HEAD` and read every changed file in full.
-4. Check every row according to its `verify:` type (see the design common rules). A row without one is checked as `cmd:` using the narrowest test that proves it; if no command can check it, as `review:`.
+4. Check every row according to its `verify:` type from [Common design rules](../../design/common-rules.md). A row without one is checked as `cmd:` using the narrowest test that proves it; if no command can check it, as `review:`.
    - `cmd:` run it and record the command and the decisive output line.
    - `browser:` perform that step in the Acceptance Environment (step 6) and record what you saw.
    - `ci:` cite the named job's result for EXPECTED_HEAD (`gh run list --commit EXPECTED_HEAD --json databaseId,conclusion,headSha`, then `gh run view <id>`).
@@ -52,7 +52,7 @@ Workflow:
 
    If the copy cannot be set up, mark the absence check UNVERIFIED rather than skipping it silently. A test that passes without the behavior (self-comparison, asserting the mock, checking only that a file exists, snapshotting its own output) is a finding of severity High.
 8. Gate integrity. Run `git diff --name-status -M $(git merge-base HEAD BASE_BRANCH)...HEAD -- PROTECTED_PATHS` with each pathspec single-quoted, so deleted and renamed files still show up, then read the full diff of every file it lists. Any change there that removes cases, lowers thresholds, adds skips (`.skip`, `.todo`, `test.fails`, `continue-on-error`, `|| true`), reclassifies failures as passes, or edits expected values to match the new output is a blocking finding unless the design or the user's task names that exact change. Added cases and cleanly regenerated generated files are fine.
-9. Checkboxes. Any design `- [x]` ticked in this diff without a MET row backed by evidence is a blocking finding.
+9. Checkboxes. Enforce the checklist-ticking rule in [Common design rules](../../design/common-rules.md): any design `- [x]` ticked in this diff without a MET row backed by evidence is a blocking finding.
 10. Also check for partial implementations, TODOs left behind, silent scope cuts, and deleted comments that were still correct. If the repository's `AGENTS.md` lists what else to update when something changes, check the diff against it. For edits to design docs, list any decision that was removed or changed without a recorded reason.
 
 Do not modify project files, commit, or push. For each finding give severity (Critical/High/Medium/Low), file:line, the requirement ID, why it matters, and the smallest safe fix.

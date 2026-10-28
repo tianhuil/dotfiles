@@ -59,15 +59,15 @@ Only a reviewer-confirmed MET item may be ticked; `owner:` items are ticked only
 Every design that changes user-visible or integration behavior includes two short sections:
 
 - **Acceptance Environment:** how to start the system and the exact URLs, hosts, and ports the owner actually uses (for example a remote or Tailscale origin, not only `localhost` on the agent's machine). Take these from the repository's `AGENTS.md` when it defines them. Acceptance runs there.
-- **Owner Acceptance Script:** 1–8 numbered steps a person can run in under ten minutes, or an agent can run with a real browser, each with its expected result. Agents run it before a user-visible change is ready to merge; the owner runs it at the design's approval points. CI passing does not replace it.
+- **Owner Acceptance Script:** 1–8 numbered steps a person can run in under ten minutes, or an agent can run with a real browser, each with its expected result. CI passing does not replace it.
 
 ## Protected paths
 
-List the files that decide whether the work is done: gates, manifests, required-case lists, golden or expected files, and acceptance tests. Builders must not weaken them (remove cases, add skips, lower thresholds, or edit expected values to match new output) unless the design names that exact change as a deliverable. When the work is large, write and approve these files before implementation starts.
+List the files that decide whether the work is done: gates, manifests, required-case lists, golden or expected files, and acceptance tests. When the work is large, write and approve these files before implementation starts.
 
 ## Ready to build
 
-A design is ready for implementation only when no `[TODO:` markers remain and, for large designs, the owner has added a line `Approved-by: <owner> <date>` (a reviewer's `APPROVE` verdict is input to that decision, not a substitute for it). Implementation skills check this before starting.
+A design is ready for implementation only when no `[TODO:` markers remain and, for large designs, the owner has added a line `Approved-by: <owner> <date>` (a reviewer's `APPROVE` verdict is input to that decision, not a substitute for it).
 
 ## Boundaries
 
