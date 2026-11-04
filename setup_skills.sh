@@ -40,6 +40,7 @@ REMOTE_SKILLS=(
   "kunchenguid/axi:axi"
   "mattpocock/skills:*"
   "stablyai/orca:orca-cli"
+  "stablyai/orca:orca-linear"
   "stablyai/orca:orchestration"
   "stablyai/orca:orca-per-workspace-env"
   "vercel-labs/agent-browser:agent-browser"
