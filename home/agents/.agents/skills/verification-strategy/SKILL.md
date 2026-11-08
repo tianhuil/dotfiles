@@ -109,4 +109,5 @@ When the main objective is to document external server behavior, use the [`my-re
 
 ## 10. Miscellaneous rules
 
+- Do not test third-party platform behavior: whether Docker, Cloud Run, `gcloud` or another platform honors a flag, its defaults, or its error wording. A PR cannot change it, so a per-PR check only re-proves a fact. Unit-test the arguments your code passes, and record once, in a research note, that those arguments produce the intended behavior.
 - Do not test whether a file is Git-committed, whether a path appears in Git status, or any other incidental Git state. Those checks test the checkout, not application behavior. If code intentionally integrates with Git, test its observable behavior using controlled fixture repositories or an explicit Git boundary.
