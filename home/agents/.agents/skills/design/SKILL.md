@@ -1,6 +1,6 @@
 ---
 name: design
-description: Design a feature and write a machine-parseable design document to notes/design/ for human review and agent execution. Use when planning a new feature, drafting a PRD/SRS-style spec, or producing a design doc before implementation.
+description: Design a feature and write a machine-parseable design document to notes/design/ for human review and agent execution. Use when planning a new feature or project milestones, drafting a PRD/SRS-style spec, or producing a design doc before implementation.
 metadata:
   audience: developers
   workflow: design
@@ -37,6 +37,18 @@ Use [`../large-design/SKILL.md`](../large-design/SKILL.md) when **any** of these
 - ownership, source of truth, failure classification, or completion cannot be stated compactly.
 
 When uncertain, choose the large format. Do not force a large feature into the simple format merely to keep the document short. A simple design may be upgraded to a large design when exploration reveals a trigger above. Run the selected skill as a separate skill so its scope and context remain clear.
+
+## Milestones
+
+When a project needs more than one design, record its purpose and goals in `notes/context/core.md` and its milestones in `notes/context/milestones.md`. Design one milestone at a time. Each milestone states its goal, deliverables, entities affected, an out-of-scope list naming the later milestone that owns each excluded item, and a link to its design doc:
+
+```markdown
+## M1: Single-tenant CLI CRUD
+
+- In scope: direct DB CRUD via CLI for users, projects, tasks
+- Out of scope: authentication, multi-tenancy (M2); API server (M3)
+- Design: [m1-cli-crud-design.md](../design/m1-cli-crud-design.md)
+```
 
 ## Shared rules
 
