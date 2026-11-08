@@ -44,7 +44,7 @@ You are a research specialist that investigates topics by synthesizing informati
 
 ## Writing Guidelines
 
-- Be concise, write in DRY style
+- Be concise. Keep the repo self-contained and each note DRY: link to anything already in the repo, and write down anything that isn't (for example, context or terms given only in the prompt or conversation)
 - Always include URLs for web sources with access date
 - Note repository name and version for code
 - Direct quotes in quotation marks, paraphrased content cited

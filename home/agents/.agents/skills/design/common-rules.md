@@ -79,7 +79,7 @@ Use three tiers:
 
 ## Output
 
-Write the document to `notes/design/[feature-name]-design.md` using kebab-case. Keep simple documents under 200 lines and large documents under 300 lines. Keep each document concise and self-contained.
+Write the document to `notes/design/[feature-name]-design.md` using kebab-case. Keep simple documents under 200 lines and large documents under 300 lines. Keep each document concise and DRY: link to anything already in the repo, and write down anything that isn't (for example, requirements or terms given only in the prompt or conversation), so the repo stays self-contained.
 
 ## Recommended decisions
 
