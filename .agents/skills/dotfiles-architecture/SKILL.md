@@ -49,7 +49,7 @@ submodule initialization, plugin builds, and RTK integration.
 1. Commit only files under `dotfiles/`. A **Mixed Commit** touches files both
    inside and outside `dotfiles/` and is rejected by deployment.
 2. Merge the commit to the workspace `main` branch.
-3. From the workspace root, run `scripts/deploy-dotfiles.sh`.
+3. From the workspace root, run `.agents/skills/local/deploy-dotfiles/deploy-dotfiles.sh`.
 
 The deploy script requires a clean tree and `HEAD == origin/main`, checks
 commits since the **Deploy Marker**, runs the Mixed Commit guard, and pushes

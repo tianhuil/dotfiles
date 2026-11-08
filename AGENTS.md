@@ -17,7 +17,7 @@ deploy script runs its setup script (`setup.sh`, falling back to
 2. Commit dotfiles-only changes. A **Mixed Commit** touches files inside
    `dotfiles/` and outside it, and is not allowed.
 3. Merge the commit to the workspace `main` branch.
-4. From the workspace root, run `scripts/deploy-dotfiles.sh`. It checks the
+4. From the workspace root, run `.agents/skills/local/deploy-dotfiles/deploy-dotfiles.sh`. It checks the
    clean, merged state and the Mixed Commit guard, pushes `dotfiles/` to the
    Mirror Remote with `git subtree`, moves the **Deploy Marker** tag, then
    fast-forwards the Host Clones and runs their setup script (`setup.sh`, or
