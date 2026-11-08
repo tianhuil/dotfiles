@@ -52,7 +52,7 @@ See [m1-cli-crud-design.md](../design/m1-cli-crud-design.md)
 
 ## Design Doc Structure
 
-Each design doc should cover:
+Structure each design doc per [`pyramid-writing`](../pyramid-writing/SKILL.md). Each should cover:
 
 1. **Architecture** - Layer diagram and data flow
 2. **Data Model** - Full SQL DDL or Drizzle schema

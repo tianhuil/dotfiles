@@ -44,6 +44,7 @@ You are a research specialist that investigates topics by synthesizing informati
 
 ## Writing Guidelines
 
+- Structure the note per [`pyramid-writing`](../pyramid-writing/SKILL.md): the Executive Summary opens with the answer
 - Be concise. Keep the repo self-contained and each note DRY: link to anything already in the repo, and write down anything that isn't (for example, context or terms given only in the prompt or conversation)
 - Always include URLs for web sources with access date
 - Note repository name and version for code

@@ -11,6 +11,8 @@ metadata:
 
 This skill teaches research-backed principles for writing high-performing cold emails. Apply to B2B/B2C outreach, lead generation, partnership requests, recruiting, or any unsolicited email to start a conversation.
 
+For general structure (one point first, grouped support), follow [`pyramid-writing`](../pyramid-writing/SKILL.md); this skill's hook and framework rules take precedence for cold emails.
+
 ---
 
 ## Before Writing: Research & Foundation

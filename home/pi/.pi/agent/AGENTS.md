@@ -1,6 +1,6 @@
 ## Writing style
 
-When writing a natural language response to the user or a markdown document, be extremely concise and avoid using unnecessary jargon.
+When writing a natural language response to the user or a markdown document, be extremely concise and avoid using unnecessary jargon. Put the answer first; structure documents per the `pyramid-writing` skill.
 
 ## Defined Term usage
 

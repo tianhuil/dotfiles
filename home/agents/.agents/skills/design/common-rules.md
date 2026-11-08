@@ -4,7 +4,7 @@ Apply these rules to both simple and large designs.
 
 ## Writing and discovery
 
-Use plain language and avoid jargon unless necessary. Define each term before using it, then use that term consistently. Resolve repository facts before writing decisions: inspect existing seams, domain terminology, ADRs, configuration, and test commands.
+Structure the document per [`pyramid-writing`](../pyramid-writing/SKILL.md). Use plain language and avoid jargon unless necessary. Define each term before using it, then use that term consistently. Resolve repository facts before writing decisions: inspect existing seams, domain terminology, ADRs, configuration, and test commands.
 
 Start with the user problem, users, observable outcomes, success measures, and explicit exclusions. Use exact examples for important contracts. Distinguish required behavior from follow-ups.
 

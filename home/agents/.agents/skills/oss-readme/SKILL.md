@@ -78,9 +78,10 @@ One line: `[License name](LICENSE) © Year Name`. No long license text in the RE
 
 ## Principles
 
+- **Answer first.** Structure prose sections per [`pyramid-writing`](../pyramid-writing/SKILL.md).
 - **Lead with the badge line.** It's the most scannable signal — language, license, status in one visual sweep.
 - **One repo fact, one place.** Don't state the license in both the badge and a prose section; the badge and the License heading cover it. Don't list dependencies in both Install and How It Works unless the contexts genuinely differ.
 - **Concrete over descriptive.** "Run `pnpm install`" beats "install the dependencies." Show the command; skip the narrative.
 - **Tables over prose for behavior.** When a project has several modes or input→output mappings, a table reads in one pass where paragraphs force re-reading.
 - **No TODOs.** If a section isn't written yet, don't leave a placeholder — omit it. A section heading with nothing under it is noise.
-- **Write for the newcomer, not the contributor.** The README's audience is someone arriving from a search result or a link, not someone who already knows the project.术语 and internal jargon ("ADR-0003", "the handler") belong in docs, not the README.
+- **Write for the newcomer, not the contributor.** The README's audience is someone arriving from a search result or a link, not someone who already knows the project. Terms and internal jargon ("ADR-0003", "the handler") belong in docs, not the README.
