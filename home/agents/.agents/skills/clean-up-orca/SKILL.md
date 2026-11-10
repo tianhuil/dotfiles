@@ -1,11 +1,12 @@
 ---
 name: clean-up-orca
 description: >-
-  Clean up Orca workspaces whose linked GitHub pull requests are closed or
-  merged. Use whenever the user asks to clean up, prune, remove, or close stale
-  Orca workspaces based on PR status. Inspect every workspace with the Orca CLI,
-  remove only non-main worktrees linked to a closed or merged PR, and preserve
-  all other workspaces.
+  Clean up Orca workspaces whose linked pull requests are closed or merged, or
+  whose branches are merged into the default branch according to Git. Use
+  whenever the user asks to clean up, prune, remove, or close stale Orca
+  workspaces based on PR or Git status. Inspect every workspace with the Orca
+  CLI, remove only non-main worktrees confirmed merged by PR metadata or Git,
+  and preserve all other workspaces.
 ---
 
 # Clean up Orca
@@ -34,20 +35,29 @@ Fetch the complete workspace inventory:
 <ORCA> worktree ps --json
 ```
 
-Use each entry's `worktreeId`, `isMainWorktree`, and `linkedPR` fields. A
-workspace is a candidate only when all of these are true:
+Use each entry's `worktreeId`, `isMainWorktree`, `linkedPR`, branch, repository,
+and default-branch fields. A workspace is a candidate only when all of these
+are true:
 
 1. `isMainWorktree` is `false`.
-2. `linkedPR` is present.
-3. `linkedPR.state`, case-insensitively, is `closed` or `merged`.
+2. It is confirmed merged by either:
+   - `linkedPR` is present and `linkedPR.state`, case-insensitively, is
+     `closed` or `merged`; or
+   - the workspace branch tip is an ancestor of the repository's default branch
+     according to Git. Use `git merge-base --is-ancestor <branch> <default>`;
+     do not use `gh` or infer merge status from names, timestamps, or activity.
+3. Git checks use the repository and refs for that workspace. If the branch,
+   default branch, or ancestry cannot be verified, preserve the workspace.
 
-The absence of a linked PR is not evidence that a workspace is stale. Preserve
-it. Preserve open, draft, pending, unknown, or missing PR states. Preserve all
-main worktrees regardless of PR metadata.
+A missing linked PR is not evidence that a workspace is stale, but it may still
+be removed when Git confirms that its branch is merged. Preserve open, draft,
+pending, unknown, or missing PR states when Git does not independently confirm
+merge status. Preserve all main worktrees regardless of PR or Git metadata.
 
 Before mutating anything, print a compact candidate table containing the repo,
-workspace name, PR number, PR state, and the exact `worktreeId`. If there are no
-candidates, report that no cleanup was needed and stop.
+workspace name, merge reason (`PR` or `Git`), PR number/state when present, and
+the exact `worktreeId`. If there are no candidates, report that no cleanup was
+needed and stop.
 
 ## Remove candidates
 
