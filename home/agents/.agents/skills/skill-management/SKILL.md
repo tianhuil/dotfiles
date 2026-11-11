@@ -77,6 +77,15 @@ Pi discovers these nested directories recursively. If custom skills must live di
 
 For Claude Code symlinks, create `.claude/skills/.gitignore` with the same pattern. Usually only the symlinks are generated, so keep `.claude/skills/` ignored locally and commit the source skill under `.agents/skills/local/`.
 
+## Harness asymmetries (verified)
+
+- Pi applies ignore files found inside the skills tree (`.gitignore`, `.ignore`, `.fdignore`); the repository-root `.gitignore` has no effect. Consequence: vendor skills hidden by the catch-all above are invisible to Pi — load them with `pi --skill <path>`, or install them as a Pi package. Claude Code ignores `.gitignore` entirely, so the same ignored skills load fine there via symlinks.
+- Pi recurses into `.agents/skills/` subdirectories, and a directory containing `SKILL.md` is a skill root (nothing below it is scanned). Claude Code reads only one level under `.claude/skills/` and does not read project `.agents/skills/` at all — symlink each skill flat: `.claude/skills/<name>` → `.agents/skills/local/<name>`.
+- Pi scans `.agents/skills/` from the working directory up to the git repository root (to the filesystem root when there is no repo); skills above the repo root are not loaded.
+- Name collisions: pi keeps the first discovered skill; keep local and vendor skill names unique.
+
+Re-verify against the installed CLIs with `tests/skill-claims-test.sh` in this skill's directory (`--pi`, `--claude`, `--online` for the `npx skills` lockfile test).
+
 Keep `skills-lock.json` tracked. Do not ignore the whole parent directory from the repository root: that hides local skills and makes accidental omission easy. Check the result with:
 
 ```bash
@@ -89,3 +98,11 @@ The first path should be ignored; a custom path such as `.agents/skills/local/re
 ## Completion criteria
 
 Finish only when the source of truth is identified, generated files are ignored, local skills remain trackable, external skills can be restored, and discovery has been verified from the project directory. Report any unreviewed executable content or name collisions as residual risks.
+
+## References
+
+- [Agent Skills specification](https://agentskills.io/specification)
+- [Pi skills docs](https://pi.dev/docs/latest/skills)
+- [Claude Code skills docs](https://code.claude.com/docs/en/skills)
+- [Anthropic skills collection](https://github.com/anthropics/skills)
+- [skills CLI — `npx skills`, owns `skills-lock.json`](https://github.com/vercel-labs/skills)
