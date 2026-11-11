@@ -77,14 +77,32 @@ Pi discovers these nested directories recursively. If custom skills must live di
 
 For Claude Code symlinks, create `.claude/skills/.gitignore` with the same pattern. Usually only the symlinks are generated, so keep `.claude/skills/` ignored locally and commit the source skill under `.agents/skills/local/`.
 
-## Harness asymmetries (verified)
+## Bridge Claude Code with a small CLAUDE.md
 
-- Pi applies ignore files found inside the skills tree (`.gitignore`, `.ignore`, `.fdignore`); the repository-root `.gitignore` has no effect. Consequence: vendor skills hidden by the catch-all above are invisible to Pi — load them with `pi --skill <path>`, or install them as a Pi package. Claude Code ignores `.gitignore` entirely, so the same ignored skills load fine there via symlinks.
-- Pi recurses into `.agents/skills/` subdirectories, and a directory containing `SKILL.md` is a skill root (nothing below it is scanned). Claude Code reads only one level under `.claude/skills/` and does not read project `.agents/skills/` at all — symlink each skill flat: `.claude/skills/<name>` → `.agents/skills/local/<name>`.
-- Pi scans `.agents/skills/` from the working directory up to the git repository root (to the filesystem root when there is no repo); skills above the repo root are not loaded.
-- Name collisions: pi keeps the first discovered skill; keep local and vendor skill names unique.
+Do not duplicate project instructions in `CLAUDE.md`: Claude Code reads `AGENTS.md` natively. It does not index `.agents/skills/`, so when symlinks are unwanted, commit this one-pointer `CLAUDE.md` at the repo root:
 
-Re-verify against the installed CLIs with `tests/skill-claims-test.sh` in this skill's directory (`--pi`, `--claude`, `--online` for the `npx skills` lockfile test).
+```markdown
+# Agent configuration
+
+- Treat `AGENTS.md` at the repo root as your project instructions.
+- Project skills live in `.agents/skills/**/SKILL.md` (including `local/`). They are not registered in Claude Code's skill list. When a task may match a skill, search that tree, read the matching `SKILL.md`, and follow it.
+```
+
+Use the pointer only for on-demand skill use. When a skill must activate without being named, add a flat symlink `.claude/skills/<name>` → `.agents/skills/local/<name>` instead: Claude Code auto-loads skills only from that one level.
+
+## Discovery rules to respect
+
+- Pi honors ignore files inside the skills tree (`.gitignore`, `.ignore`, `.fdignore`) and never the repository-root `.gitignore`. Never expect a vendor skill hidden by the catch-all above to load in Pi — load it with `pi --skill <path>` or install it as a Pi package. Claude Code ignores `.gitignore` entirely.
+- Pi recurses into `.agents/skills/` subdirectories and stops recursing at any directory containing `SKILL.md`. Claude Code reads only one level under `.claude/skills/`.
+- Pi scans `.agents/skills/` from the working directory up to the git repository root (to the filesystem root when there is no repo).
+- Keep local and vendor skill names unique: on collision, Pi silently keeps the first discovered skill.
+
+## Supporting files
+
+Read these only when changing this skill or investigating discovery behavior:
+
+- `research.md` — verification evidence: claim matrix, CLI versions, CLAUDE.md pointer experiments.
+- `tests/skill-claims-test.sh` — re-runs every claim against the installed `pi` and `claude` CLIs (`--pi`, `--claude`, `--online` for the `npx skills` lockfile test).
 
 Keep `skills-lock.json` tracked. Do not ignore the whole parent directory from the repository root: that hides local skills and makes accidental omission easy. Check the result with:
 
