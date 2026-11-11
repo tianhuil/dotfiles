@@ -1,4 +1,4 @@
-## Writing style
+##  Writing style
 
 When writing a natural language response to the user or a markdown document, be extremely concise and avoid using unnecessary jargon. Put the answer first; structure documents per the `pyramid-writing` skill.
 
@@ -21,7 +21,6 @@ A **Defined Term** is a word or phrase that has a unique and precise meaning th
 
 Keep primary checkout on its current branch. For a different branch, create a worktree and work there; never switch primary checkout. For worktree creation and Orca/Git fallback, use `git-orca-worktrees` skill; use `orca-cli` for advanced Orca operations.
 
-
 ## Subagent
 
-When running sub-agents in pi, default to using `gpt-5.6-luna` with medium effort unless there is a compelling reason not to or the user says to use something else.
+When running sub-agents in pi, default to using `gpt-5.6-luna` with medium effort unless there is a compelling reason not to or the user says to use something else.  When unsure, use a sub-agent to save context of main thread.
