@@ -1,6 +1,6 @@
 ##  Writing style
 
-When writing a natural language response to the user or a markdown document, be extremely concise and avoid using unnecessary jargon. Put the answer first; structure documents per the `pyramid-writing` skill.
+When writing a natural language response to the user or a markdown document, be extremely concise and avoid using unnecessary jargon. Put the answer first; structure documents per the `pyramid-writing` skill. In Markdown intended for LaTeX rendering, escape literal dollar signs with one backslash (`\$`), never two (`\\$`).
 
 ## Defined Term usage
 
