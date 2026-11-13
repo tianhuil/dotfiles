@@ -43,6 +43,8 @@ REMOTE_SKILLS=(
   "stablyai/orca:orca-linear"
   "stablyai/orca:orchestration"
   "stablyai/orca:orca-per-workspace-env"
+  "aws/agent-toolkit-for-aws:aws-serverless"
+  "cloudflare/skills:wrangler"
   "vercel-labs/agent-browser:agent-browser"
   "vercel-labs/skills:find-skills"
 )
