@@ -23,7 +23,7 @@ When rewriting or replacing an existing design, read it and any review comments 
 ## Contracts and verification
 
 - Pair every implementation step with a clear, checkable completion criterion.
-- Choose each behavior's check with the [verification-strategy](../verification-strategy/SKILL.md) waterfall: the cheapest rung that can prove it. Verify external behavior, not implementation details.
+- Choose each behavior's check with the [verification-strategy](../verification-strategy/SKILL.md) waterfall: the cheapest rung that can prove it. Within that rung, test at the highest useful seam (the public entry point: a procedure, a component, a command) and verify external behavior, not implementation details.
 - Give every important behavior one owner and source of truth.
 - Classify relevant failure states and external assumptions.
 - Keep acceptance criteria reproducible and independently verifiable.
