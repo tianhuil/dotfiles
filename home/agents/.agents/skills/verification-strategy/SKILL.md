@@ -62,7 +62,7 @@ For each behavior, take the first rung that can prove it:
 
 > **Test at the highest useful seam.** A seam is where a test enters the code and swaps in its dependencies. Within a rung, enter through the public entry point (a procedure, a component, a command) so the test checks behavior and survives refactors. When a decision is hard to reach from there, extract it and test it lower (section 3).
 
-Done when every behavior has exactly one home, and each Wiring Test states in one line why no earlier rung can prove it.
+Done when every behavior has exactly one home (a rung and a seam), and each Wiring Test states in one line why no earlier rung can prove it.
 
 **Move each check to its rung in one change.** Move a check up when it sits on a later rung than it needs (an e2e test that checks logic, a Unit Test a narrower type would make impossible). Move it down to a Wiring Test when it only passes because of its mock (section 4). Add the new check and remove the old one in the same change, and list old check → new check in the PR description.
 
