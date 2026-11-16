@@ -39,7 +39,8 @@ For each behavior, take the first rung that can prove it:
    - **Message**: the diagnostic names the fix ("compare ObjectIds with `.equals()`"), not just the ban.
 4. **Component Test.** Front-end behavior that only shows up when components render together.
    - **What**: a form submit calls the right mutation; loading, error and empty states render; a user event changes what is shown.
-   - **Query like a user**: find elements by role and label text rather than test IDs or class names, so the test survives markup refactors.
+   - **How**: [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/) in Vitest with a simulated DOM (jsdom or happy-dom). Drive it with `@testing-library/user-event`, not `fireEvent`, and await async UI with `findBy*`.
+   - **Query like a user**: find elements with `getByRole` and `getByLabelText` rather than test IDs or class names, so the test survives markup refactors.
    - **Mock the server, not the hooks**: for a Component Test, intercept at the network boundary with the `trpc-testing` skill (MSW or msw-trpc). This proves component behavior without pretending to prove the real server; use a Wiring Test for that.
    - **Pull logic out**: extract formatting and derived state into pure functions and give them Unit Tests instead.
 5. **Wiring Test.** Only for behavior that lives between processes, where no fake can stand in:
