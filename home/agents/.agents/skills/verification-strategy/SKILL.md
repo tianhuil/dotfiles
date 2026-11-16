@@ -29,10 +29,11 @@ For each behavior, take the first rung that can prove it:
 2. **Unit Test.** Types prove shape, not decisions. Test logic whose result depends on runtime values:
    - **Nested `if`s and early returns**: each path through them is one case.
    - **Boolean logic** (`||`, `&&`, `!`): a wrong operator or a missed negation still type-checks.
-   - **Boolean conditions in DB queries**: `where` clauses that combine `and`, `or` and `not`. Run them against real Postgres with PGlite (see "Use PGlite for Postgres" in section 8).
+   - **Boolean conditions in DB queries**: `where` clauses that combine `and`, `or` and `not`. Run them against real Postgres with PGlite (see "Use PGlite for Postgres" in section 6).
    - **Loops and `let`**: off-by-one errors, empty input, early `break`, and accumulator state.
+   - **Rules with many cases**: parsing and validation, permission and security decisions, state transitions, boundaries, and data transforms.
 
-   See steps 2–3.
+   Cover each rule's branches, one test per meaningful case, named after the rule. Skip glue with no decisions in it (getters, pass-throughs, framework config); the type checker or a Wiring Test already covers it. See step 2.
 3. **Lint rule.** Ban a whole class of code that type-checks and is normally valid, but is wrong in this codebase.
    - **When**: the bug is a pattern that can appear anywhere, so one rule beats a test at every call site. Example: comparing Mongo ObjectIds with `===` is always false for two instances; require `.equals()`.
    - **How**: write a [Biome plugin](https://biomejs.dev/linter/plugins/) in TypeScript, with types from `@biomejs/runtime`; it can read the file's semantic model. The JS/TS plugin format is a developer preview. For a pure syntax pattern, use GritQL instead.
@@ -51,7 +52,9 @@ For each behavior, take the first rung that can prove it:
    - a WebSocket upgrades
    - the app boots with its real config
 
-   See step 4.
+   > **Keep Wiring Tests few and on the happy path.** A Wiring Test walks the main path a real user takes and asserts it arrives. Add a failure-mode Wiring Test only when that failure is the point of the app and only the real stack can enforce it: an auth gate that must block a request at the proxy, a security header the browser must honor. Keep these to a handful. A Wiring Test may assert exact responses on its path, but leaves rule variants (every error code, every bad input) to Unit Tests.
+
+> **Prove each check can fail.** Before finishing, break the rule once (make the check return `true`, skip the compare) and confirm the check goes red. For a lint rule, confirm it flags a sample violation.
 
 Done when every behavior has exactly one home, and each Wiring Test states in one line why no earlier rung can prove it.
 
@@ -69,35 +72,23 @@ When logic is hard to reach from a Unit Test, change the code's shape, never its
 
 Land the refactor as its own change with test files untouched. The existing suite passing unchanged is the proof that behavior held.
 
-## 3. Write Unit Tests for complex logic
-
-Spend Unit Tests where bugs hide: branching rules, parsing and validation, permission and security decisions, state transitions, boundaries, and data transforms. Glue with no decisions in it (getters, pass-throughs, framework config) is already covered by the type checker or a Wiring Test.
-
-Cover each rule's branches, one test per meaningful case, named after the rule. A good check fails when its rule is broken: before finishing, break the rule once (make the check return `true`, skip the compare) and confirm the test goes red. For a lint rule, confirm it flags a sample violation.
-
-## 4. Keep Wiring Tests few and on the happy path
-
-A Wiring Test walks the main path a real user takes and asserts it arrives. Add a failure-mode Wiring Test only when that failure is the point of the app and only the real stack can enforce it: an auth gate that must block a request at the proxy, a security header the browser must honor. Keep these to a handful.
-
-A Wiring Test may assert exact responses on its path, but leaves rule variants (every error code, every bad input) to Unit Tests.
-
-## 5. Attach evidence to the PR
+## 3. Attach evidence to the PR
 
 1. **CI**: passing tests are the first evidence the PR does what it claims.
 2. **UI change**: a Storybook story for each variant, with a screenshot of each on the PR.
 3. **CLI change**: run the happy path(s) and paste the command and output into the PR.
 
-## 6. Treat mocking as a test smell
+## 4. Treat mocking as a test smell
 
 - A test that only passes because of its mock usually tests the mock, not the system. If it relies on mocked server, database, browser, transport, or configuration behavior, move it to a **Wiring Test** and use real dependencies wherever practical. Do not make the mock more elaborate to preserve it.
 - Exceptions are narrow: use mocks or fakes for unavailable third-party services, nondeterministic inputs, or failure paths the real dependency cannot safely produce. Keep the mocked contract small and test the integration with at least one real-stack path when feasible.
 - **Move in both directions**: migrate mock-dependent integration tests to Wiring Tests; migrate Wiring Tests that mostly check branching, parsing, validation, permissions, state transitions, or data transforms to Unit Tests. Extract pure logic, unit-test its rules, and retain only a thin Wiring Test for connection proof.
 
-## 7. Document external service behavior with research
+## 5. Document external service behavior with research
 
-When the main objective is to document external server behavior, use the [`my-research`](../my-research/SKILL.md) skill to create or update a research note in `notes/research/`. Do not write a test for this; see "Don't test third-party platform behavior" in section 8. Record the service, API version, relevant documented behavior, request and response examples, authentication assumptions, failure semantics, source URLs, and access dates. Update the note when the dependency or API version changes. Treat the note as evidence for external behavior; treat local tests as evidence for our code.
+When the main objective is to document external server behavior, use the [`my-research`](../my-research/SKILL.md) skill to create or update a research note in `notes/research/`. Do not write a test for this; see "Don't test third-party platform behavior" in section 6. Record the service, API version, relevant documented behavior, request and response examples, authentication assumptions, failure semantics, source URLs, and access dates. Update the note when the dependency or API version changes. Treat the note as evidence for external behavior; treat local tests as evidence for our code.
 
-## 8. Miscellaneous rules
+## 6. Miscellaneous rules
 
 - **Don't test third-party platform behavior.** Do not test whether Docker, Cloud Run, `gcloud` or another platform honors a flag, its defaults, or its error wording. A PR cannot change it, so a per-PR check only re-proves a fact. Unit-test the arguments your code passes, and record once, in a research note, that those arguments produce the intended behavior.
 - **Don't test incidental Git state.** Do not test whether a file is Git-committed, whether a path appears in Git status, or any other incidental Git state. Those checks test the checkout, not application behavior. If code intentionally integrates with Git, test its observable behavior using controlled fixture repositories or an explicit Git boundary.

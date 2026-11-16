@@ -33,7 +33,7 @@ Use **msw-trpc** when the test asks "given this response, does the UI do the rig
 ## Choosing
 
 1. **The assertion is about rendering given a response** (states, formatting, which button is enabled, how an error is shown): **msw-trpc**. The component's contract is its reaction to data, so the mock is the input, not the thing under test.
-2. **The assertion depends on server behavior** (a Zod error message appears, a user without access sees a denial, a created item shows up after the refetch): **`localLink` + PGlite**. Reproducing this in MSW handlers means building a fake server, which is the mock smell in section 6 of [SKILL.md](./SKILL.md).
+2. **The assertion depends on server behavior** (a Zod error message appears, a user without access sees a denial, a created item shows up after the refetch): **`localLink` + PGlite**. Reproducing this in MSW handlers means building a fake server, which is the mock smell in section 4 of [SKILL.md](./SKILL.md).
 3. **Subscriptions**: **`localLink`**.
 4. **The screen also needs Storybook stories**: **msw-trpc**, so stories and tests share one set of handlers.
 5. **The behavior needs HTTP** (cookies, auth headers, batching, the route URL, a proxy): neither. Write a **Wiring Test**.
@@ -64,7 +64,7 @@ export function renderWithRouter(ui: React.ReactElement, ctx: TestContext) {
 }
 ```
 
-`TestContext` is the router's context with test dependencies, for example a Drizzle `db` on PGlite ("Use PGlite for Postgres" in section 8 of [SKILL.md](./SKILL.md)). The msw-trpc setup is in the `trpc-testing` skill.
+`TestContext` is the router's context with test dependencies, for example a Drizzle `db` on PGlite ("Use PGlite for Postgres" in section 6 of [SKILL.md](./SKILL.md)). The msw-trpc setup is in the `trpc-testing` skill.
 
 ## Sources
 
