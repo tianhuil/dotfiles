@@ -1,15 +1,11 @@
 ---
 name: verification-strategy
-description: Prove each behavior with the cheapest check that can catch its bug (types, Unit Tests, lint rules, Component Tests, then e2e) and attach evidence to the PR. Use when planning, writing, reviewing, or moving tests, when a design or task needs a verification plan, when a PR needs evidence, or when a test needs a Postgres database.
+description: "Verification waterfall: prove each behavior with the cheapest check that catches its bug, and attach PR evidence. Use when planning, reviewing or moving tests, writing PR evidence, or when a test needs Postgres."
 ---
 
 # Verification Strategy
 
-Verify each behavior with the cheapest check that proves it. The goals:
-
-- **Fast**: quick local feedback and cheap CI.
-- **Concise**: no more tests than needed.
-- **Correct**: the code works as intended.
+Verify each behavior with the cheapest check that proves it: fast feedback, and no more tests than needed.
 
 Terms used below:
 
@@ -17,9 +13,11 @@ Terms used below:
 - **Component Test**: a React Testing Library test that renders front-end components together in-process, with the server mocked or its router called in-process.
 - **Wiring Test**: an e2e test through the real stack (browser, proxy, server, database). It proves the parts are connected, not that the logic is right. Each one is slow and costs CI minutes, so each must earn its place.
 
-## 1. Attach evidence to the PR
+## 1. Decide the PR's evidence first
 
-1. **CI**: passing tests are the first evidence the PR does what it claims.
+Before writing checks, decide what will show the PR does what it claims:
+
+1. **CI**: passing tests are the first evidence.
 2. **UI change**: a Storybook story for each variant, with a screenshot of each on the PR.
 3. **CLI change**: run the happy path(s) and paste the command and output into the PR.
 
@@ -29,26 +27,26 @@ For each behavior, take the first rung that can prove it:
 
 1. **Types.** Narrow types and functional code catch first-order bugs with no test at all. A state the type system cannot express needs no test.
    - **Narrow types**: type each value as tightly as it really is. Use literal unions (`'draft' | 'sent'`) over `string`, discriminated unions over bags of optional fields, and branded IDs (`UserId`) over raw strings, so a mixed-up argument fails to compile.
-   - **No escape hatches**: no `as any`, `as unknown as T`, or non-null `!`. Parse unknown input (requests, env, JSON) with a schema such as Zod at the boundary, so everything inside is typed.
+   - **Parse at the boundary**: parse unknown input (requests, env, JSON) with a schema such as Zod, so everything inside is typed. Keep `as any`, `as unknown as T` and non-null `!` out.
    - **Exhaustive switches**: end a `switch` over a union with a `never` check. Adding a case then breaks the build until every switch handles it.
    - **`const` and array methods**: build values with `.map`, `.filter` and `.flatMap` instead of `let` and loops. Each step's type is checked, and there is no mutable state to get wrong.
 2. **Unit Test.** Types prove shape, not decisions. Test logic whose result depends on runtime values:
    - **Nested `if`s and early returns**: each path through them is one case.
    - **Boolean logic** (`||`, `&&`, `!`): a wrong operator or a missed negation still type-checks.
-   - **Boolean conditions in DB queries**: `where` clauses that combine `and`, `or` and `not`. Run them against real Postgres with PGlite (see "Use PGlite for Postgres" in section 5).
+   - **Boolean conditions in DB queries**: `where` clauses that combine `and`, `or` and `not`.
    - **Loops and `let`**: off-by-one errors, empty input, early `break`, and accumulator state.
    - **Rules with many cases**: parsing and validation, permission and security decisions, state transitions, boundaries, and data transforms.
 
-   Cover each rule's branches, one test per meaningful case, named after the rule. Skip glue with no decisions in it (getters, pass-throughs, framework config); the type checker or a Wiring Test already covers it. See step 3.
+   Cover each rule's branches, one test per meaningful case, named after the rule. Leave glue with no decisions in it (getters, pass-throughs, framework config) to the type checker or a Wiring Test. When a test needs Postgres, follow [PGlite for Unit Tests](./pglite.md). When logic is hard to reach, see "Refactor for testability" (section 3).
 3. **Lint rule.** Ban a whole class of code that type-checks and is normally valid, but is wrong in this codebase.
    - **When**: the bug is a pattern that can appear anywhere, so one rule beats a test at every call site. Example: comparing Mongo ObjectIds with `===` is always false for two instances; require `.equals()`.
    - **How**: write a [Biome plugin](https://biomejs.dev/linter/plugins/) in TypeScript, with types from `@biomejs/runtime`; it can read the file's semantic model. The JS/TS plugin format is a developer preview. For a pure syntax pattern, use GritQL instead.
    - **Message**: the diagnostic names the fix ("compare ObjectIds with `.equals()`"), not just the ban.
 4. **Component Test.** Front-end behavior that only shows up when components render together.
    - **What**: a form submit calls the right mutation; loading, error and empty states render; a user event changes what is shown.
-   - **How**: [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/) in Vitest with a simulated DOM (jsdom or happy-dom). Drive it with `@testing-library/user-event`, not `fireEvent`, and await async UI with `findBy*`.
-   - **Query like a user**: find elements with `getByRole` and `getByLabelText` rather than test IDs or class names, so the test survives markup refactors.
-   - **Mock the server, not the hooks**: for a Component Test, intercept at the network boundary with the `trpc-testing` skill (MSW or msw-trpc). This proves component behavior without pretending to prove the real server; use a Wiring Test for that.
+   - **How**: [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/) in Vitest with a simulated DOM (jsdom or happy-dom). Drive it with `@testing-library/user-event`, and await async UI with `findBy*`.
+   - **Query like a user**: find elements with `getByRole` and `getByLabelText`, so the test survives markup refactors.
+   - **Mock at the network boundary**: keep the real hooks and intercept requests with the `trpc-testing` skill (MSW or msw-trpc). This proves component behavior; proving the real server is a Wiring Test's job.
    - **msw-trpc or `localLink`**: use msw-trpc for UI reactions to given responses; use tRPC's `localLink` to run the real router in-process when the assertion depends on server behavior. See [msw-trpc vs localLink](./msw-trpc-vs-locallink.md) for the tradeoffs.
    - **Pull logic out**: extract formatting and derived state into pure functions and give them Unit Tests instead.
 5. **Wiring Test.** Only for behavior that lives between processes, where no fake can stand in:
@@ -64,7 +62,7 @@ For each behavior, take the first rung that can prove it:
 
 Done when every behavior has exactly one home, and each Wiring Test states in one line why no earlier rung can prove it.
 
-**Move checks up the waterfall, never drop them.** When a check sits on a later rung than it needs (an e2e test that checks logic, a Unit Test a narrower type would make impossible), move it: add the earlier check and remove the later one in the same change, and list old check → new check in the PR description.
+**Move each check to its rung in one change.** Move a check up when it sits on a later rung than it needs (an e2e test that checks logic, a Unit Test a narrower type would make impossible). Move it down to a Wiring Test when it only passes because of its mock (section 4). Add the new check and remove the old one in the same change, and list old check → new check in the PR description.
 
 ## 3. Refactor for testability
 
@@ -73,24 +71,17 @@ When logic is hard to reach from a Unit Test, change the code's shape, never its
 - **Extract pure functions** for decisions: `safeNext(next)`, `needsRefresh(token, now)`, `missingTokenAction(env)`.
 - **Split each handler into a core and a wrapper**: `core(req, deps) -> Response` holds the logic; the framework route is a one-line wrapper that builds `deps`.
 - **Inject dependencies** (`db`, auth client, `fetch`, `now`) as parameters with production defaults, so existing callers keep working.
-- **Read config in one module**; tests vary it with stubs (for example `vi.stubEnv`), not by mutating `process.env`.
+- **Read config in one module**; tests vary it with stubs (for example `vi.stubEnv`) instead of mutating `process.env`.
 - **Pass time in** as a value or as data (an `expires_at` already in the past), rather than faking clocks.
 
 Land the refactor as its own change with test files untouched. The existing suite passing unchanged is the proof that behavior held.
 
 ## 4. Treat mocking as a test smell
 
-- A test that only passes because of its mock usually tests the mock, not the system. If it relies on mocked server, database, browser, transport, or configuration behavior, move it to a **Wiring Test** and use real dependencies wherever practical. Do not make the mock more elaborate to preserve it.
-- Exceptions are narrow: use mocks or fakes for unavailable third-party services, nondeterministic inputs, or failure paths the real dependency cannot safely produce. Keep the mocked contract small and test the integration with at least one real-stack path when feasible.
-- **Move in both directions**: migrate mock-dependent integration tests to Wiring Tests; migrate Wiring Tests that mostly check branching, parsing, validation, permissions, state transitions, or data transforms to Unit Tests. Extract pure logic, unit-test its rules, and retain only a thin Wiring Test for connection proof.
+- **Mock the input, not the subject.** A mock is fine as the test's input: a Component Test feeds a canned response and asserts what the UI does with it. It is a smell when the assertion is really about the mocked thing (server, database, browser, transport or configuration behavior), because the test then checks the mock. Run the real code instead: in-process where possible (PGlite, tRPC `localLink`), or in a Wiring Test. Keep mocks small; when one grows to preserve a test, replace it with the real dependency.
+- **Fake only what you cannot run**: unavailable third-party services, nondeterministic inputs, and failure paths the real dependency cannot safely produce. Keep the faked contract small, and cover the integration with at least one real-stack path when feasible.
 
-## 5. Miscellaneous rules
+## 5. Test our code, not its environment
 
-- **Research third-party behavior; don't test it.** Whether Docker, Cloud Run, `gcloud`, an external API or another service honors a flag, its defaults, or its error wording is not something a PR can change, so a per-PR check only re-proves a fact. Unit-test the arguments your code passes. Record the behavior once in a research note with the [`my-research`](../my-research/SKILL.md) skill, in `notes/research/`: the service, the API version, the documented behavior, request and response examples, authentication assumptions, failure semantics, source URLs and access dates. Update the note when the dependency or API version changes. The note is the evidence for the service's behavior; local tests are the evidence for our code.
-- **Don't test incidental Git state.** Do not test whether a file is Git-committed, whether a path appears in Git status, or any other incidental Git state. Those checks test the checkout, not application behavior. If code intentionally integrates with Git, test its observable behavior using controlled fixture repositories or an explicit Git boundary.
-- **Use PGlite for Postgres.** When a Unit Test needs Postgres, use [PGlite](https://pglite.dev/docs/) (`@electric-sql/pglite`): [real Postgres compiled to WASM](https://pglite.dev/docs/about), running in-process with `new PGlite()`. Prefer it over [pg-mem](https://github.com/oguimbal/pg-mem), which is a partial emulator: its own SQL parser, no timezones, JS numbers for every numeric type, no extensions. PGlite runs the same SQL as production; pg-mem can pass a test that Postgres would fail.
-  - **One instance per test file** (`beforeAll`), migrations applied once, tables emptied before each test. Cold start takes seconds, so never create one per test.
-  - **Use the app's real migrations and data layer**, for example Drizzle via [`drizzle-orm/pglite`](https://orm.drizzle.team/docs/connect-pglite) with the app's `Db` type passed in as a dependency.
-  - **Stay on the query builder** rather than raw `execute`, whose result shapes differ between PGlite and node-postgres.
-  - **Match the major Postgres version** between PGlite and the production image.
-  - **Move rows, not clocks**: Postgres `now()` ignores fake timers, so put timestamps in the past instead.
+- **Record third-party behavior in a research note.** Whether Docker, Cloud Run, `gcloud`, an external API or another service honors a flag, its defaults, or its error wording is not something a PR can change, so a per-PR check only re-proves a fact. Unit-test the arguments your code passes. Record the behavior once in a research note with the [`my-research`](../my-research/SKILL.md) skill, in `notes/research/`: the service, the API version, the documented behavior, request and response examples, authentication assumptions, failure semantics, source URLs and access dates. Update the note when the dependency or API version changes. The note is the evidence for the service's behavior; local tests are the evidence for our code.
+- **Test Git integration through fixture repositories.** When code intentionally integrates with Git, test its observable behavior against controlled fixture repositories or an explicit Git boundary. Whether a file is committed, or a path shows in `git status`, is checkout state rather than application behavior, so it gets no test.
