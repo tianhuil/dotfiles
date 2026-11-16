@@ -13,6 +13,8 @@ Complete a task in an isolated worktree, validate it, push a PR, and iterate unt
 
 Design documents follow [Common design rules](../design/common-rules.md). Apply that skill instead of repeating its writing, checklist, acceptance, protected-path, and readiness rules here.
 
+Tests and PR evidence follow [Verification strategy](../verification-strategy/SKILL.md).
+
 ## Helper Scripts
 
 This skill includes bash scripts that handle the mechanical orchestration (no AI needed). Run them via:
@@ -154,7 +156,8 @@ The subagent is a small autonomous unit. Its instructions:
 2. Do not tick design checkboxes and do not declare the task complete; the reviewers decide.
 3. Do not weaken protected paths (remove cases, skip, loosen, or edit expected values to match new output) unless the design or the user's task names that change. Adding cases and regenerating generated files are fine. If a protected check looks wrong, report it instead of changing it.
 4. Do not waive failing checks. Report them with the exact error.
-5. Stop only processes you started, by PID; other sessions share the machine.
+5. Choose and write tests with the `verification-strategy` skill.
+6. Stop only processes you started, by PID; other sessions share the machine.
 
 Commit the worker's changes before validation and review, so reviewers see a clean tree at a known commit. Stage the files the worker reported, then confirm nothing else is left:
 

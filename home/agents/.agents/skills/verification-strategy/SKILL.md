@@ -17,7 +17,13 @@ Terms used below:
 - **Component Test**: a React Testing Library test that renders front-end components together in-process, with the server mocked or its router called in-process.
 - **Wiring Test**: an e2e test through the real stack (browser, proxy, server, database). It proves the parts are connected, not that the logic is right. Each one is slow and costs CI minutes, so each must earn its place.
 
-## 1. Place each behavior on the waterfall
+## 1. Attach evidence to the PR
+
+1. **CI**: passing tests are the first evidence the PR does what it claims.
+2. **UI change**: a Storybook story for each variant, with a screenshot of each on the PR.
+3. **CLI change**: run the happy path(s) and paste the command and output into the PR.
+
+## 2. Place each behavior on the waterfall
 
 For each behavior, take the first rung that can prove it:
 
@@ -33,7 +39,7 @@ For each behavior, take the first rung that can prove it:
    - **Loops and `let`**: off-by-one errors, empty input, early `break`, and accumulator state.
    - **Rules with many cases**: parsing and validation, permission and security decisions, state transitions, boundaries, and data transforms.
 
-   Cover each rule's branches, one test per meaningful case, named after the rule. Skip glue with no decisions in it (getters, pass-throughs, framework config); the type checker or a Wiring Test already covers it. See step 2.
+   Cover each rule's branches, one test per meaningful case, named after the rule. Skip glue with no decisions in it (getters, pass-throughs, framework config); the type checker or a Wiring Test already covers it. See step 3.
 3. **Lint rule.** Ban a whole class of code that type-checks and is normally valid, but is wrong in this codebase.
    - **When**: the bug is a pattern that can appear anywhere, so one rule beats a test at every call site. Example: comparing Mongo ObjectIds with `===` is always false for two instances; require `.equals()`.
    - **How**: write a [Biome plugin](https://biomejs.dev/linter/plugins/) in TypeScript, with types from `@biomejs/runtime`; it can read the file's semantic model. The JS/TS plugin format is a developer preview. For a pure syntax pattern, use GritQL instead.
@@ -60,7 +66,7 @@ Done when every behavior has exactly one home, and each Wiring Test states in on
 
 **Move checks up the waterfall, never drop them.** When a check sits on a later rung than it needs (an e2e test that checks logic, a Unit Test a narrower type would make impossible), move it: add the earlier check and remove the later one in the same change, and list old check → new check in the PR description.
 
-## 2. Refactor for testability
+## 3. Refactor for testability
 
 When logic is hard to reach from a Unit Test, change the code's shape, never its behavior:
 
@@ -71,12 +77,6 @@ When logic is hard to reach from a Unit Test, change the code's shape, never its
 - **Pass time in** as a value or as data (an `expires_at` already in the past), rather than faking clocks.
 
 Land the refactor as its own change with test files untouched. The existing suite passing unchanged is the proof that behavior held.
-
-## 3. Attach evidence to the PR
-
-1. **CI**: passing tests are the first evidence the PR does what it claims.
-2. **UI change**: a Storybook story for each variant, with a screenshot of each on the PR.
-3. **CLI change**: run the happy path(s) and paste the command and output into the PR.
 
 ## 4. Treat mocking as a test smell
 
