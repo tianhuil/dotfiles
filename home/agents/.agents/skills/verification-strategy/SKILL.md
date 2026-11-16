@@ -29,10 +29,10 @@ For each behavior, take the first rung that can prove it:
 2. **Unit Test.** Types prove shape, not decisions. Test logic whose result depends on runtime values:
    - **Nested `if`s and early returns**: each path through them is one case.
    - **Boolean logic** (`||`, `&&`, `!`): a wrong operator or a missed negation still type-checks.
-   - **Boolean conditions in DB queries**: `where` clauses that combine `and`, `or` and `not`. Run them against real Postgres with PGlite (step 3).
+   - **Boolean conditions in DB queries**: `where` clauses that combine `and`, `or` and `not`. Run them against real Postgres with PGlite (see "Use PGlite for Postgres" in section 8).
    - **Loops and `let`**: off-by-one errors, empty input, early `break`, and accumulator state.
 
-   See steps 2–4.
+   See steps 2–3.
 3. **Lint rule.** Ban a whole class of code that type-checks and is normally valid, but is wrong in this codebase.
    - **When**: the bug is a pattern that can appear anywhere, so one rule beats a test at every call site. Example: comparing Mongo ObjectIds with `===` is always false for two instances; require `.equals()`.
    - **How**: write a [Biome plugin](https://biomejs.dev/linter/plugins/) in TypeScript, with types from `@biomejs/runtime`; it can read the file's semantic model. The JS/TS plugin format is a developer preview. For a pure syntax pattern, use GritQL instead.
@@ -51,9 +51,11 @@ For each behavior, take the first rung that can prove it:
    - a WebSocket upgrades
    - the app boots with its real config
 
-   See step 5.
+   See step 4.
 
 Done when every behavior has exactly one home, and each Wiring Test states in one line why no earlier rung can prove it.
+
+**Move checks up the waterfall, never drop them.** When a check sits on a later rung than it needs (an e2e test that checks logic, a Unit Test a narrower type would make impossible), move it: add the earlier check and remove the later one in the same change, and list old check → new check in the PR description.
 
 ## 2. Refactor for testability
 
@@ -67,49 +69,41 @@ When logic is hard to reach from a Unit Test, change the code's shape, never its
 
 Land the refactor as its own change with test files untouched. The existing suite passing unchanged is the proof that behavior held.
 
-## 3. Use PGlite for Postgres
-
-When a Unit Test needs Postgres, use [PGlite](https://pglite.dev/docs/) (`@electric-sql/pglite`): [real Postgres compiled to WASM](https://pglite.dev/docs/about), running in-process with `new PGlite()`. Prefer it over [pg-mem](https://github.com/oguimbal/pg-mem), which is a partial emulator: its own SQL parser, no timezones, JS numbers for every numeric type, no extensions. PGlite runs the same SQL as production; pg-mem can pass a test that Postgres would fail.
-
-- **One instance per test file** (`beforeAll`), migrations applied once, tables emptied before each test. Cold start takes seconds, so never create one per test.
-- **Use the app's real migrations and data layer**, for example Drizzle via [`drizzle-orm/pglite`](https://orm.drizzle.team/docs/connect-pglite) with the app's `Db` type passed in as a dependency.
-- **Stay on the query builder** rather than raw `execute`, whose result shapes differ between PGlite and node-postgres.
-- **Match the major Postgres version** between PGlite and the production image.
-- **Move rows, not clocks**: Postgres `now()` ignores fake timers, so put timestamps in the past instead.
-
-## 4. Write Unit Tests for complex logic
+## 3. Write Unit Tests for complex logic
 
 Spend Unit Tests where bugs hide: branching rules, parsing and validation, permission and security decisions, state transitions, boundaries, and data transforms. Glue with no decisions in it (getters, pass-throughs, framework config) is already covered by the type checker or a Wiring Test.
 
 Cover each rule's branches, one test per meaningful case, named after the rule. A good check fails when its rule is broken: before finishing, break the rule once (make the check return `true`, skip the compare) and confirm the test goes red. For a lint rule, confirm it flags a sample violation.
 
-## 5. Keep Wiring Tests few and on the happy path
+## 4. Keep Wiring Tests few and on the happy path
 
 A Wiring Test walks the main path a real user takes and asserts it arrives. Add a failure-mode Wiring Test only when that failure is the point of the app and only the real stack can enforce it: an auth gate that must block a request at the proxy, a security header the browser must honor. Keep these to a handful.
 
 A Wiring Test may assert exact responses on its path, but leaves rule variants (every error code, every bad input) to Unit Tests.
 
-## 6. Move checks up the waterfall, never drop them
-
-When a check sits on a later rung than it needs (an e2e test that checks logic, a Unit Test a narrower type would make impossible), move it: add the earlier check and remove the later one in the same change, and list old check → new check in the PR description.
-
-## 7. Attach evidence to the PR
+## 5. Attach evidence to the PR
 
 1. **CI**: passing tests are the first evidence the PR does what it claims.
 2. **UI change**: a Storybook story for each variant, with a screenshot of each on the PR.
 3. **CLI change**: run the happy path(s) and paste the command and output into the PR.
 
-## 8. Treat mocking as a test smell
+## 6. Treat mocking as a test smell
 
 - A test that only passes because of its mock usually tests the mock, not the system. If it relies on mocked server, database, browser, transport, or configuration behavior, move it to a **Wiring Test** and use real dependencies wherever practical. Do not make the mock more elaborate to preserve it.
 - Exceptions are narrow: use mocks or fakes for unavailable third-party services, nondeterministic inputs, or failure paths the real dependency cannot safely produce. Keep the mocked contract small and test the integration with at least one real-stack path when feasible.
 - **Move in both directions**: migrate mock-dependent integration tests to Wiring Tests; migrate Wiring Tests that mostly check branching, parsing, validation, permissions, state transitions, or data transforms to Unit Tests. Extract pure logic, unit-test its rules, and retain only a thin Wiring Test for connection proof.
 
-## 9. Document external service behavior with research
+## 7. Document external service behavior with research
 
-When the main objective is to document external server behavior, use the [`my-research`](../my-research/SKILL.md) skill to create or update a research note in `notes/research/`. Do not write a test for this; see the first rule in section 10. Record the service, API version, relevant documented behavior, request and response examples, authentication assumptions, failure semantics, source URLs, and access dates. Update the note when the dependency or API version changes. Treat the note as evidence for external behavior; treat local tests as evidence for our code.
+When the main objective is to document external server behavior, use the [`my-research`](../my-research/SKILL.md) skill to create or update a research note in `notes/research/`. Do not write a test for this; see "Don't test third-party platform behavior" in section 8. Record the service, API version, relevant documented behavior, request and response examples, authentication assumptions, failure semantics, source URLs, and access dates. Update the note when the dependency or API version changes. Treat the note as evidence for external behavior; treat local tests as evidence for our code.
 
-## 10. Miscellaneous rules
+## 8. Miscellaneous rules
 
-- Do not test third-party platform behavior: whether Docker, Cloud Run, `gcloud` or another platform honors a flag, its defaults, or its error wording. A PR cannot change it, so a per-PR check only re-proves a fact. Unit-test the arguments your code passes, and record once, in a research note, that those arguments produce the intended behavior.
-- Do not test whether a file is Git-committed, whether a path appears in Git status, or any other incidental Git state. Those checks test the checkout, not application behavior. If code intentionally integrates with Git, test its observable behavior using controlled fixture repositories or an explicit Git boundary.
+- **Don't test third-party platform behavior.** Do not test whether Docker, Cloud Run, `gcloud` or another platform honors a flag, its defaults, or its error wording. A PR cannot change it, so a per-PR check only re-proves a fact. Unit-test the arguments your code passes, and record once, in a research note, that those arguments produce the intended behavior.
+- **Don't test incidental Git state.** Do not test whether a file is Git-committed, whether a path appears in Git status, or any other incidental Git state. Those checks test the checkout, not application behavior. If code intentionally integrates with Git, test its observable behavior using controlled fixture repositories or an explicit Git boundary.
+- **Use PGlite for Postgres.** When a Unit Test needs Postgres, use [PGlite](https://pglite.dev/docs/) (`@electric-sql/pglite`): [real Postgres compiled to WASM](https://pglite.dev/docs/about), running in-process with `new PGlite()`. Prefer it over [pg-mem](https://github.com/oguimbal/pg-mem), which is a partial emulator: its own SQL parser, no timezones, JS numbers for every numeric type, no extensions. PGlite runs the same SQL as production; pg-mem can pass a test that Postgres would fail.
+  - **One instance per test file** (`beforeAll`), migrations applied once, tables emptied before each test. Cold start takes seconds, so never create one per test.
+  - **Use the app's real migrations and data layer**, for example Drizzle via [`drizzle-orm/pglite`](https://orm.drizzle.team/docs/connect-pglite) with the app's `Db` type passed in as a dependency.
+  - **Stay on the query builder** rather than raw `execute`, whose result shapes differ between PGlite and node-postgres.
+  - **Match the major Postgres version** between PGlite and the production image.
+  - **Move rows, not clocks**: Postgres `now()` ignores fake timers, so put timestamps in the past instead.
