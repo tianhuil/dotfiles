@@ -14,7 +14,7 @@ Verify each behavior with the cheapest check that proves it. The goals:
 Terms used below:
 
 - **Unit Test**: a test that runs in-process, in seconds, with no Docker, no network and no running app. It may use fakes and an in-memory database.
-- **Component Test**: a React Testing Library test that renders front-end components together in-process, with the server mocked.
+- **Component Test**: a React Testing Library test that renders front-end components together in-process, with the server mocked or its router called in-process.
 - **Wiring Test**: an e2e test through the real stack (browser, proxy, server, database). It proves the parts are connected, not that the logic is right. Each one is slow and costs CI minutes, so each must earn its place.
 
 ## 1. Place each behavior on the waterfall
@@ -42,6 +42,7 @@ For each behavior, take the first rung that can prove it:
    - **How**: [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/) in Vitest with a simulated DOM (jsdom or happy-dom). Drive it with `@testing-library/user-event`, not `fireEvent`, and await async UI with `findBy*`.
    - **Query like a user**: find elements with `getByRole` and `getByLabelText` rather than test IDs or class names, so the test survives markup refactors.
    - **Mock the server, not the hooks**: for a Component Test, intercept at the network boundary with the `trpc-testing` skill (MSW or msw-trpc). This proves component behavior without pretending to prove the real server; use a Wiring Test for that.
+   - **msw-trpc or `localLink`**: use msw-trpc for UI reactions to given responses; use tRPC's `localLink` to run the real router in-process when the assertion depends on server behavior. See [msw-trpc vs localLink](./msw-trpc-vs-locallink.md) for the tradeoffs.
    - **Pull logic out**: extract formatting and derived state into pure functions and give them Unit Tests instead.
 5. **Wiring Test.** Only for behavior that lives between processes, where no fake can stand in:
    - a route reaches its handler
