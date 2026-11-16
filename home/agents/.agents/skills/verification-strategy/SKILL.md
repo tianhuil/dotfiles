@@ -35,7 +35,7 @@ For each behavior, take the first rung that can prove it:
 2. **Unit Test.** Types prove shape, not decisions. Test logic whose result depends on runtime values:
    - **Nested `if`s and early returns**: each path through them is one case.
    - **Boolean logic** (`||`, `&&`, `!`): a wrong operator or a missed negation still type-checks.
-   - **Boolean conditions in DB queries**: `where` clauses that combine `and`, `or` and `not`. Run them against real Postgres with PGlite (see "Use PGlite for Postgres" in section 6).
+   - **Boolean conditions in DB queries**: `where` clauses that combine `and`, `or` and `not`. Run them against real Postgres with PGlite (see "Use PGlite for Postgres" in section 5).
    - **Loops and `let`**: off-by-one errors, empty input, early `break`, and accumulator state.
    - **Rules with many cases**: parsing and validation, permission and security decisions, state transitions, boundaries, and data transforms.
 
@@ -84,13 +84,9 @@ Land the refactor as its own change with test files untouched. The existing suit
 - Exceptions are narrow: use mocks or fakes for unavailable third-party services, nondeterministic inputs, or failure paths the real dependency cannot safely produce. Keep the mocked contract small and test the integration with at least one real-stack path when feasible.
 - **Move in both directions**: migrate mock-dependent integration tests to Wiring Tests; migrate Wiring Tests that mostly check branching, parsing, validation, permissions, state transitions, or data transforms to Unit Tests. Extract pure logic, unit-test its rules, and retain only a thin Wiring Test for connection proof.
 
-## 5. Document external service behavior with research
+## 5. Miscellaneous rules
 
-When the main objective is to document external server behavior, use the [`my-research`](../my-research/SKILL.md) skill to create or update a research note in `notes/research/`. Do not write a test for this; see "Don't test third-party platform behavior" in section 6. Record the service, API version, relevant documented behavior, request and response examples, authentication assumptions, failure semantics, source URLs, and access dates. Update the note when the dependency or API version changes. Treat the note as evidence for external behavior; treat local tests as evidence for our code.
-
-## 6. Miscellaneous rules
-
-- **Don't test third-party platform behavior.** Do not test whether Docker, Cloud Run, `gcloud` or another platform honors a flag, its defaults, or its error wording. A PR cannot change it, so a per-PR check only re-proves a fact. Unit-test the arguments your code passes, and record once, in a research note, that those arguments produce the intended behavior.
+- **Research third-party behavior; don't test it.** Whether Docker, Cloud Run, `gcloud`, an external API or another service honors a flag, its defaults, or its error wording is not something a PR can change, so a per-PR check only re-proves a fact. Unit-test the arguments your code passes. Record the behavior once in a research note with the [`my-research`](../my-research/SKILL.md) skill, in `notes/research/`: the service, the API version, the documented behavior, request and response examples, authentication assumptions, failure semantics, source URLs and access dates. Update the note when the dependency or API version changes. The note is the evidence for the service's behavior; local tests are the evidence for our code.
 - **Don't test incidental Git state.** Do not test whether a file is Git-committed, whether a path appears in Git status, or any other incidental Git state. Those checks test the checkout, not application behavior. If code intentionally integrates with Git, test its observable behavior using controlled fixture repositories or an explicit Git boundary.
 - **Use PGlite for Postgres.** When a Unit Test needs Postgres, use [PGlite](https://pglite.dev/docs/) (`@electric-sql/pglite`): [real Postgres compiled to WASM](https://pglite.dev/docs/about), running in-process with `new PGlite()`. Prefer it over [pg-mem](https://github.com/oguimbal/pg-mem), which is a partial emulator: its own SQL parser, no timezones, JS numbers for every numeric type, no extensions. PGlite runs the same SQL as production; pg-mem can pass a test that Postgres would fail.
   - **One instance per test file** (`beforeAll`), migrations applied once, tables emptied before each test. Cold start takes seconds, so never create one per test.

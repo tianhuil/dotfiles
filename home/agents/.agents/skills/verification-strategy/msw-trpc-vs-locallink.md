@@ -64,7 +64,7 @@ export function renderWithRouter(ui: React.ReactElement, ctx: TestContext) {
 }
 ```
 
-`TestContext` is the router's context with test dependencies, for example a Drizzle `db` on PGlite ("Use PGlite for Postgres" in section 6 of [SKILL.md](./SKILL.md)). The msw-trpc setup is in the `trpc-testing` skill.
+`TestContext` is the router's context with test dependencies, for example a Drizzle `db` on PGlite ("Use PGlite for Postgres" in section 5 of [SKILL.md](./SKILL.md)). The msw-trpc setup is in the `trpc-testing` skill.
 
 ## Sources
 
