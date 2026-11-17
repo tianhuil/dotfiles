@@ -25,5 +25,5 @@
     "zai/glm-4.7-flash"
   ],
   "hideThinkingBlock": false,
-  "shellCommandPrefix": "set -o pipefail;"
+  "shellCommandPrefix": "source \"${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}/pipecheck.sh\" 2>/dev/null;"
 }
