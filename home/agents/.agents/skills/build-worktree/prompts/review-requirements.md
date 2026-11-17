@@ -32,14 +32,14 @@ Workflow:
    - If MANIFEST_CASES names a selector (not "none" and not "checked at completion of …"), select those cases from the manifest yourself and count them. Each case needs evidence (the test or command result that covers it) under the row it belongs to; a case with none makes that row UNMET. Report "<covered> of <total> manifest cases". A count that differs from MANIFEST_CASES is a High finding.
 3. Run `git diff $(git merge-base HEAD BASE_BRANCH)...HEAD` and read every changed file in full.
 4. Check every row according to its `verify:` type from [Common design rules](../../design/common-rules.md). A row without one is checked as `cmd:` using the narrowest test that proves it; if no command can check it, as `review:`.
-   - `cmd:` run it and record the command and the decisive output line.
+   - `cmd:` run it through `bash ~/.agents/skills/build-worktree/validate.sh WORKTREE_PATH "<cmd>"` and record its `EXIT=` line plus the decisive output line from the `LOG=` file.
    - `browser:` perform that step in the Acceptance Environment (step 6) and record what you saw.
    - `ci:` cite the named job's result for EXPECTED_HEAD (`gh run list --commit EXPECTED_HEAD --json databaseId,conclusion,headSha`, then `gh run view <id>`).
    - `review:` judge the work against the stated criterion. Quote the `file:line` you relied on and say concretely why it is or is not met. A `grep` showing a word exists is not enough on its own.
    - `owner:` you cannot verify it. Mark it OWNER and say what the owner must check. It does not block this review, and it is never ticked by agents.
 
    A `cmd:`, `browser:`, or `ci:` row with no executed evidence is UNMET. "Should work", "covered by CI" without the run, or a worker's report is not evidence. If a row marked `review:` or `owner:` could clearly have been an automated check, add a Medium finding suggesting the command.
-5. Run VERIFY_COMMAND. Any failure makes the verdict FAIL. Do not waive failures as "environmental", "flaky", "known OOM", or "unrelated": record them as UNVERIFIED with the exact error. Afterwards run `git status --porcelain` again; if the verify step changed tracked files, report it as a finding.
+5. Run `bash ~/.agents/skills/build-worktree/validate.sh WORKTREE_PATH "VERIFY_COMMAND"`. Its `EXIT=` line decides: any non-zero exit makes the verdict FAIL, and never judge pass from cut-off output. Do not waive failures as "environmental", "flaky", "known OOM", or "unrelated": record them as UNVERIFIED with the exact error. Afterwards run `git status --porcelain` again; if the verify step changed tracked files, report it as a finding.
 6. Acceptance. If ACCEPTANCE_PROCEDURE is "not applicable", confirm from the diff that no user-visible or integration surface changed; if one did, that is a High finding. Otherwise run ACCEPTANCE_PROCEDURE against the real environment it names (real URLs, real browser), using servers you started from this checkout for this round, and paste the observed result for each step. Prove where the servers came from: for each port, `ss -ltnp 'sport = :<port>'` gives the PID, and `readlink /proc/<pid>/cwd` must be inside WORKTREE_PATH; paste both. Stop those servers afterwards. If it cannot run, mark the affected rows UNVERIFIED and say why.
 7. Test strength. For each row with executable behavior, name the test that would fail if the behavior were absent; write "N/A (documentation)" for documentation-only rows. In a first round or a final full review (skip in other re-review rounds), prove it for the one or two highest-severity rows in a disposable copy outside WORKTREE_PATH, never in WORKTREE_PATH itself:
 
@@ -71,7 +71,7 @@ Checkout: <pwd> <branch> <HEAD>  (matches expected: yes/no; clean: yes/no)
 Manifest cases: <covered> of <total> (or "none")
 
 ### Verify command
-`VERIFY_COMMAND` → exit <code>; <summary>
+`EXIT=<code> LOG=<path> CMD=VERIFY_COMMAND` (quoted from validate.sh); <summary>
 
 ### Acceptance procedure
 <each step → observed result, or why it could not run>

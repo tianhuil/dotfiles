@@ -31,7 +31,7 @@ Or reference them by their install path at `~/.agents/skills/build-worktree/`.
 | Script                                     | Step | Purpose                                                                                                                                                |
 | ------------------------------------------ | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `git-orca-worktrees/setup.sh "<name>"`      | 0    | Create Orca worktree, falling back to plain Git. Outputs `BRANCH_NAME`, `BASE_BRANCH`, `WORKTREE_TOOL`, `WORKTREE_PATH`, and Orca `WORKTREE_ID` |
-| `validate.sh "<worktree>" <cmd...>`        | 2    | Run validation commands in worktree. Exits 0 on pass, 1 on failure                                                                                     |
+| `validate.sh "<worktree>" <cmd...>`        | 2    | Run validation commands in worktree with `pipefail`. Prints `EXIT=<code> LOG=<path> CMD=<cmd>` per command and the log tail on failure. Exits 0 only if all pass |
 | `push-pr.sh "<branch>" "<title>" "<body>"` | 4    | Push branch + create PR. Outputs PR URL and `PR_NUMBER`                                                                                                |
 | `monitor-ci.sh "<branch>" "<pr_number>"`   | 5    | Wait for CI via `gh run watch`, check mergeability. Outputs `CONCLUSION`, `MERGEABLE`, `RUN_ID`                                                        |
 | `gh pr merge`                               | 7    | Merge PR only when explicitly requested                                                          |
@@ -63,7 +63,7 @@ Keep the host responsive: only the requirements reviewer runs commands that buil
 Track one status for the task and report it everywhere:
 
 - `IN_PROGRESS`: work or review is ongoing, or review has not run.
-- `READY`: on the current `HEAD` with a clean working tree, the reviewers and the final full review returned PASS, `VERIFY_COMMAND` passed, and the acceptance procedure passed, or it is not applicable with a stated reason that the requirements reviewer confirmed from the diff (no user-visible or integration surface changed).
+- `READY`: on the current `HEAD` with a clean working tree, the reviewers and the final full review returned PASS, `VERIFY_COMMAND` exited 0 under `validate.sh`, and the acceptance procedure passed, or it is not applicable with a stated reason that the requirements reviewer confirmed from the diff (no user-visible or integration surface changed).
 - `BLOCKED`: any of the above is missing when a cap is reached, a check cannot run, or a precondition fails. `BLOCKED` work may be pushed as a **draft** PR for visibility but is never merged.
 
 `READY` covers one PR. When the design names an owner approval point (for example the end of a large-design phase), merged PRs do not complete that phase: report "awaiting owner acceptance" until the owner has run the Owner Acceptance Script.
@@ -156,8 +156,9 @@ The subagent is a small autonomous unit. Its instructions:
 2. Do not tick design checkboxes and do not declare the task complete; the reviewers decide.
 3. Do not weaken protected paths (remove cases, skip, loosen, or edit expected values to match new output) unless the design or the user's task names that change. Adding cases and regenerating generated files are fine. If a protected check looks wrong, report it instead of changing it.
 4. Do not waive failing checks. Report them with the exact error.
-5. Choose and write tests with the `verification-strategy` skill.
-6. Stop only processes you started, by PID; other sessions share the machine.
+5. Run validation commands through `~/.agents/skills/build-worktree/validate.sh "$WORKTREE_PATH" "<cmd>"` and quote each command's `EXIT=` line. A pass claim without `EXIT=0` is not evidence; never judge pass from cut-off output.
+6. Choose and write tests with the `verification-strategy` skill.
+7. Stop only processes you started, by PID; other sessions share the machine.
 
 Commit the worker's changes before validation and review, so reviewers see a clean tree at a known commit. Stage the files the worker reported, then confirm nothing else is left:
 
@@ -208,6 +209,8 @@ bash ~/.agents/skills/build-worktree/validate.sh "$WORKTREE_PATH" "npm test" "np
 
 Do not drop a command because it is slow, memory-hungry, or failed for "environmental" reasons. If a failure looks environmental (port in use, out of memory, stale server), stop only processes this task started, re-run once, and if it still fails, set status `BLOCKED` and report the exact error. A skipped command is reported as not verified, never as passed.
 
+Pass and fail come from `validate.sh` exit codes, never from reading output. Every pass claim, by the orchestrator, a worker, or a reviewer, quotes the `EXIT=0` line; read the `LOG=` file when the tail is not enough.
+
 If it exits non-zero, continue `BUILD_AGENT_SESSION_ID` as the fix agent. Pass the worktree path as `cwd` and include the validation output in its follow-up prompt. Ask it to fix the failures, commit, and report its changes; then re-run. Repeat until all pass **up to 3 times**. If the native `subagent` tool returns a new run ID after resuming `BUILD_AGENT_SESSION_ID`, use that latest run ID for the next resume. If it continues to fail after these attempts to fix it, set status `BLOCKED`, skip Step 3, push only a draft PR (Step 4), and explain what went wrong.
 
 ## Step 3: Task Review (required)
@@ -240,7 +243,7 @@ SKILL_DIR="$(dirname "$(realpath ~/.agents/skills/build-worktree/SKILL.md)")"
 
 Set the build status from evidence, not from any agent's summary:
 
-- `READY` only when, on the current `HEAD` with a clean working tree (`git status --porcelain` is empty): both reviewers and the final full review returned PASS; `VERIFY_COMMAND` passed; and the acceptance procedure passed, as recorded step by step in the requirements review (or is not applicable, as confirmed by the requirements reviewer).
+- `READY` only when, on the current `HEAD` with a clean working tree (`git status --porcelain` is empty): both reviewers and the final full review returned PASS; `validate.sh` printed `EXIT=0` for `VERIFY_COMMAND` on that `HEAD`; and the acceptance procedure passed, as recorded step by step in the requirements review (or is not applicable, as confirmed by the requirements reviewer).
 - Otherwise `BLOCKED`, with the missing items listed.
 
 When the status is `READY`, record `READY_HEAD="$(git -C "$WORKTREE_PATH" rev-parse HEAD)"`, then delegate to a fresh `worker` session (not `BUILD_AGENT_SESSION_ID`) one commit that ticks each design `- [ ]` item the final requirements review marked MET, citing its evidence in the commit message. Items not MET stay unticked, and OWNER items are never ticked by agents: list them in the PR body for the owner. Check that commit mechanically before accepting it:

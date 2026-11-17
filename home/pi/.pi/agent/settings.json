@@ -24,5 +24,6 @@
     "zai/glm-5.3*",
     "zai/glm-4.7-flash"
   ],
-  "hideThinkingBlock": false
+  "hideThinkingBlock": false,
+  "shellCommandPrefix": "set -o pipefail;"
 }
