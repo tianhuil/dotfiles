@@ -124,6 +124,8 @@ subagent({ action: "resume", id: WORKER_RUN_ID, message: "<follow-up task>" })
 
 Resume keeps the child's earlier context, agent, model, and tools, and returns a **new** run ID: replace the stored ID with it every time. A resumed run is async; wait for its result before acting on it. If resume rejects the run, start a fresh child for that role with the full task and context, record its run ID, and say so in the final report. A fix agent must resume `WORKER_RUN_ID`, not start a new worker.
 
+Match the action to the run's state, using only run IDs the tool returned: `status` to check a run, `steer` only while it is still running, `resume` once it has finished. Do not use `command.status`. Never launch with made-up model names to probe the registry; use the models this skill names.
+
 ## Step 1: Execute the Task
 
 Spawn a `worker` agent (or a user-specified agent) with Pi's `subagent` tool. Supply a custom prompt containing:
@@ -207,9 +209,9 @@ Resolve all prompt paths relative to this skill's directory—the directory cont
 SKILL_DIR="$(dirname "$(realpath ~/.agents/skills/build-worktree/SKILL.md)")"
 ```
 
-1. Read `"$SKILL_DIR/prompts/review-code-quality.md"` and `"$SKILL_DIR/prompts/review-requirements.md"`. Fill every placeholder, including `TASK_DESCRIPTION` (the user's full task text, unedited), `BASE_BRANCH`, `EXPECTED_BRANCH`, and `EXPECTED_HEAD` (`git -C "$WORKTREE_PATH" rev-parse HEAD` after the latest commit) and the Step 0.5 values. Pass design docs and requirement IDs as given; do not summarize or restate them.
+1. Do not paste the prompt files into the task (workflow tasks are capped at 16 KB). Give each reviewer the absolute path of its prompt file below and tell it to read and follow it. In the task, give a value for every placeholder in that file, including `TASK_DESCRIPTION` (the user's full task text, unedited), `BASE_BRANCH`, `EXPECTED_BRANCH`, and `EXPECTED_HEAD` (`git -C "$WORKTREE_PATH" rev-parse HEAD` after the latest commit) and the Step 0.5 values. Pass design docs and requirement IDs as given; do not summarize or restate them.
 2. Set the review-round cap from the user's request, or use `5`. The count carries across re-entries from Steps 5.5 and 6; it does not reset.
-3. Start these reviewers in parallel (only the requirements reviewer for docs-only changes), passing `WORKTREE_PATH` as `cwd`, with shell access and a stronger model tier than the worker (see Execution Model):
+3. Start these reviewers so they run concurrently (only the requirements reviewer for docs-only changes): the tool accepts **one `subagent` call per turn**, so launch or resume each as its own async call in consecutive turns, then wait for both results. Pass `WORKTREE_PATH` as `cwd`, with shell access and a stronger model tier than the worker (see Execution Model):
   
   | Reviewer     | Agent            | Run ID                    | Prompt                           |
   | ------------ | ---------------- | ------------------------- | -------------------------------- |

@@ -23,4 +23,4 @@ Keep primary checkout on its current branch. For a different branch, create a wo
 
 ## Subagent
 
-When running sub-agents in pi, default to using `gpt-5.6-luna` with medium effort unless there is a compelling reason not to or the user says to use something else.  When unsure, use a sub-agent to save context of main thread.
+When running sub-agents in pi, default to model `openai-codex/gpt-5.6-luna:medium` (effort goes in the model name; the `subagent` tool has no `effort` option) unless there is a compelling reason not to or the user says to use something else.  When unsure, use a sub-agent to save context of main thread.
