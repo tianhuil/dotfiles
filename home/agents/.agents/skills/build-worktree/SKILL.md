@@ -52,7 +52,7 @@ This is an **orchestrator** — it coordinates bash scripts and delegated agents
 
 Reviewers must be able to run shell commands (they execute verification and acceptance steps), and should use a stronger model tier than the worker. A reviewer on the same cheap model as the worker tends to approve the worker's blind spots. Use the user's model choice when given.
 
-Use the `build-reviewer` agent for both reviewers. It has shell access, pins a stronger model, and may not edit the checkout. Do **not** use the built-in `reviewer` agent: it has no shell and is told not to run commands, so it cannot execute the verification this skill requires. If `build-reviewer` is unavailable (`subagent({ action: "list" })`; it is installed from the user's dotfiles), use `oracle` with `context: "fresh"` and `model: "openai-codex/gpt-6-sol"`, paste the rules from the `build-reviewer` agent into the task, state review-only authority, and say so in the final report.
+Use the `build-reviewer` agent for both reviewers. It has shell access, pins a stronger model, and may not edit the checkout. Do **not** use the built-in `reviewer` agent: it has no shell and is told not to run commands, so it cannot execute the verification this skill requires. If `build-reviewer` is unavailable (`subagent({ action: "list" })`; it is installed from the user's dotfiles), use `oracle` with `context: "fresh"` and `model: "openai-codex/gpt-5.6-luna:xhigh"` (effort goes in the model name; the tool has no `effort` option), paste the rules from the `build-reviewer` agent into the task, state review-only authority, and say so in the final report.
 
 Keep the host responsive: only the requirements reviewer runs commands that build, test, or start servers. The code-quality reviewer reads code and diffs only; it does not run tests, because both reviewers share one worktree and its build output.
 
@@ -108,43 +108,27 @@ Before any implementation, collect the contract the reviewers will enforce. Read
 
 Keep these items in the orchestrator's environment as `DESIGN_DOCS`, `DESIGN_SCOPE`, `REQUIREMENT_IDS`, `MANIFEST_CASES`, `VERIFY_COMMAND`, `ACCEPTANCE_PROCEDURE`, and `PROTECTED_PATHS`. Pass them to every worker and reviewer.
 
-## Agent Session Lifecycle
+## Agent Run IDs
 
-Create these Pi session IDs once, immediately after Step 0:
+The `subagent` tool identifies a child by the `runId` it returns. It has no session option: never pass `session`, `sessionId`, or generated IDs. Keep the latest run ID for each role:
 
-```bash
-BUILD_AGENT_SESSION_ID="$(openssl rand -hex 16)"
-CODE_QUALITY_SESSION_ID="$(openssl rand -hex 16)"
-REQUIREMENTS_SESSION_ID="$(openssl rand -hex 16)"
+- `WORKER_RUN_ID`: the Step 1 worker and every later fix agent.
+- `CODE_QUALITY_RUN_ID`: the code-quality reviewer.
+- `REQUIREMENTS_RUN_ID`: the requirements reviewer.
+
+Start a role with a normal launch (see Delegated agents) and record the `runId` it returns. Continue it with:
+
+```text
+subagent({ action: "resume", id: WORKER_RUN_ID, message: "<follow-up task>" })
 ```
 
-The names describe the session's role:
-
-- `BUILD_AGENT_SESSION_ID`: the Step 1 worker and every later fix agent.
-- `CODE_QUALITY_SESSION_ID`: the code-quality reviewer.
-- `REQUIREMENTS_SESSION_ID`: the requirements reviewer.
-
-Keep the IDs in the orchestrator's environment and reuse them for every retry. Never generate a replacement ID for an existing session.
-
-Start a new Pi session with `--session-id`:
-
-```bash
-cd "$WORKTREE_PATH" && pi --session-id "$BUILD_AGENT_SESSION_ID" "<initial task>"
-```
-
-Continue an existing session with `--session` and its session ID:
-
-```bash
-cd "$WORKTREE_PATH" && pi --session "$BUILD_AGENT_SESSION_ID" "<follow-up task>"
-```
-
-`--session-id` creates the session when absent; `--session` reopens it. With the native `subagent` tool, retain the corresponding `*_SESSION_ID` as the session identity and use the tool's returned run ID only as the resume handle: `runs.run(key, { resume: latestRunId, task: ... })`. A fix agent must resume `BUILD_AGENT_SESSION_ID`, not start a new session.
+Resume keeps the child's earlier context, agent, model, and tools, and returns a **new** run ID: replace the stored ID with it every time. A resumed run is async; wait for its result before acting on it. If resume rejects the run, start a fresh child for that role with the full task and context, record its run ID, and say so in the final report. A fix agent must resume `WORKER_RUN_ID`, not start a new worker.
 
 ## Step 1: Execute the Task
 
 Spawn a `worker` agent (or a user-specified agent) with Pi's `subagent` tool. Supply a custom prompt containing:
 
-- **Session**: start it with `BUILD_AGENT_SESSION_ID`; retain the returned run ID as the resume handle for later fix agents.
+- **Run ID**: record the returned `runId` as `WORKER_RUN_ID`; later fix agents resume it.
 - **Working directory**: pass the worktree path explicitly as the delegation tool's `cwd`; **ALWAYS** work in that worktree, not in the main branch / worktree.
 - **Task description**: the full task text, links to design docs, and `DESIGN_SCOPE`, `REQUIREMENT_IDS`, `MANIFEST_CASES`, `VERIFY_COMMAND`, and `PROTECTED_PATHS` from Step 0.5.
 - **Instructions**: Read AGENTS.md, README, and package.json; implement the task; do NOT commit.
@@ -211,7 +195,7 @@ Do not drop a command because it is slow, memory-hungry, or failed for "environm
 
 Pass and fail come from `validate.sh` exit codes, never from reading output. Every pass claim, by the orchestrator, a worker, or a reviewer, quotes the `EXIT=0` line; read the `LOG=` file when the tail is not enough.
 
-If it exits non-zero, continue `BUILD_AGENT_SESSION_ID` as the fix agent. Pass the worktree path as `cwd` and include the validation output in its follow-up prompt. Ask it to fix the failures, commit, and report its changes; then re-run. Repeat until all pass **up to 3 times**. If the native `subagent` tool returns a new run ID after resuming `BUILD_AGENT_SESSION_ID`, use that latest run ID for the next resume. If it continues to fail after these attempts to fix it, set status `BLOCKED`, skip Step 3, push only a draft PR (Step 4), and explain what went wrong.
+If it exits non-zero, resume `WORKER_RUN_ID` as the fix agent, with the validation output in its follow-up message. Ask it to fix the failures, commit, and report its changes; then re-run. Repeat until all pass **up to 3 times**. If it continues to fail after these attempts to fix it, set status `BLOCKED`, skip Step 3, push only a draft PR (Step 4), and explain what went wrong.
 
 ## Step 3: Task Review (required)
 
@@ -225,18 +209,18 @@ SKILL_DIR="$(dirname "$(realpath ~/.agents/skills/build-worktree/SKILL.md)")"
 
 1. Read `"$SKILL_DIR/prompts/review-code-quality.md"` and `"$SKILL_DIR/prompts/review-requirements.md"`. Fill every placeholder, including `TASK_DESCRIPTION` (the user's full task text, unedited), `BASE_BRANCH`, `EXPECTED_BRANCH`, and `EXPECTED_HEAD` (`git -C "$WORKTREE_PATH" rev-parse HEAD` after the latest commit) and the Step 0.5 values. Pass design docs and requirement IDs as given; do not summarize or restate them.
 2. Set the review-round cap from the user's request, or use `5`. The count carries across re-entries from Steps 5.5 and 6; it does not reset.
-3. Start these reviewer sessions in parallel (only the requirements reviewer for docs-only changes), passing `WORKTREE_PATH` as `cwd`, with shell access and a stronger model tier than the worker (see Execution Model):
+3. Start these reviewers in parallel (only the requirements reviewer for docs-only changes), passing `WORKTREE_PATH` as `cwd`, with shell access and a stronger model tier than the worker (see Execution Model):
   
-  | Reviewer     | Agent            | Session ID                | Prompt                           |
+  | Reviewer     | Agent            | Run ID                    | Prompt                           |
   | ------------ | ---------------- | ------------------------- | -------------------------------- |
-  | Code quality | `build-reviewer` | `CODE_QUALITY_SESSION_ID` | `"$SKILL_DIR/prompts/review-code-quality.md"` |
-  | Requirements | `build-reviewer` | `REQUIREMENTS_SESSION_ID` | `"$SKILL_DIR/prompts/review-requirements.md"` |
+  | Code quality | `build-reviewer` | `CODE_QUALITY_RUN_ID`     | `"$SKILL_DIR/prompts/review-code-quality.md"` |
+  | Requirements | `build-reviewer` | `REQUIREMENTS_RUN_ID`     | `"$SKILL_DIR/prompts/review-requirements.md"` |
   
 
-   Keep each session ID paired with its reviewer; never swap them.  A new session will be spawned the first time but re-used in subsequent runs.
+   Round 1 launches them and records each returned run ID; later rounds resume them (see Agent Run IDs). Keep each run ID paired with its reviewer; never swap them.
 4. On every round, have both reviewers inspect the current diff and report whether prior issues are fixed, plus any new evidence-backed issues. Give them the new `EXPECTED_HEAD` each round; a report against a different commit does not count.
-5. If either reviewer finds in-scope issues, resume `BUILD_AGENT_SESSION_ID` with both reports, fix only those issues, and re-run Step 2. Then resume Step 3 with the same `CODE_QUALITY_SESSION_ID` and `REQUIREMENTS_SESSION_ID` for the next round. Do not accept a fix agent's claim that something is fixed; the next review round checks it. Reviewers must label out-of-scope findings as follow-up notes; they do not trigger edits or another review round.
-6. When both reviewers approve after more than one round, run one **final full review** with a fresh requirements-reviewer session (new session ID) against the final `HEAD`, including the absence check. Resumed reviewers tend to check only their earlier findings; the fresh one reviews the whole change. Its FAIL starts another round. If round 1 passed, it already was a fresh full review; skip this.
+5. If either reviewer finds in-scope issues, resume `WORKER_RUN_ID` with both reports, fix only those issues, and re-run Step 2. Then resume `CODE_QUALITY_RUN_ID` and `REQUIREMENTS_RUN_ID` for the next round. Do not accept a fix agent's claim that something is fixed; the next review round checks it. Reviewers must label out-of-scope findings as follow-up notes; they do not trigger edits or another review round.
+6. When both reviewers approve after more than one round, run one **final full review** with a fresh requirements reviewer (a new launch, not a resume; record its run ID as `REQUIREMENTS_RUN_ID`) against the final `HEAD`, including the absence check. Resumed reviewers tend to check only their earlier findings; the fresh one reviews the whole change. Its FAIL starts another round. If round 1 passed, it already was a fresh full review; skip this.
 7. Stop when both reviewers and the final full review pass on the same `HEAD`, or when the review-round cap is reached. **Reaching the cap with any FAIL or UNVERIFIED sets status `BLOCKED`.** Do not continue to a ready PR or a merge.
 
 ## Step 3.5: Readiness Decision
@@ -246,7 +230,7 @@ Set the build status from evidence, not from any agent's summary:
 - `READY` only when, on the current `HEAD` with a clean working tree (`git status --porcelain` is empty): both reviewers and the final full review returned PASS; `validate.sh` printed `EXIT=0` for `VERIFY_COMMAND` on that `HEAD`; and the acceptance procedure passed, as recorded step by step in the requirements review (or is not applicable, as confirmed by the requirements reviewer).
 - Otherwise `BLOCKED`, with the missing items listed.
 
-When the status is `READY`, record `READY_HEAD="$(git -C "$WORKTREE_PATH" rev-parse HEAD)"`, then delegate to a fresh `worker` session (not `BUILD_AGENT_SESSION_ID`) one commit that ticks each design `- [ ]` item the final requirements review marked MET, citing its evidence in the commit message. Items not MET stay unticked, and OWNER items are never ticked by agents: list them in the PR body for the owner. Check that commit mechanically before accepting it:
+When the status is `READY`, record `READY_HEAD="$(git -C "$WORKTREE_PATH" rev-parse HEAD)"`, then delegate to a fresh `worker` (a new launch, not a resume of `WORKER_RUN_ID`) one commit that ticks each design `- [ ]` item the final requirements review marked MET, citing its evidence in the commit message. Items not MET stay unticked, and OWNER items are never ticked by agents: list them in the PR body for the owner. Check that commit mechanically before accepting it:
 
 ```bash
 git -C "$WORKTREE_PATH" diff --name-only "$READY_HEAD" HEAD   # only files in DESIGN_DOCS
@@ -316,7 +300,7 @@ The script waits for the CI run of that exact commit, so a result from an earlie
 
 ## Step 5.5: Resolve Merge Conflicts
 
-Resume `BUILD_AGENT_SESSION_ID` to rebase and resolve with the **resolve-merge-conflict** skill (the orchestrator does not edit files):
+Resume `WORKER_RUN_ID` to rebase and resolve with the **resolve-merge-conflict** skill (the orchestrator does not edit files):
 
 ```bash
 cd $WORKTREE_PATH && git fetch origin "${BASE_BRANCH#origin/}" && git rebase "$BASE_BRANCH"
@@ -340,7 +324,7 @@ gh run view $RUN_ID --json jobs --jq '.jobs[] | select(.conclusion != "success")
 gh run view $RUN_ID --log-failed
 ```
 
-Continue `BUILD_AGENT_SESSION_ID` as the fix agent, with the worktree passed explicitly as `cwd`. Include the failed CI logs and the locked contract in its follow-up prompt. Ask it to fix only failures caused by this branch or required by the task; pre-existing or adjacent failures become `BLOCKED` follow-up notes, not scope expansion. Ask it to report its changes. Commit the reported files (as in Step 1) and push:
+Resume `WORKER_RUN_ID` as the fix agent. Include the failed CI logs and the locked contract in its follow-up message. Ask it to fix only failures caused by this branch or required by the task; pre-existing or adjacent failures become `BLOCKED` follow-up notes, not scope expansion. Ask it to report its changes. Commit the reported files (as in Step 1) and push:
 
 ```bash
 cd "$WORKTREE_PATH" && git add -- <reported files> && git status --porcelain
@@ -374,7 +358,7 @@ Do NOT remove the worktree. User handles cleanup; follow `git-orca-worktrees` fo
 
 ## Additional Work
 
-After creating the PR, keep this Pi session working in `WORKTREE_PATH`. If the user gives follow-up work in this session, update the Step 0.5 contract for it, then delegate it (Step 1, resuming `BUILD_AGENT_SESSION_ID`) in the same worktree and branch; do not make the change yourself, and do not return to or switch branches in the primary checkout. After each follow-up task, re-perform Steps 2 through 6 (including 3.5 and 4's PR update) before completing.
+After creating the PR, keep this Pi session working in `WORKTREE_PATH`. If the user gives follow-up work in this session, update the Step 0.5 contract for it, then delegate it (Step 1, resuming `WORKER_RUN_ID`) in the same worktree and branch; do not make the change yourself, and do not return to or switch branches in the primary checkout. After each follow-up task, re-perform Steps 2 through 6 (including 3.5 and 4's PR update) before completing.
 
 ## Error Cases
 
