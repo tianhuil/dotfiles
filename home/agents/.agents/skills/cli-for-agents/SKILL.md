@@ -1,6 +1,6 @@
 ---
 name: cli-for-agents
-description: Use when building, changing, or reviewing a CLI that agents run: its commands, `--help` text, output, errors, or the skill that teaches it.
+description: "Use when building, changing, or reviewing a CLI that agents run: its commands, `--help` text, output, errors, or the skill that teaches it."
 ---
 
 # CLIs for agents
