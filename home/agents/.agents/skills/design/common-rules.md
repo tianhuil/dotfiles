@@ -28,6 +28,16 @@ When rewriting or replacing an existing design, read it and any review comments 
 - Classify relevant failure states and external assumptions.
 - Keep acceptance criteria reproducible and independently verifiable.
 
+### Edge cases
+
+Decide each corner case in the design in one sentence, with one label:
+
+- `handled`: the behavior, proven by one focused test.
+- `rejected`: a clear error and nonzero exit (or the equivalent refusal), proven by one short test.
+- `best-effort`: the intended behavior, documented and untested. It never blocks review.
+
+Prefer `rejected` or `best-effort` unless a user relies on the case. For example, an odd flag combination is `rejected: exit 2 naming both flags`, and a second Ctrl-C during shutdown is `best-effort: exit immediately`. When a corner case the design leaves unlabeled comes up during the build, the orchestrator labels it when the answer is reasonably clear and asks the owner only when it is not; the implementer never decides it alone.
+
 Checklist items are the unit of completion. A task names its work unit: either a heading (done when every checklist item under it is met) or a single checklist item (done when it and any items nested under it are met). Write each item in this form so a reviewer knows how to check it:
 
 ```markdown

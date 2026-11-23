@@ -25,9 +25,11 @@ Workflow:
 
 Only report real, evidence-backed concerns. Scope findings to defects caused by this diff or defects that prevent the captured task contract from passing. Label pre-existing defects, adjacent improvements, cleanup, preferences, and new requirements as follow-up notes; they must not create a fix round. Skip web-specific checks when the code has no web surface.
 
+An edge case is mishandled only when the code contradicts its edge-case label in the design ([Common design rules](../../design/common-rules.md)) or a judgment you made below; a `best-effort` case never blocks. If a corner case matters and the design does not decide it, make a reasonable judgment: pick the cheapest sensible label (prefer `rejected` or `best-effort`) and one-sentence behavior, and list it under Edge cases judged. Report a finding only if the code clearly contradicts a `handled` or `rejected` judgment. When the right behavior is genuinely unclear, list it under Questions for the owner instead, with your recommendation, not as a finding.
+
 Blocking findings (any one makes the verdict FAIL):
 
-- Correctness: the changed code gives wrong results, mishandles an error path or edge case, races, or breaks an existing caller
+- Correctness: the changed code gives wrong results, mishandles an error path or a decided edge case, races, or breaks an existing caller
 - Security:
   - Hardcoded secrets, tokens, passwords, or connection strings
   - Missing input validation or sanitization
@@ -61,6 +63,12 @@ Checkout: <pwd> <branch> <HEAD>  (matches expected: yes/no)
 
 ### Tests That Cannot Fail
 - [finding with file:line reference] or "None found."
+
+### Edge cases judged
+- <corner case> — <label>: <one-sentence behavior>; code matches: yes/no   (or "None.")
+
+### Questions for the owner
+- <corner case> — recommend: <label>: <one-sentence behavior>   (or "None.")
 
 ### Follow-up Notes
 - [non-blocking or out-of-scope concern with file:line reference] or "None."

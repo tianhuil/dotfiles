@@ -83,7 +83,7 @@ Before approval, confirm:
 - the outcome is observable and reproducible;
 - every important contract has an example;
 - ownership, source of truth, and verification are clear;
-- required cases are named;
+- required cases are named, and each corner case has an edge-case label (`handled`, `rejected`, or `best-effort`) from the common rules;
 - relevant failure states and assumptions are classified;
 - every checklist item has a typed `verify:` (`cmd:` wherever the check can be automated) and no `[TODO:` markers remain;
 - user-visible changes name where the owner will check them (Acceptance Environment); and

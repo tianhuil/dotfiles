@@ -63,7 +63,7 @@ Keep the host responsive: only the requirements reviewer runs commands that buil
 Track one status for the task and report it everywhere:
 
 - `IN_PROGRESS`: work or review is ongoing, or review has not run.
-- `READY`: on the current `HEAD` with a clean working tree, the reviewers and the final full review returned PASS (the final full review blocks only on Critical findings; Step 3.6), Step 2's `validate.sh` run printed `EXIT=0` for `VERIFY_COMMAND` on that `HEAD`, and the acceptance procedure passed, or it is not applicable with a stated reason that the requirements reviewer confirmed from the diff (no user-visible or integration surface changed).
+- `READY`: on the current `HEAD` with a clean working tree, the reviewers and the final full review returned PASS (the final full review blocks only on Critical findings; Step 3, item 7), Step 2's `validate.sh` run printed `EXIT=0` for `VERIFY_COMMAND` on that `HEAD`, and the acceptance procedure passed, or it is not applicable with a stated reason that the requirements reviewer confirmed from the diff (no user-visible or integration surface changed).
 - `BLOCKED`: any of the above is missing when a cap is reached, a check cannot run, or a precondition fails. `BLOCKED` work may be pushed as a **draft** PR for visibility but is never merged.
 
 `READY` covers one PR. When the design names an owner approval point (for example the end of a large-design phase), merged PRs do not complete that phase: report "awaiting owner acceptance" until the owner has run the Owner Acceptance Script.
@@ -215,7 +215,7 @@ SKILL_DIR="$(dirname "$(realpath ~/.agents/skills/build-worktree/SKILL.md)")"
 ```
 
 1. Do not paste the prompt files into the task (workflow tasks are capped at 16 KB). Give each reviewer the absolute path of its prompt file below and tell it to read and follow it. In the task, give a value for every placeholder in that file, including `TASK_DESCRIPTION` (the user's full task text, unedited), `BASE_BRANCH`, `EXPECTED_BRANCH`, `EXPECTED_HEAD` (`git -C "$WORKTREE_PATH" rev-parse HEAD` after the latest commit), `REVIEW_ROUND` (`first`, `re-review` with the previous reviewed `HEAD`, or `final full review`), `VERIFY_RESULT` (Step 2's run; its `VERIFY_HEAD` must equal `EXPECTED_HEAD`), and the Step 0.5 values. Pass design docs and requirement IDs as given; do not summarize or restate them.
-2. Set the review-round cap from the user's request, or use `5`. The count carries across re-entries from Steps 5.5 and 6; it does not reset.
+2. Set the review-round cap from the user's request, or use `3`. The count carries across re-entries from Steps 5.5 and 6; it does not reset.
 3. Start these reviewers so they run concurrently (only the requirements reviewer for docs-only changes): the tool accepts **one `subagent` call per turn**, so launch or resume each as its own async call in consecutive turns, then wait for both results. Pass `WORKTREE_PATH` as `cwd`, with shell access and a stronger model tier than the worker (see Execution Model):
   
   | Reviewer     | Agent            | Run ID                    | Prompt                           |
@@ -226,9 +226,10 @@ SKILL_DIR="$(dirname "$(realpath ~/.agents/skills/build-worktree/SKILL.md)")"
 
    Round 1 launches them and records each returned run ID; later rounds resume them (see Agent Run IDs). Keep each run ID paired with its reviewer; never swap them.
 4. On every round, have both reviewers inspect the current diff and report whether prior issues are fixed, plus any new evidence-backed issues. Give them the new `EXPECTED_HEAD` each round; a report against a different commit does not count. In `re-review` rounds the prompts' re-review rule applies: new findings outside the fix diff (`git diff <previous reviewed HEAD>..HEAD`) block only if Critical, and the rest become follow-up notes. Round 1 is the full review; later rounds still report everything but cannot keep adding blockers outside the fix.
-5. If either reviewer finds in-scope issues, resume `WORKER_RUN_ID` with both reports, fix only those issues, and re-run Step 2. Then resume `CODE_QUALITY_RUN_ID` and `REQUIREMENTS_RUN_ID` for the next round. Do not accept a fix agent's claim that something is fixed; the next review round checks it. Reviewers must label out-of-scope and non-blocking findings as follow-up notes; they do not trigger edits or another review round.
-6. When both reviewers approve after more than one round, run one **final full review** with a fresh requirements reviewer (a new launch, not a resume; record its run ID as `REQUIREMENTS_RUN_ID`) against the final `HEAD`, including the absence check. Resumed reviewers tend to check only their earlier findings; the fresh one reviews the whole change. It blocks only on Critical findings and on the prompt's hard conditions (checkout, requirement rows, verify result, acceptance, protected paths); its FAIL starts another round. Its High and lower findings go in the PR body under Follow-up notes. If round 1 passed, it already was a fresh full review; skip this.
-7. Stop when both reviewers and the final full review pass on the same `HEAD`, or when the review-round cap is reached. **Reaching the cap with any FAIL or UNVERIFIED sets status `BLOCKED`.** Do not continue to a ready PR or a merge.
+5. If either reviewer lists Questions for the owner, decide each one yourself when the answer is reasonably clear from the design, the task, and the reviewer's recommendation (usually `rejected` or `best-effort`). Stop and ask the user only about the unclear ones, offering the recommended label and behavior. Have the worker record each decision in the design as an edge-case label ([Common design rules](../design/common-rules.md)) as part of the next fix, and list the ones you decided, plus each reviewer's Edge cases judged, in the PR body under "Edge cases decided without the owner". Have the worker record the reviewers' judgments in the design too. `rejected` and `best-effort` decisions usually need only that line and a short test or none.
+6. If either reviewer finds in-scope issues, resume `WORKER_RUN_ID` with both reports, fix only those issues, and re-run Step 2. During the fix, the worker runs only the focused tests for those findings (for example `vitest run <file> -t "<name>"`), not the full suite or slow checks; Step 2 runs the full verify command afterwards. Then resume `CODE_QUALITY_RUN_ID` and `REQUIREMENTS_RUN_ID` for the next round. Do not accept a fix agent's claim that something is fixed; the next review round checks it. Reviewers must label out-of-scope and non-blocking findings as follow-up notes; they do not trigger edits or another review round.
+7. When both reviewers approve after more than one round, run one **final full review** with a fresh requirements reviewer (a new launch, not a resume; record its run ID as `REQUIREMENTS_RUN_ID`) against the final `HEAD`, including the absence check. Resumed reviewers tend to check only their earlier findings; the fresh one reviews the whole change. It blocks only on Critical findings and on the prompt's hard conditions (checkout, requirement rows, verify result, acceptance, protected paths); its FAIL starts another round. Its High and lower findings go in the PR body under Follow-up notes. If round 1 passed, it already was a fresh full review; skip this.
+8. Stop when both reviewers and the final full review pass on the same `HEAD`, or when the review-round cap is reached. **Reaching the cap with any FAIL or UNVERIFIED sets status `BLOCKED`.** Do not continue to a ready PR or a merge. Report the hard-to-pass tests instead (see Reporting): for each requirement row or test that failed in more than one round, its name, the rounds it failed, the finding each time, and a suggestion: relabel the case `rejected` or `best-effort`, split the test, or have the owner decide the behavior.
 
 ## Step 3.5: Readiness Decision
 
@@ -287,6 +288,9 @@ The AI must compose the PR title and body. Use this structure, copying tables fr
 
 ## For the owner to check
 - <each OWNER row: ID and what to check, or "Nothing.">
+
+## Edge cases decided without the owner
+- <case — label: behavior, or "None.">
 
 ## Follow-up notes
 - <non-blocking findings from the reviewers and the final full review, or "None.">
@@ -380,7 +384,7 @@ After creating the PR, keep this Pi session working in `WORKTREE_PATH`. If the u
 - **Push fails**: Report error (likely need rebase)
 - **Merge conflict**: Step 5.5 handles rebase + force push
 - **Max CI retries (5)**: Report all accumulated failures and stop
-- **Review cap reached with blockers**: status `BLOCKED`; draft PR only; report the open findings
+- **Review cap reached with blockers**: status `BLOCKED`; draft PR only; report the open findings and the hard-to-pass tests
 - **Verify or acceptance cannot run**: status `BLOCKED`; report the exact error; never report it as passed
 
 ## Reporting
@@ -394,4 +398,5 @@ At the end, always report:
 - Requirements table from the final requirements review
 - What was not verified
 - If failed: which jobs failed and a summary of attempts made
+- If the review cap was reached: the hard-to-pass tests (Step 3, item 8)
 

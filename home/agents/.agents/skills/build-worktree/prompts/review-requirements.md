@@ -23,6 +23,8 @@ Protected paths (gates, manifests, required-case lists, acceptance tests) this c
 
 Do not assess general code quality or security; a separate reviewer covers them. You DO own: completeness, whether each requirement is proven by executed evidence, and whether the tests and gates could fail. Keep scope locked to the task contract: a finding must show that this diff misses, regresses, or cannot verify a captured requirement. Pre-existing defects, adjacent improvements, cleanup, preferences, and new requirements are follow-up notes, not blockers or fix-round triggers.
 
+Undecided corner cases. If a corner case matters and neither the design's edge-case labels ([Common design rules](../../design/common-rules.md)) nor the task text decides it, make a reasonable judgment: pick the cheapest sensible label (prefer `rejected` or `best-effort`) and one-sentence behavior, and list it under Edge cases judged. If the code already behaves that way, or the label is `best-effort`, it is not a finding. If the code clearly contradicts a `handled` or `rejected` judgment, report a finding citing that judgment. When the right behavior is genuinely unclear, list it under Questions for the owner instead, with your recommendation; do not mark a row UNMET for it or propose a fix.
+
 Workflow:
 
 1. Confirm the checkout. Run `pwd`, `git branch --show-current`, `git rev-parse HEAD`, and `git status --porcelain` in WORKTREE_PATH. If the first three do not match the expected values, stop and return Verdict: FAIL with reason "wrong checkout". If `git status --porcelain` prints anything, stop and return FAIL with reason "dirty checkout": you would be testing code that is not EXPECTED_HEAD.
@@ -40,9 +42,11 @@ Workflow:
    - `review:` judge the work against the stated criterion. Quote the `file:line` you relied on and say concretely why it is or is not met. A `grep` showing a word exists is not enough on its own.
    - `owner:` you cannot verify it. Mark it OWNER and say what the owner must check. It does not block this review, and it is never ticked by agents.
 
+   Slow checks run once, at the end. A slow check is a `cmd:` row that calls real external services or accounts (for example an e2e test against real GitHub). Run it only when every other row is MET in this round, and always in a `final full review`; otherwise mark it UNMET with "deferred: other rows UNMET". In a `re-review` round, carry forward an earlier passing run if `git diff --stat <previous reviewed HEAD>..HEAD` shows the fix touched no code the check exercises.
+
    A `cmd:`, `browser:`, or `ci:` row with no executed evidence is UNMET. "Should work", "covered by CI" without the run, or a worker's report is not evidence. If a row marked `review:` or `owner:` could clearly have been an automated check, add a Medium finding suggesting the command.
 5. Check VERIFY_RESULT; do not re-run VERIFY_COMMAND. It must name EXPECTED_HEAD, and its `EXIT=` line decides: a missing result, a different HEAD, or a non-zero exit makes the verdict FAIL. Read its `LOG=` file for the decisive lines; never judge pass from cut-off output. Do not waive failures as "environmental", "flaky", "known OOM", or "unrelated": record them as UNVERIFIED with the exact error from the log.
-6. Acceptance. If ACCEPTANCE_PROCEDURE is "not applicable", confirm from the diff that no user-visible or integration surface changed; if one did, that is a High finding. In a `re-review` round, run `git diff --stat <previous reviewed HEAD>..HEAD`: if the fix touched no user-visible or integration surface, do not re-run acceptance; write "carried forward from <previous HEAD>: fix touched only <files>". Always run it in `first` and `final full review` rounds. When you run it, run ACCEPTANCE_PROCEDURE against the real environment it names (real URLs, real browser), using servers you started from this checkout for this round, and paste the observed result for each step. Prove where the servers came from: for each port, `ss -ltnp 'sport = :<port>'` gives the PID, and `readlink /proc/<pid>/cwd` must be inside WORKTREE_PATH; paste both. Stop those servers afterwards. If it cannot run, mark the affected rows UNVERIFIED and say why.
+6. Acceptance. If ACCEPTANCE_PROCEDURE is "not applicable", confirm from the diff that no user-visible or integration surface changed; if one did, that is a High finding. In a `re-review` round, run `git diff --stat <previous reviewed HEAD>..HEAD`: if the fix touched no user-visible or integration surface, do not re-run acceptance; write "carried forward from <previous HEAD>: fix touched only <files>". In a `first` round, run it only when every requirement row is MET (slow checks aside); otherwise write "deferred: other rows UNMET". Always run it in a `final full review`. When you run it, run ACCEPTANCE_PROCEDURE against the real environment it names (real URLs, real browser), using servers you started from this checkout for this round, and paste the observed result for each step. Prove where the servers came from: for each port, `ss -ltnp 'sport = :<port>'` gives the PID, and `readlink /proc/<pid>/cwd` must be inside WORKTREE_PATH; paste both. Stop those servers afterwards. If it cannot run, mark the affected rows UNVERIFIED and say why.
 7. Test strength. For each row with executable behavior, name the test that would fail if the behavior were absent; write "N/A (documentation)" for documentation-only rows. When REVIEW_ROUND is `first` or `final full review` (skip it in `re-review` rounds), prove it for the one or two highest-severity rows in a disposable copy outside WORKTREE_PATH, never in WORKTREE_PATH itself:
 
    ```bash
@@ -88,6 +92,12 @@ Manifest cases: <covered> of <total> (or "none")
 
 ### Findings
 - [severity] [ID] file:line — in-scope finding → smallest fix   (or "No requirements gaps found.")
+
+### Edge cases judged
+- <corner case> — <label>: <one-sentence behavior>; code matches: yes/no   (or "None.")
+
+### Questions for the owner
+- <corner case> — recommend: <label>: <one-sentence behavior>   (or "None.")
 
 ### Follow-up Notes
 - [out-of-scope concern] or "None."

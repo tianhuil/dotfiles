@@ -32,11 +32,11 @@ Use [`../large-design/SKILL.md`](../large-design/SKILL.md) when **any** of these
 - the change crosses a public API, process, service, deployment, or integration boundary;
 - external versions, configuration, network, platform, vendor behavior, or security assumptions matter;
 - generated files, fixtures, captured data, migrations, or other evidence need provenance or drift rules;
-- the required cases form a matrix, include multiple modes, or could be silently omitted;
+- the required cases form a matrix or include multiple modes;
 - a false-green acceptance result could hide missing behavior, data-integrity risk, or an unsafe claim; or
 - ownership, source of truth, failure classification, or completion cannot be stated compactly.
 
-When uncertain, choose the large format. Do not force a large feature into the simple format merely to keep the document short. A simple design may be upgraded to a large design when exploration reveals a trigger above. Run the selected skill as a separate skill so its scope and context remain clear.
+When uncertain, choose the simple format. Use the large format only when a trigger above concretely applies, not because one might. A simple design may be upgraded to a large design when exploration reveals a trigger above. Run the selected skill as a separate skill so its scope and context remain clear.
 
 ## Milestones
 
