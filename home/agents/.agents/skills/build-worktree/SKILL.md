@@ -39,8 +39,8 @@ Or reference them by their install path at `~/.agents/skills/build-worktree/`.
 
 ## Constraints
 
-1. **Do not merge by default.** Merge only when the user explicitly requests merging as part of this task, and only when the build status is `READY` (Step 3.5). Otherwise stop after CI passes and report the result.
-2. **Stay on the worktree you created in Step 0.** Never create additional branches or worktrees, except the disposable detached worktrees reviewers create and remove for absence checks. Fix issues in place.
+1. **Do not merge by default.** Merge only when the user explicitly requests merging as part of this task, and only when the build status is `READY` (Step 3.5). Otherwise stop after CI passes and report the result. The one exception is the broken-base fix PR in [`fix-broken-base.md`](fix-broken-base.md), which merges under that file's rules.
+2. **Stay on the worktree you created in Step 0.** Never create additional branches or worktrees, except the disposable detached worktrees reviewers create and remove for absence checks, and the broken-base fix worktree in [`fix-broken-base.md`](fix-broken-base.md). Fix issues in place.
 3. **Fail closed.** Missing evidence means not done. Never waive a failing check as "environmental", "flaky", "known OOM", or "unrelated". Clean up only processes you started, re-run once, and if it still fails, set status `BLOCKED` and escalate to the user.
 4. **Workers preserve checklist integrity.** They do not weaken protected paths by removing cases, adding skips, loosening assertions or thresholds, or editing expected values to match new output unless the task names that change. Reviewers decide; the separate readiness commit records the result. Apply checklist-ticking rules from [Common design rules](../design/common-rules.md).
 5. **Scope is locked.** Fix only findings required by the captured task contract, caused by the diff, or required to make its declared verification pass. Treat pre-existing defects, adjacent improvements, cleanup, reviewer preferences, and new requirements as follow-up notes; do not change them in this PR. If a fix would alter `DESIGN_SCOPE`, `REQUIREMENT_IDS`, `MANIFEST_CASES`, `ACCEPTANCE_PROCEDURE`, or `PROTECTED_PATHS`, stop and ask the user rather than expanding scope. A user-approved scope change starts a new contract capture and review cycle.
@@ -105,6 +105,7 @@ Before any implementation, collect the contract the reviewers will enforce. Read
 
    Changes to CI workflow files can only be proven by a CI run. For those rows, push a draft PR (Step 4) before review; the requirements reviewer then cites the CI run for `EXPECTED_HEAD` (`gh run list --commit <sha> --json conclusion,headSha`) as executed evidence.
 5. **Protected paths.** Record paths named by the design and `AGENTS.md` as single-quoted git pathspecs (for example `':(glob)**/*.test.ts' 'scripts/verify.ts'`) so deleted files still match. Apply their protection rules from [Common design rules](../design/common-rules.md).
+6. **Base check.** Run `VERIFY_COMMAND` with Step 2's `validate.sh` in `WORKTREE_PATH`, which still equals `BASE_BRANCH`. If it prints a non-zero `EXIT=`, the base is broken: read [`fix-broken-base.md`](fix-broken-base.md) and follow it before any implementation.
 
 Keep these items in the orchestrator's environment as `DESIGN_DOCS`, `DESIGN_SCOPE`, `REQUIREMENT_IDS`, `MANIFEST_CASES`, `VERIFY_COMMAND`, `ACCEPTANCE_PROCEDURE`, and `PROTECTED_PATHS`. Pass them to every worker and reviewer.
 
