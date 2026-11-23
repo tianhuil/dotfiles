@@ -15,7 +15,9 @@ Design documents (authoritative): DESIGN_DOCS
 Work unit in scope (design file and heading, or "no design"): DESIGN_SCOPE
 Requirement rows the orchestrator extracted (checklist lines under that heading, or the task's asks): REQUIREMENT_IDS
 Required-case manifest cases for this unit (file, selector, count, or "none"): MANIFEST_CASES
+Review round (`first`, `re-review` with the previous reviewed HEAD, or `final full review`): REVIEW_ROUND
 Repository verify command: VERIFY_COMMAND
+Verify result the orchestrator recorded in Step 2 (HEAD and the `EXIT= LOG= CMD=` line; or "not applicable (docs-only)"): VERIFY_RESULT
 Acceptance procedure (end-to-end, real environment): ACCEPTANCE_PROCEDURE
 Protected paths (gates, manifests, required-case lists, acceptance tests) this change must not weaken: PROTECTED_PATHS
 
@@ -32,16 +34,16 @@ Workflow:
    - If MANIFEST_CASES names a selector (not "none" and not "checked at completion of …"), select those cases from the manifest yourself and count them. Each case needs evidence (the test or command result that covers it) under the row it belongs to; a case with none makes that row UNMET. Report "<covered> of <total> manifest cases". A count that differs from MANIFEST_CASES is a High finding.
 3. Run `git diff $(git merge-base HEAD BASE_BRANCH)...HEAD` and read every changed file in full.
 4. Check every row according to its `verify:` type from [Common design rules](../../design/common-rules.md). A row without one is checked as `cmd:` using the narrowest test that proves it; if no command can check it, as `review:`.
-   - `cmd:` run it through `bash ~/.agents/skills/build-worktree/validate.sh WORKTREE_PATH "<cmd>"` and record its `EXIT=` line plus the decisive output line from the `LOG=` file.
+   - `cmd:` run it through `bash ~/.agents/skills/build-worktree/validate.sh WORKTREE_PATH "<cmd>"` and record its `EXIT=` line plus the decisive output line from the `LOG=` file. If the command is VERIFY_COMMAND, cite VERIFY_RESULT instead of re-running it.
    - `browser:` perform that step in the Acceptance Environment (step 6) and record what you saw.
    - `ci:` cite the named job's result for EXPECTED_HEAD (`gh run list --commit EXPECTED_HEAD --json databaseId,conclusion,headSha`, then `gh run view <id>`).
    - `review:` judge the work against the stated criterion. Quote the `file:line` you relied on and say concretely why it is or is not met. A `grep` showing a word exists is not enough on its own.
    - `owner:` you cannot verify it. Mark it OWNER and say what the owner must check. It does not block this review, and it is never ticked by agents.
 
    A `cmd:`, `browser:`, or `ci:` row with no executed evidence is UNMET. "Should work", "covered by CI" without the run, or a worker's report is not evidence. If a row marked `review:` or `owner:` could clearly have been an automated check, add a Medium finding suggesting the command.
-5. Run `bash ~/.agents/skills/build-worktree/validate.sh WORKTREE_PATH "VERIFY_COMMAND"`. Its `EXIT=` line decides: any non-zero exit makes the verdict FAIL, and never judge pass from cut-off output. Do not waive failures as "environmental", "flaky", "known OOM", or "unrelated": record them as UNVERIFIED with the exact error. Afterwards run `git status --porcelain` again; if the verify step changed tracked files, report it as a finding.
-6. Acceptance. If ACCEPTANCE_PROCEDURE is "not applicable", confirm from the diff that no user-visible or integration surface changed; if one did, that is a High finding. Otherwise run ACCEPTANCE_PROCEDURE against the real environment it names (real URLs, real browser), using servers you started from this checkout for this round, and paste the observed result for each step. Prove where the servers came from: for each port, `ss -ltnp 'sport = :<port>'` gives the PID, and `readlink /proc/<pid>/cwd` must be inside WORKTREE_PATH; paste both. Stop those servers afterwards. If it cannot run, mark the affected rows UNVERIFIED and say why.
-7. Test strength. For each row with executable behavior, name the test that would fail if the behavior were absent; write "N/A (documentation)" for documentation-only rows. In a first round or a final full review (skip in other re-review rounds), prove it for the one or two highest-severity rows in a disposable copy outside WORKTREE_PATH, never in WORKTREE_PATH itself:
+5. Check VERIFY_RESULT; do not re-run VERIFY_COMMAND. It must name EXPECTED_HEAD, and its `EXIT=` line decides: a missing result, a different HEAD, or a non-zero exit makes the verdict FAIL. Read its `LOG=` file for the decisive lines; never judge pass from cut-off output. Do not waive failures as "environmental", "flaky", "known OOM", or "unrelated": record them as UNVERIFIED with the exact error from the log.
+6. Acceptance. If ACCEPTANCE_PROCEDURE is "not applicable", confirm from the diff that no user-visible or integration surface changed; if one did, that is a High finding. In a `re-review` round, run `git diff --stat <previous reviewed HEAD>..HEAD`: if the fix touched no user-visible or integration surface, do not re-run acceptance; write "carried forward from <previous HEAD>: fix touched only <files>". Always run it in `first` and `final full review` rounds. When you run it, run ACCEPTANCE_PROCEDURE against the real environment it names (real URLs, real browser), using servers you started from this checkout for this round, and paste the observed result for each step. Prove where the servers came from: for each port, `ss -ltnp 'sport = :<port>'` gives the PID, and `readlink /proc/<pid>/cwd` must be inside WORKTREE_PATH; paste both. Stop those servers afterwards. If it cannot run, mark the affected rows UNVERIFIED and say why.
+7. Test strength. For each row with executable behavior, name the test that would fail if the behavior were absent; write "N/A (documentation)" for documentation-only rows. When REVIEW_ROUND is `first` or `final full review` (skip it in `re-review` rounds), prove it for the one or two highest-severity rows in a disposable copy outside WORKTREE_PATH, never in WORKTREE_PATH itself:
 
    ```bash
    tmp=$(mktemp -d) && git -C WORKTREE_PATH worktree add --detach "$tmp" HEAD
@@ -54,6 +56,8 @@ Workflow:
 8. Gate integrity. Run `git diff --name-status -M $(git merge-base HEAD BASE_BRANCH)...HEAD -- PROTECTED_PATHS` with each pathspec single-quoted, so deleted and renamed files still show up, then read the full diff of every file it lists. Any change there that removes cases, lowers thresholds, adds skips (`.skip`, `.todo`, `test.fails`, `continue-on-error`, `|| true`), reclassifies failures as passes, or edits expected values to match the new output is a blocking finding unless the design or the user's task names that exact change. Added cases and cleanly regenerated generated files are fine.
 9. Checkboxes. Enforce the checklist-ticking rule in [Common design rules](../../design/common-rules.md): any design `- [x]` ticked in this diff without a MET row backed by evidence is a blocking finding.
 10. Also check for partial implementations, TODOs left behind, silent scope cuts, and deleted comments that were still correct. If the repository's `AGENTS.md` lists what else to update when something changes, check the diff against it. For edits to design docs, list any decision that was removed or changed without a recorded reason.
+
+Re-review rule. When REVIEW_ROUND is `re-review`, first report whether each prior finding is fixed; a prior finding that is still open keeps its original blocking status. Then review the whole diff as usual and report everything you find. A new finding in lines changed by `git diff <previous reviewed HEAD>..HEAD` blocks under the normal rules. A new finding anywhere else blocks only if it is Critical; otherwise list it under Follow-up Notes marked "found late, outside the fix".
 
 Do not modify project files, commit, or push. For each finding give severity (Critical/High/Medium/Low), file:line, the requirement ID, why it matters, and the smallest safe fix.
 
@@ -71,7 +75,7 @@ Checkout: <pwd> <branch> <HEAD>  (matches expected: yes/no; clean: yes/no)
 Manifest cases: <covered> of <total> (or "none")
 
 ### Verify command
-`EXIT=<code> LOG=<path> CMD=VERIFY_COMMAND` (quoted from validate.sh); <summary>
+<HEAD from VERIFY_RESULT>: `EXIT=<code> LOG=<path> CMD=VERIFY_COMMAND` (quoted from VERIFY_RESULT); <decisive lines from the log>
 
 ### Acceptance procedure
 <each step → observed result, or why it could not run>
@@ -93,4 +97,6 @@ Manifest cases: <covered> of <total> (or "none")
 
 ### Verdict: PASS | FAIL
 
-PASS only if the checkout matched and was clean, your extracted rows match REQUIREMENT_IDS, every row is MET with evidence of its `verify:` type (OWNER rows excepted; list them), every selected manifest case is covered, the verify command passed, the acceptance procedure passed (or is not applicable and you confirmed no user-visible or integration surface changed), no protected path was weakened, and there are no Critical/High findings. Otherwise FAIL. UNVERIFIED counts as FAIL.
+PASS only if the checkout matched and was clean, your extracted rows match REQUIREMENT_IDS, every row is MET with evidence of its `verify:` type (OWNER rows excepted; list them), every selected manifest case is covered, VERIFY_RESULT is for EXPECTED_HEAD with `EXIT=0`, the acceptance procedure passed (or was carried forward in a `re-review` as step 6 allows, or is not applicable and you confirmed no user-visible or integration surface changed), no protected path was weakened, and there are no blocking Critical/High findings after the re-review rule. Otherwise FAIL. UNVERIFIED counts as FAIL.
+
+In a `final full review`, only Critical findings block: High and lower findings do not make the verdict FAIL; list them under Findings marked "non-blocking (final review)". Every other PASS condition above still applies.
