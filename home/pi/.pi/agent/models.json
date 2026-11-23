@@ -9,7 +9,7 @@
 // distinct effort tier.
 //
 // Effort models:  deepseek-v4-flash-free (low/high/max)
-// Effort models:  glm-5.3-flash and glm-5.4 (low/high/max), gpt-5.6-sol/luna (none/low/medium/high/xhigh/max)
+// Effort models:  glm-5.3-flash and glm-5.4 (low/high/max), gpt-6.2-sol/luna (none/low/medium/high/xhigh/max)
 
 {
   "providers": {
@@ -31,7 +31,7 @@
     },
     "openai-codex": {
       "modelOverrides": {
-        "gpt-5.6-sol": {
+        "gpt-6.2-sol": {
           "thinkingLevelMap": {
             "off": null,
             "minimal": null,
