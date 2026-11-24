@@ -31,6 +31,8 @@
 #   p6  `pi --skill <path>` explicitly loads a skill the in-tree ignore file
 #       hides                                                                  (SS)
 #   p7  name collision: pi keeps the first discovered skill, not both          (DOC)
+#   p8  project trust gate: in print mode an untrusted project loads NO
+#       project skills; with --approve they load (pi >= 1.6)                   (pi 1.6 re-verify)
 #   c1  claude discovers a flat .claude/skills/<name>/SKILL.md                 (SK)
 #   c2  claude does NOT discover nested .claude/skills/<sub>/<name>/SKILL.md   (SK gap)
 #   c3  claude follows a .claude/skills/<name> symlink into .agents/skills     (SK)
@@ -108,8 +110,15 @@ pi_session_file() { # $1=cwd -> newest session jsonl for that cwd (or empty)
 }
 
 run_pi() { # $1=cwd, extra args after
+  # -a (--approve): sandbox repos are never trusted; without this, pi >= 1.6
+  # skips ALL project resources in print mode and every project-skill test
+  # would "pass" or "fail" vacuously. See p8 for the gate itself.
   local cwd=$1; shift
-  (cd "$cwd" && "$PI_BIN" -p "Reply with the single word OK." "$@" >/dev/null 2>&1)
+  (cd "$cwd" && "$PI_BIN" -a -p "Reply with the single word OK." "$@" >/dev/null 2>&1)
+}
+run_pi_untrusted() { # $1=cwd — no -a: exercise the project-trust gate
+  local cwd=$1
+  (cd "$cwd" && "$PI_BIN" -p "Reply with the single word OK." >/dev/null 2>&1)
 }
 
 pi_has() { # $1=session-file $2=probe-name
@@ -250,6 +259,20 @@ EOF
     else fail "p6 --skill explicit load" "probe not in session"; fi
   fi
 
+  if selected p8; then
+    sb=$(new_sandbox t8 yes)
+    mk_skill "$sb/.agents/skills/p8-trust-probe" p8-trust-probe "P8 trust probe."
+    note "p8: running pi WITHOUT --approve in a fresh (untrusted) repo…"
+    run_pi_untrusted "$sb"; f=$(pi_session_file "$sb")
+    if [ -n "$f" ] && ! pi_has "$f" p8-trust-probe; then
+      pass "p8 untrusted project: project skill NOT loaded in print mode"
+    else fail "p8 trust gate" "probe visible without trust (or no session log)"; fi
+    note "p8: running pi WITH --approve in the same repo…"
+    run_pi "$sb"; f=$(pi_session_file "$sb")
+    if pi_has "$f" p8-trust-probe; then pass "p8 approved project: project skill loaded"
+    else fail "p8 trust gate" "probe still hidden with --approve"; fi
+  fi
+
   if selected p7; then
     sb=$(new_sandbox t7 yes)
     mk_skill "$sb/.agents/skills/aa-first/p7-dup-probe" p7-dup-probe "P7 first."
@@ -258,7 +281,7 @@ EOF
     run_pi "$sb"; f=$(pi_session_file "$sb")
     local loc count
     loc=$(pi_location "$f" p7-dup-probe)
-    count=$(grep -o "<name>p7-dup-probe</name>" "$f" 2>/dev/null | wc -l)
+    count=$(grep -o "<name>p7-dup-probe</name>" "$f" 2>/dev/null | wc -l | tr -d ' ')
     if [ "$count" = 1 ] && [ -n "$loc" ]; then
       case "$loc" in *aa-first*) pass "p7 collision: exactly one skill kept (first: $loc)" ;;
         *) pass "p7 collision: exactly one skill kept (winner: $loc — not the first scanned)"; note "     (pi docs say first discovered wins; winner order may differ by version)" ;;

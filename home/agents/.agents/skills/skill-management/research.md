@@ -2,7 +2,7 @@
 
 Evidence for the rules in [SKILL.md](SKILL.md). Read only when changing this skill or investigating discovery behavior. Re-run anything with `tests/skill-claims-test.sh`.
 
-Verified against pi 1.5.2 (installed dist source: `dist/core/skills.js`, `dist/core/package-manager.js`) and Claude Code 2.1.322 (empirical CLI runs only). Behavior may drift; the test script is the source of truth.
+Verified against pi 1.5.2 (2026-11-11) and re-verified against pi 1.6.0 + Claude Code 2.1.285 (2026-11-24). Behavior may drift; the test script is the source of truth.
 
 ## Claim matrix (2026-11-11)
 
@@ -15,6 +15,7 @@ Verified against pi 1.5.2 (installed dist source: `dist/core/skills.js`, `dist/c
 | p5 | repo-root `.gitignore` does not affect pi skill discovery | PASS |
 | p6 | `pi --skill <path>` loads a skill the in-tree ignore file hides | PASS |
 | p7 | name collision: exactly one skill kept, first scanned wins | PASS |
+| p8 | project trust gate: untrusted project loads no project skills in print mode; `--approve` loads them (pi >= 1.6) | PASS |
 | c1 | claude discovers flat `.claude/skills/<name>/` | PASS |
 | c2 | claude does NOT discover `.claude/skills/<sub>/<name>/` (one level only) | PASS |
 | c3 | claude follows `.claude/skills/<name>` symlink into `.agents/skills/local/` | PASS |
@@ -23,6 +24,17 @@ Verified against pi 1.5.2 (installed dist source: `dist/core/skills.js`, `dist/c
 | s1 | `npx skills experimental_install` plans restore from `skills-lock.json` (online) | PASS |
 
 Detection method: pi — skills section of the system prompt in the newest session jsonl under `~/.pi/agent/sessions/`; claude — `skill_listing` attachment in the newest jsonl under `~/.claude/projects/<cwd with / and . mapped to ->`.
+
+## Re-verification (2026-11-24, pi 1.6.0)
+
+Question behind this re-run: does pi discover skills when the skills folder is ignored by the **repository-root** `.gitignore`? Answer: **yes — p5 still holds.** A root `.gitignore` entry hiding `.agents/skills/<name>/` does not hide the skill from pi. pi reads ignore files (`.gitignore`, `.ignore`, `.fdignore`) only inside the scanned skills tree (dist source: `addIgnoreRules` is called per directory under the skills root; the repo root is never consulted).
+
+Two pi 1.6.0 changes surfaced while re-running:
+
+1. **Project trust gate.** pi 1.6.0 added project trust; in print/RPC mode an untrusted project loads **no** project resources, including `.agents/skills/`. The original p5 run failed for this reason, not because of gitignore. Fixes: the test harness now runs `pi -a` (`--approve`, trust for one run) and a new p8 asserts the gate itself (untrusted: probe absent; approved: probe present). Saved trust decisions live in `~/.pi/agent/trust.json`.
+2. **Test harness bug (not a pi change).** p7 compared macOS `wc -l` output (space-padded) as a string and always failed; the count is now trimmed.
+
+All pi claims (p1–p8) and all claude claims (c1–c5) PASS on this date: `tests/skill-claims-test.sh --all` → 17 checks, 0 failures.
 
 ## CLAUDE.md pointer experiments (2026-11-11)
 
