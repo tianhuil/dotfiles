@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Claude Code: default every session to bypassPermissions.
+# Claude Code: default every session to bypassPermissions and hide Claude attribution.
 #
 # Why this hack instead of stowing ~/.claude/settings.json like other dotfiles:
 #   - Orca (and Claude itself) rewrite settings.json by replacing the file, which
@@ -18,5 +18,5 @@ command -v jq >/dev/null || { echo "WARNING: jq not found; skipping Claude setti
 CLAUDE_SETTINGS="$HOME/.claude/settings.json"
 mkdir -p "$(dirname "$CLAUDE_SETTINGS")"
 [ -f "$CLAUDE_SETTINGS" ] || echo '{}' > "$CLAUDE_SETTINGS"
-jq '.permissions.defaultMode = "bypassPermissions"' "$CLAUDE_SETTINGS" > "$CLAUDE_SETTINGS.tmp"
+jq '.permissions.defaultMode = "bypassPermissions" | .attribution = {commit: "", pr: "", sessionUrl: false}' "$CLAUDE_SETTINGS" > "$CLAUDE_SETTINGS.tmp"
 mv "$CLAUDE_SETTINGS.tmp" "$CLAUDE_SETTINGS"
