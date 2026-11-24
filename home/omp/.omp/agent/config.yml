@@ -4,9 +4,9 @@ theme:
 setupVersion: 1
 modelRoles: 
   default: opencode-zen/big-pickle:medium
-  slow: zai/glm-5.2:xhigh          # hardest reasoning; max thinking on strongest subscription model
-  plan: zai/glm-5.2:high           # architecture / multi-file planning
-  designer: zai/glm-5.2:high       # GLM-5.2 is #1 on the design arena
+  slow: zai/glm-5.4:max            # hardest reasoning; max thinking on strongest subscription model
+  plan: zai/glm-5.4:high           # architecture / multi-file planning
+  designer: zai/glm-5.4:high       # strongest GLM model
   # --- Fast / latency-sensitive: zai subscription (flash) ---
   smol: zai/glm-4.7-flash          # most frequent call: lookups, classification, trivial work
   vision: zai/glm-5v-turbo         # newest zai multimodal model
