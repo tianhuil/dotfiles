@@ -92,9 +92,10 @@ Use the pointer only for on-demand skill use. When a skill must activate without
 
 ## Discovery rules to respect
 
-- Pi honors ignore files inside the skills tree (`.gitignore`, `.ignore`, `.fdignore`) and never the repository-root `.gitignore`. Never expect a vendor skill hidden by the catch-all above to load in Pi — load it with `pi --skill <path>` or install it as a Pi package. Claude Code ignores `.gitignore` entirely.
+- Pi honors ignore files inside the skills tree (`.gitignore`, `.ignore`, `.fdignore`) and never the repository-root `.gitignore`. Gitignoring skills from the repo root does **not** hide them from pi — use an in-tree ignore file to do that. Never expect a vendor skill hidden by the catch-all above to load in Pi — load it with `pi --skill <path>` or install it as a Pi package. Claude Code ignores `.gitignore` entirely.
 - Pi recurses into `.agents/skills/` subdirectories and stops recursing at any directory containing `SKILL.md`. Claude Code reads only one level under `.claude/skills/`.
 - Pi scans `.agents/skills/` from the working directory up to the git repository root (to the filesystem root when there is no repo).
+- Pi >= 1.6 gates project skills behind **project trust**: in print/RPC mode an untrusted project loads no project skills at all. Grant trust with `pi -a` (one run), `/trust` (saved, in `~/.pi/agent/trust.json`), or `defaultProjectTrust` in settings. A missing skill in scripted runs is usually this gate, not gitignore.
 - Keep local and vendor skill names unique: on collision, Pi silently keeps the first discovered skill.
 
 ## Supporting files
