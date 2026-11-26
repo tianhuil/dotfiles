@@ -45,7 +45,7 @@ Done when: the worker made a fix, all three diff checks pass, and `validate.sh` 
 
 1. Launch a fresh `build-reviewer` with `cwd: FIX_PATH`. Its task: confirm the checkout is `FIX_BRANCH` at the fix commit and clean; read the full diff; apply the "Gate integrity" step of `"$SKILL_DIR/prompts/review-requirements.md"` with `PROTECTED_PATHS`; judge whether the diff fixes the cause rather than hiding the failure, quoting `file:line`. Verdict PASS or FAIL.
 2. Push with `push-pr.sh` (not a draft). In the body, give the failing command, the cause, the reviewer's verdict, and the `EXIT=0` line.
-3. Run `monitor-ci.sh` for the fix commit. Merge only on `CONCLUSION=success`:
+3. Run `run-local-ci.sh` from `FIX_PATH` for the fix commit. Merge only on `CONCLUSION=success`:
 
    ```bash
    gh pr merge "$FIX_PR_NUMBER" --merge --match-head-commit "$(git -C "$FIX_PATH" rev-parse HEAD)"

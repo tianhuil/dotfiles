@@ -31,9 +31,10 @@ Or reference them by their install path at `~/.agents/skills/build-worktree/`.
 | Script                                     | Step | Purpose                                                                                                                                                |
 | ------------------------------------------ | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `git-orca-worktrees/setup.sh "<name>"`      | 0    | Create Orca worktree, falling back to plain Git. Outputs `BRANCH_NAME`, `BASE_BRANCH`, `WORKTREE_TOOL`, `WORKTREE_PATH`, and Orca `WORKTREE_ID` |
+| `local-ci-status.sh "<worktree>"`         | 0.5  | Check that local-ci can run. Outputs `LOCAL_CI` (command, such as `pnpm exec local-ci`; empty if missing) and `SETUP` (what is missing, empty when ready) |
 | `validate.sh "<worktree>" <cmd...>`        | 2    | Run validation commands in worktree with `pipefail`. Prints `EXIT=<code> LOG=<path> CMD=<cmd>` per command and the log tail on failure. Exits 0 only if all pass |
-| `push-pr.sh "<branch>" "<title>" "<body>"` | 4    | Push branch + create PR. Outputs PR URL and `PR_NUMBER`                                                                                                |
-| `monitor-ci.sh "<branch>" "<pr_number>"`   | 5    | Wait for CI via `gh run watch`, check mergeability. Outputs `CONCLUSION`, `MERGEABLE`, `RUN_ID`                                                        |
+| `push-pr.sh "<branch>" "<title>" "<body>"` | 1    | Push branch + create PR (`PR_DRAFT=1` for a draft). Outputs PR URL and `PR_NUMBER`                                                                     |
+| `run-local-ci.sh "<pr_number>" "<sha>"`     | 5    | Run from the worktree. Run local-ci on `HEAD`, check mergeability. Outputs `CONCLUSION`, `LOCAL_CI_LOGS`, `MERGEABLE`, `MERGE_CONFLICT` |
 | `gh pr merge`                               | 7    | Merge PR only when explicitly requested                                                          |
 
 
@@ -100,10 +101,16 @@ Parse the output for `BRANCH_NAME` (may have `-v2` suffix if branch existed), `B
 Before any implementation, collect the contract the reviewers will enforce. Read the repository's `AGENTS.md` and README in the worktree, and every design doc linked by the task.
 
 1. **Design contract.** Apply [Common design rules](../design/common-rules.md). For each design the task implements, verify readiness before implementation. Capture `DESIGN_SCOPE`, `REQUIREMENT_IDS`, and `MANIFEST_CASES` verbatim from the design; for a task without a design, capture each ask verbatim as `TASK#1`, `TASK#2`, and so on. If the task links a design but does not name an existing work unit, stop and ask the user.
+2. **local-ci.** PR checks run only on this machine with local-ci; read the `local-ci` skill. Run `bash ~/.agents/skills/build-worktree/local-ci-status.sh "$WORKTREE_PATH"`. Done when `SETUP` is empty and `LOCAL_CI` is set. For each word in `SETUP`:
+   - `deps`: local-ci is declared but not installed; run the repository's install command.
+   - `config`, `dev-dependency`, `global`: stop and ask the user before setting up local-ci, naming what is missing. On no, set status `BLOCKED` and stop: work does not start without local-ci. On yes, add `TASK#local-ci` to the contract and, after the base check (item 6), have the worker (record `WORKER_RUN_ID`; Step 1 resumes it) do the project-file parts in one commit, `ci: run PR checks with local-ci`:
+     - `config`: write `local-ci.yml` with one Check per command the PR workflows in `.github/workflows/` run (or the parts of `VERIFY_COMMAND`, when there are none).
+     - `dev-dependency`: install local-ci pinned to the latest tag (`git ls-remote --tags --refs https://github.com/tianhuil/local-ci | sort -t/ -k3 -V | tail -1`), for example `pnpm add -D github:tianhuil/local-ci#<tag>`.
+     - `global` (no `package.json`): run `npm install -g github:tianhuil/local-ci#<tag>` yourself; it touches no project file.
 3. **Verify command.** Use the single verify command the repository's `AGENTS.md` defines (for example `pnpm verify`). If none is defined, derive the command list from CI (Step 2) and say in the final report that the repository lacks one.
 4. **Acceptance procedure.** From the design's Owner Acceptance Script and Acceptance Environment, or the repository's `AGENTS.md`, record how to check the change end to end in the environment the user actually uses (real URLs, real browser). For changes with no user-visible or integration surface, record "not applicable" and why; the requirements reviewer must confirm that from the diff. If the procedure needs a browser, probe for it in the worktree now (for example `command -v agent-browser && agent-browser --version`, or the repository's browser test command). If the probe fails, set status `BLOCKED` ("owner acceptance required: no browser tool") now rather than spending review rounds.
 
-   Changes to CI workflow files can only be proven by a CI run. For those rows, push a draft PR (Step 4) before review; the requirements reviewer then cites the CI run for `EXPECTED_HEAD` (`gh run list --commit <sha> --json conclusion,headSha`) as executed evidence.
+   Changes to CI workflow files can only be proven by a CI run on GitHub. The requirements reviewer cites the run for `EXPECTED_HEAD` (`gh run list --commit <sha> --json conclusion,headSha`) as executed evidence. A workflow whose trigger excludes pull requests (repos using local-ci often run cloud CI only on `main`) never runs on the draft PR, so start it on the branch with `gh workflow run <file> --ref "$BRANCH_NAME"` (needs a `workflow_dispatch` trigger). Changes to `local-ci.yml` are proven by Step 5's run.
 5. **Protected paths.** Record paths named by the design and `AGENTS.md` as single-quoted git pathspecs (for example `':(glob)**/*.test.ts' 'scripts/verify.ts'`) so deleted files still match. Apply their protection rules from [Common design rules](../design/common-rules.md).
 6. **Base check.** Run `VERIFY_COMMAND` with Step 2's `validate.sh` in `WORKTREE_PATH`, which still equals `BASE_BRANCH`. If it prints a non-zero `EXIT=`, the base is broken: read [`fix-broken-base.md`](fix-broken-base.md) and follow it before any implementation.
 
@@ -155,6 +162,14 @@ cd "$WORKTREE_PATH" && git add -- <reported files> && git status --porcelain
 git commit -m "<type>: <descriptive message>"
 ```
 
+Then open a draft PR, so the work is visible from the first commit (title and body as in Step 4, with `Status: IN_PROGRESS`), and record `PR_NUMBER`. If output contains `NO_REMOTE`, report that no PR is possible and stop.
+
+```bash
+cd "$WORKTREE_PATH" && PR_DRAFT=1 bash ~/.agents/skills/build-worktree/push-pr.sh "$BRANCH_NAME" "$TITLE" "$BODY"
+```
+
+From here on, push every new commit (`git -C "$WORKTREE_PATH" push`), so the PR always shows `HEAD`. Step 4 updates its body and draft state; Step 5 runs local-ci.
+
 ### Delegated agents
 
 Use focused prompts and pass the worktree as `cwd` on every delegation. Preserve this contract:
@@ -202,7 +217,7 @@ Do not drop a command because it is slow, memory-hungry, or failed for "environm
 
 Pass and fail come from `validate.sh` exit codes, never from reading output. Every pass claim, by the orchestrator, a worker, or a reviewer, quotes the `EXIT=0` line; read the `LOG=` file when the tail is not enough.
 
-If it exits non-zero, resume `WORKER_RUN_ID` as the fix agent, with the validation output in its follow-up message. Ask it to fix the failures, commit, and report its changes; then re-run. Repeat until all pass **up to 3 times**. If it continues to fail after these attempts to fix it, set status `BLOCKED`, skip Step 3, push only a draft PR (Step 4), and explain what went wrong.
+If it exits non-zero, resume `WORKER_RUN_ID` as the fix agent, with the validation output in its follow-up message. Ask it to fix the failures, commit, and report its changes; then re-run. Repeat until all pass **up to 3 times**. If it continues to fail after these attempts to fix it, set status `BLOCKED`, skip Step 3, update the draft PR (Step 4), and explain what went wrong.
 
 ## Step 3: Task Review (required)
 
@@ -247,18 +262,9 @@ git -C "$WORKTREE_PATH" diff -U0 "$READY_HEAD" HEAD            # only "- [ ]" ->
 
 If the commit passes both checks, it keeps `READY`. Anything else, or any other change after `READY`, returns the status to `IN_PROGRESS`. Record `FINAL_HEAD="$(git -C "$WORKTREE_PATH" rev-parse HEAD)"`: this is the only commit that may merge.
 
-## Step 4: Push PR
+## Step 4: Update the PR
 
-```bash
-# READY:
-bash ~/.agents/skills/build-worktree/push-pr.sh "$BRANCH_NAME" "$TITLE" "$BODY"
-# BLOCKED or unreviewed: open a draft so it cannot be mistaken for finished work
-PR_DRAFT=1 bash ~/.agents/skills/build-worktree/push-pr.sh "$BRANCH_NAME" "$TITLE" "$BODY"
-```
-
-If output contains `NO_REMOTE`, report that no PR is possible and stop.
-
-If a PR already exists for the branch (for example an earlier draft), do not create another. Push, then update it to match the current status. Do this every time the status or `HEAD` changes, including after Steps 5.5 and 6:
+The draft PR from Step 1 is the only PR for the branch. Push, then update it to match the current status; it stays a draft unless `READY`, so unfinished work is never mistaken for finished work. Do this every time the status or `HEAD` changes, including after Steps 5.5 and 6:
 
 ```bash
 git -C "$WORKTREE_PATH" push
@@ -299,18 +305,18 @@ The AI must compose the PR title and body. Use this structure, copying tables fr
 - <anything not observed directly, or "Nothing.">
 ```
 
-## Step 5: Monitor CI
+## Step 5: Run CI with local-ci
 
 ```bash
-bash ~/.agents/skills/build-worktree/monitor-ci.sh "$BRANCH_NAME" "$PR_NUMBER" "$(git -C "$WORKTREE_PATH" rev-parse HEAD)"
+cd "$WORKTREE_PATH" && bash ~/.agents/skills/build-worktree/run-local-ci.sh "$PR_NUMBER" "$(git rev-parse HEAD)"
 ```
 
-The script waits for the CI run of that exact commit, so a result from an earlier push is never mistaken for this one. Parse output:
+The local Run is the CI: the script runs local-ci on `HEAD`, which mirrors each Check to GitHub as a `local-ci/<check>` Commit Status and skips Checks already passed on that commit. It can run as long as the slowest Check's timeout in `local-ci.yml`. `gh pr checks` passes even when local-ci never ran, so this output is the CI evidence. Parse output:
 
-- `CONCLUSION=success` → **CI PASSED**; proceed to Step 7 only if user explicitly requested merging and status is `READY`, otherwise report and stop
 - `MERGE_CONFLICT=true` → proceed to Step 5.5
-- `CONCLUSION=<other>` → proceed to Step 6
-- `TIMEOUT` → no CI run appeared, report to user
+- `CONCLUSION=success` → **CI PASSED**; proceed to Step 7 only if user explicitly requested merging and status is `READY`, otherwise report and stop
+- `CONCLUSION=failure` → proceed to Step 6
+- `ERROR:` → local-ci did not start (not ready, or `HEAD` moved); report to user
 
 ## Step 5.5: Resolve Merge Conflicts
 
@@ -331,12 +337,7 @@ git push --force-with-lease origin $BRANCH_NAME
 
 ## Step 6: Fix CI Failures (Loop)
 
-This step requires AI to understand failure logs. Get the details:
-
-```bash
-gh run view $RUN_ID --json jobs --jq '.jobs[] | select(.conclusion != "success") | {name: .name, conclusion: .conclusion}'
-gh run view $RUN_ID --log-failed
-```
+This step requires AI to understand failure logs. Read the failure preview in Step 5's output, and `<LOCAL_CI_LOGS>/<check>.log` for each failed Check.
 
 Resume `WORKER_RUN_ID` as the fix agent. Include the failed CI logs and the locked contract in its follow-up message. Ask it to fix only failures caused by this branch or required by the task; pre-existing or adjacent failures become `BLOCKED` follow-up notes, not scope expansion. Ask it to report its changes. Commit the reported files (as in Step 1) and push:
 

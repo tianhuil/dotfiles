@@ -9,7 +9,7 @@ set -euo pipefail
 #
 # Two ownership classes:
 #   1. Remote skills from other repos (anthropics/skills, mattpocock/skills, axi,
-#      orca-cli, lavish, vercel-labs agent-browser/find-skills) — declared in
+#      orca-cli, lavish, vercel-labs agent-browser/find-skills, local-ci) — declared in
 #      REMOTE_SKILLS, installed via the `skills` CLI, lock-tracked, refreshed every run.
 #      plannotator-* are CLI-managed too, by the plannotator CLI itself, and are left alone.
 #   2. Repo-versioned skills — owned by the `agents` stow package:
@@ -47,6 +47,7 @@ REMOTE_SKILLS=(
   "cloudflare/skills:wrangler"
   "vercel-labs/agent-browser:agent-browser"
   "vercel-labs/skills:find-skills"
+  "tianhuil/local-ci:local-ci"
 )
 
 if ! command -v npx >/dev/null 2>&1; then

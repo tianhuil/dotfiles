@@ -38,7 +38,7 @@ Workflow:
 4. Check every row according to its `verify:` type from [Common design rules](../../design/common-rules.md). A row without one is checked as `cmd:` using the narrowest test that proves it; if no command can check it, as `review:`.
    - `cmd:` run it through `bash ~/.agents/skills/build-worktree/validate.sh WORKTREE_PATH "<cmd>"` and record its `EXIT=` line plus the decisive output line from the `LOG=` file. If the command is VERIFY_COMMAND, cite VERIFY_RESULT instead of re-running it.
    - `browser:` perform that step in the Acceptance Environment (step 6) and record what you saw.
-   - `ci:` cite the named job's result for EXPECTED_HEAD (`gh run list --commit EXPECTED_HEAD --json databaseId,conclusion,headSha`, then `gh run view <id>`).
+   - `ci:` cite the named job's result for EXPECTED_HEAD (`gh run list --commit EXPECTED_HEAD --json databaseId,conclusion,headSha`, then `gh run view <id>`). A local-ci Check is a `local-ci/<check>` Commit Status: `gh api 'repos/{owner}/{repo}/commits/EXPECTED_HEAD/status' --jq '.statuses[] | {context, state, description}'`.
    - `review:` judge the work against the stated criterion. Quote the `file:line` you relied on and say concretely why it is or is not met. A `grep` showing a word exists is not enough on its own.
    - `owner:` you cannot verify it. Mark it OWNER and say what the owner must check. It does not block this review, and it is never ticked by agents.
 
