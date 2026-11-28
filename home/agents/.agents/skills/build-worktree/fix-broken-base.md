@@ -1,70 +1,30 @@
 # Fix a broken base
 
-Read this when the Step 0.5 base check fails (`VERIFY_COMMAND` fails on `BASE_BRANCH` before any implementation), or when Step 6 finds a CI Check failing for a cause outside this diff; then the Check's command is the failing command below. A broken base fails every round no matter what the task does, so settle it first. A **simple** failure is fixed in its own PR, merged, and the task continues. Anything else goes to the user.
+Use when `VERIFY_COMMAND` fails on the untouched base (Step 1), or a CI Check fails the same way on `BASE_BRANCH` (Step 6; that Check's command is the failing command). A broken base fails every round, so settle it first: a **simple** failure gets its own PR, merged before the task continues. Make one attempt; any step that misses its "Done when" goes to [Ask the user](#ask-the-user).
 
-Make one attempt. Any step that does not reach its completion criterion ends the attempt: go to [Ask the user](#ask-the-user).
-
-## 1. Classify the failure
-
-1. Re-run the base check once. If it passes, the failure is flaky, not simple.
-2. Check CI on the base commit: `gh run list --commit "$(git -C "$WORKTREE_PATH" rev-parse HEAD)" --json name,conclusion,headSha`. If CI ran the same command there and passed, the failure is local to this machine, not simple.
-
-Done when: the failure reproduced twice locally and CI on the base commit did not pass that command.
-
-## 2. Fix in a separate PR
-
-1. Create a second worktree with `bash ~/.agents/skills/git-orca-worktrees/setup.sh "fix/broken-base-<slug of the failing command>"`. Record its `BRANCH_NAME` and `WORKTREE_PATH` as `FIX_BRANCH` and `FIX_PATH`.
-2. Launch a new worker (not `WORKER_RUN_ID`) on the cheaper model:
-
-   ```text
-   subagent({
-     agent: "worker",
-     model: "openai-codex/gpt-5.6-luna:medium",
-     cwd: FIX_PATH,
-     task: `
-       Goal: make VERIFY_COMMAND pass on this branch by fixing the root cause of the failure below.
-       Context: <failing EXIT= line and log tail from the base check>; PROTECTED_PATHS.
-       Authority: edit files in FIX_PATH; do not commit or push.
-       Rules: at most 20 changed lines in at most 2 files. Fix the cause; keep every check, test, timeout, and threshold as strict as it is. If the fix needs more, or needs a check loosened, change nothing and say so.
-       Report: changed files, the cause, commands run with their EXIT= lines.
-     `
-   })
-   ```
-3. If the worker reports the fix is not simple, stop here. Otherwise commit the reported files (as in Step 1) and check the diff mechanically:
+1. **Classify.** Re-run once; a pass means flaky. Check CI on the base commit (`gh run list --commit "$(git -C "$WORKTREE_PATH" rev-parse "$BASE_BRANCH")" --json name,conclusion,headSha`); a pass of the same command there means local-only. Done when: it failed twice locally and CI didn't pass it.
+2. **Fix.** Run `bash ~/.agents/skills/git-orca-worktrees/setup.sh "fix/broken-base-<slug>"` and keep its branch and path as `FIX_BRANCH` and `FIX_PATH`. Launch a new `worker` (`model: "openai-codex/gpt-5.6-luna:medium"`, `cwd: FIX_PATH`) with the failing `EXIT=` line, the log tail, and `PROTECTED_PATHS`: fix the root cause in at most 20 changed lines across 2 files, keep every check, test, timeout, and threshold as strict as it is, don't commit, and if that isn't enough, change nothing and say so. Commit its files, then check:
 
    ```bash
-   git -C "$FIX_PATH" diff --numstat "$BASE_BRANCH"...HEAD   # at most 2 files; added + deleted <= 20
-   eval "git -C \"\$FIX_PATH\" diff --name-only \"\$BASE_BRANCH\"...HEAD -- $PROTECTED_PATHS '.github/workflows'"   # prints nothing
-   git -C "$FIX_PATH" diff "$BASE_BRANCH"...HEAD | grep -nE '^\+.*(\.skip|\.todo|test\.fails|continue-on-error|\|\| true|timeout|threshold|tolerance|retries)'   # prints nothing
+   git -C "$FIX_PATH" diff --numstat "$BASE_BRANCH"...HEAD   # ≤ 2 files, ≤ 20 lines
+   eval "git -C \"\$FIX_PATH\" diff --name-only \"\$BASE_BRANCH\"...HEAD -- $PROTECTED_PATHS '.github/workflows'"   # empty
+   git -C "$FIX_PATH" diff "$BASE_BRANCH"...HEAD | grep -nE '^\+.*(\.skip|\.todo|test\.fails|continue-on-error|\|\| true|timeout|threshold|tolerance|retries)'   # empty
    ```
-4. Run Step 2's `validate.sh` in `FIX_PATH`.
 
-Done when: the worker made a fix, all three diff checks pass, and `validate.sh` printed `EXIT=0` for `VERIFY_COMMAND` on the fix commit.
-
-## 3. Review, merge, and continue
-
-1. Launch a fresh `build-reviewer` with `cwd: FIX_PATH`. Its task: confirm the checkout is `FIX_BRANCH` at the fix commit and clean; read the full diff; apply the "Gate integrity" step of `"$SKILL_DIR/prompts/review-requirements.md"` with `PROTECTED_PATHS`; judge whether the diff fixes the cause rather than hiding the failure, quoting `file:line`. Verdict PASS or FAIL.
-2. Push with `push-pr.sh` (not a draft). In the body, give the failing command, the cause, the reviewer's verdict, and the `EXIT=0` line.
-3. Run `run-local-ci.sh` from `FIX_PATH` for the fix commit. Merge only on `CONCLUSION=success`:
+   Done when: all three pass and `validate.sh` prints `EXIT=0` for `VERIFY_COMMAND` in `FIX_PATH`.
+3. **Review and merge.** A fresh `build-reviewer` in `FIX_PATH` checks the checkout, reads the diff, applies the Gates step of `prompts/review-requirements.md`, and judges whether the diff fixes the cause rather than hiding it (PASS or FAIL, citing `file:line`). Push with `push-pr.sh`, not as a draft; the body gives the command, the cause, the verdict, and the `EXIT=0` line. Run `run-local-ci.sh` from `FIX_PATH`, and merge only on `CONCLUSION=success`:
 
    ```bash
    gh pr merge "$FIX_PR_NUMBER" --merge --match-head-commit "$(git -C "$FIX_PATH" rev-parse HEAD)"
    ```
-4. Move the task worktree onto the new base. From Step 0.5 it has no commits yet, so this fast-forwards; from Step 6, rebase instead with Step 5.5:
+4. **Continue.** Bring the task worktree onto the new base. From Step 1 it has no commits, so this fast-forwards; from Step 6, use Step 6's rebase instead:
 
    ```bash
    git -C "$WORKTREE_PATH" fetch origin "${BASE_BRANCH#origin/}" && git -C "$WORKTREE_PATH" merge --ff-only "$BASE_BRANCH"
    ```
-5. Re-run the failing command in `WORKTREE_PATH`.
 
-Done when: the reviewer returned PASS, CI passed, the PR merged, and the failing command printed `EXIT=0` in `WORKTREE_PATH`. Return to the step that sent you here, and list the fix PR URL in the final report. Leave `FIX_PATH` in place for the user to clean up.
+   Done when the failing command prints `EXIT=0` in `WORKTREE_PATH`. Return to the calling step and list the fix PR in the final report.
 
 ## Ask the user
 
-Stop before any implementation and ask. Give:
-
-- the failing command, its `EXIT=` line, and the log tail;
-- the CI result for the base commit;
-- why it was not fixed automatically (flaky, local only, too large, needs a check loosened, review FAIL, CI failure, or merge refused), with the fix PR URL if one exists.
-
-Wait for the user's decision. Do not start Step 1 on a broken base.
+Give the failing command, its `EXIT=` line and log tail, the base CI result, and why it wasn't fixed automatically (flaky, local-only, too large, needs a looser check, review FAIL, CI failure, or merge refused), with any fix PR URL. Wait for their decision before implementing.

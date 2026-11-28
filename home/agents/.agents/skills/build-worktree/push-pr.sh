@@ -25,7 +25,7 @@ if [ "${PR_DRAFT:-0}" = "1" ]; then
 fi
 
 if ! PR_URL=$(gh pr create ${DRAFT_ARGS[@]+"${DRAFT_ARGS[@]}"} --head "$BRANCH_NAME" --title "$TITLE" --body "$BODY" 2>&1); then
-    # Most often the PR already exists; SKILL.md Step 4 updates it instead.
+    # Most often the PR already exists; SKILL.md Step 5 updates it instead.
     echo "$PR_URL"
     exit 1
 fi
