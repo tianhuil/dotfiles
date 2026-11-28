@@ -1,6 +1,6 @@
 # Fix a broken base
 
-Read this only when the Step 0.5 base check fails: `VERIFY_COMMAND` fails on `BASE_BRANCH` before any implementation. A broken base fails every review round no matter what the task does, so settle it first. A **simple** failure is fixed in its own PR, merged, and the task continues. Anything else goes to the user.
+Read this when the Step 0.5 base check fails (`VERIFY_COMMAND` fails on `BASE_BRANCH` before any implementation), or when Step 6 finds a CI Check failing for a cause outside this diff; then the Check's command is the failing command below. A broken base fails every round no matter what the task does, so settle it first. A **simple** failure is fixed in its own PR, merged, and the task continues. Anything else goes to the user.
 
 Make one attempt. Any step that does not reach its completion criterion ends the attempt: go to [Ask the user](#ask-the-user).
 
@@ -50,14 +50,14 @@ Done when: the worker made a fix, all three diff checks pass, and `validate.sh` 
    ```bash
    gh pr merge "$FIX_PR_NUMBER" --merge --match-head-commit "$(git -C "$FIX_PATH" rev-parse HEAD)"
    ```
-4. Move the task worktree onto the new base; it has no commits yet, so this fast-forwards:
+4. Move the task worktree onto the new base. From Step 0.5 it has no commits yet, so this fast-forwards; from Step 6, rebase instead with Step 5.5:
 
    ```bash
    git -C "$WORKTREE_PATH" fetch origin "${BASE_BRANCH#origin/}" && git -C "$WORKTREE_PATH" merge --ff-only "$BASE_BRANCH"
    ```
-5. Re-run the base check in `WORKTREE_PATH`.
+5. Re-run the failing command in `WORKTREE_PATH`.
 
-Done when: the reviewer returned PASS, CI passed, the PR merged, and the base check printed `EXIT=0`. Continue Step 0.5, and list the fix PR URL in the final report. Leave `FIX_PATH` in place for the user to clean up.
+Done when: the reviewer returned PASS, CI passed, the PR merged, and the failing command printed `EXIT=0` in `WORKTREE_PATH`. Return to the step that sent you here, and list the fix PR URL in the final report. Leave `FIX_PATH` in place for the user to clean up.
 
 ## Ask the user
 

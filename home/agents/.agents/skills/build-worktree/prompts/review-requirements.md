@@ -15,7 +15,7 @@ Design documents (authoritative): DESIGN_DOCS
 Work unit in scope (design file and heading, or "no design"): DESIGN_SCOPE
 Requirement rows the orchestrator extracted (checklist lines under that heading, or the task's asks): REQUIREMENT_IDS
 Required-case manifest cases for this unit (file, selector, count, or "none"): MANIFEST_CASES
-Review round (`first`, `re-review` with the previous reviewed HEAD, or `final full review`): REVIEW_ROUND
+Review round (`first`, `re-review` or `narrow re-review` with the previous reviewed HEAD, or `final full review`): REVIEW_ROUND
 Repository verify command: VERIFY_COMMAND
 Verify result the orchestrator recorded in Step 2 (HEAD and the `EXIT= LOG= CMD=` line; or "not applicable (docs-only)"): VERIFY_RESULT
 Acceptance procedure (end-to-end, real environment): ACCEPTANCE_PROCEDURE
@@ -63,7 +63,11 @@ Workflow:
 9. Checkboxes. Enforce the checklist-ticking rule in [Common design rules](../../design/common-rules.md): any design `- [x]` ticked in this diff without a MET row backed by evidence is a blocking finding.
 10. Also check for partial implementations, TODOs left behind, silent scope cuts, and deleted comments that were still correct. If the repository's `AGENTS.md` lists what else to update when something changes, check the diff against it. For edits to design docs, list any decision that was removed or changed without a recorded reason.
 
-Re-review rule. When REVIEW_ROUND is `re-review`, first report whether each prior finding is fixed; a prior finding that is still open keeps its original blocking status. Then review the whole diff as usual and report everything you find. A new finding in lines changed by `git diff <previous reviewed HEAD>..HEAD` blocks under the normal rules. A new finding anywhere else blocks only if it is Critical; otherwise list it under Follow-up Notes marked "found late, outside the fix".
+Re-review rule. When REVIEW_ROUND is `re-review`, first report whether each prior finding is fixed; a prior finding that is still open keeps its original blocking status. Then review the whole diff as usual and report everything you find. A new finding in lines changed by `git diff <previous reviewed HEAD>..HEAD` blocks only if it is Critical or High; a new finding anywhere else blocks only if it is Critical. List the rest under Follow-up Notes marked "found late". This makes each round a smaller target than the last.
+
+Narrow re-review. When REVIEW_ROUND is `narrow re-review`, every `re-review` rule applies, and you read only `git diff <previous reviewed HEAD>..HEAD` and the prior findings instead of the whole diff. Anything the fix diff does not touch carries forward from the previous round; a Critical finding you notice outside it still blocks.
+
+Findings the contract file lists under "Deferred by the owner" do not block in any round; do not re-report them.
 
 Do not modify project files, commit, or push. For each finding give severity (Critical/High/Medium/Low), file:line, the requirement ID, why it matters, and the smallest safe fix.
 

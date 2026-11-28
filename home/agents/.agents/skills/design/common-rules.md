@@ -38,7 +38,9 @@ Decide each corner case in the design in one sentence, with one label:
 
 Prefer `rejected` or `best-effort` unless a user relies on the case. For example, an odd flag combination is `rejected: exit 2 naming both flags`, and a second Ctrl-C during shutdown is `best-effort: exit immediately`. When a corner case the design leaves unlabeled comes up during the build, the orchestrator labels it when the answer is reasonably clear and asks the owner only when it is not; the implementer never decides it alone.
 
-Checklist items are the unit of completion. A task names its work unit: either a heading (done when every checklist item under it is met) or a single checklist item (done when it and any items nested under it are met). Write each item in this form so a reviewer knows how to check it:
+Label manual-only features `best-effort` up front: diagnostics, repair commands, and operator helpers a person runs by hand. Name the few cases each must handle; reviewers treat the rest as `best-effort`. Absolute wording in a criterion ("exact", "changes nothing", "every", "always") asks for an exhaustive implementation and an exhaustive review; use it only when that is the intent.
+
+Checklist items are the unit of completion. A task names its work unit: either a heading (done when every checklist item under it is met) or a single checklist item (done when it and any items nested under it are met). Each work unit ships as one PR, so size it to about 1,000 changed lines; split a phase that would exceed that. Write each item in this form so a reviewer knows how to check it:
 
 ```markdown
 - [ ] <ID> <deliverable> — done when: <observable result> — verify: <type>: <how> — covers: <R-IDs, manifest cases>

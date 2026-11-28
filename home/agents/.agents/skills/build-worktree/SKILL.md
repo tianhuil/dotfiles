@@ -52,6 +52,8 @@ Or reference them by their install path at `~/.agents/skills/build-worktree/`.
 
 This is an **orchestrator** — it coordinates bash scripts and delegated agents. Use Pi's `subagent` tool for AI steps (1, 2, 3, 6), and always pass `WORKTREE_PATH` explicitly as `cwd`. Use the helper scripts for mechanical steps (0, 2, 4, 5). The default implementation agent is `worker`; use a user-specified agent type when provided.
 
+A build can outlive the skill text loaded at its start. After a context compaction, or when resuming after a pause of hours, re-read this `SKILL.md` and `CONTRACT_FILE`, and fetch `BASE_BRANCH`, before the next step: the skill, the contract, or the base may have changed.
+
 Reviewers must be able to run shell commands (they execute verification and acceptance steps), and should use a stronger model tier than the worker. A reviewer on the same cheap model as the worker tends to approve the worker's blind spots. Use the user's model choice when given.
 
 Use the `build-reviewer` agent for both reviewers. It has shell access, pins a stronger model, and may not edit the checkout. Do **not** use the built-in `reviewer` agent: it has no shell and is told not to run commands, so it cannot execute the verification this skill requires. If `build-reviewer` is unavailable (`subagent({ action: "list" })`; it is installed from the user's dotfiles), use `oracle` with `context: "fresh"` and `model: "openai-codex/gpt-5.6-luna:xhigh"` (effort goes in the model name; the tool has no `effort` option), paste the rules from the `build-reviewer` agent into the task, state review-only authority, and say so in the final report.
@@ -65,7 +67,7 @@ Keep the host responsive: only the requirements reviewer runs commands that buil
 Track one status for the task and report it everywhere:
 
 - `IN_PROGRESS`: work or review is ongoing, or review has not run.
-- `READY`: on the current `HEAD` with a clean working tree, the reviewers and the final full review returned PASS (the final full review blocks only on Critical findings; Step 3, item 7), Step 2's `validate.sh` run printed `EXIT=0` for `VERIFY_COMMAND` on that `HEAD`, and the acceptance procedure passed, or it is not applicable with a stated reason that the requirements reviewer confirmed from the diff (no user-visible or integration surface changed).
+- `READY`: on the current `HEAD` with a clean working tree, the reviewers and the final full review returned PASS (the final full review blocks only on Critical findings; Step 3, item 7), or every finding that blocks them is deferred by the owner (Step 3, item 9), Step 2's `validate.sh` run printed `EXIT=0` for `VERIFY_COMMAND` on that `HEAD`, and the acceptance procedure passed, or it is not applicable with a stated reason that the requirements reviewer confirmed from the diff (no user-visible or integration surface changed).
 - `BLOCKED`: any of the above is missing when a cap is reached, a check cannot run, or a precondition fails. `BLOCKED` work may be pushed as a **draft** PR for visibility but is never merged.
 
 `READY` covers one PR. When the design names an owner approval point (for example the end of a large-design phase), merged PRs do not complete that phase: report "awaiting owner acceptance" until the owner has run the Owner Acceptance Script.
@@ -103,7 +105,7 @@ Parse the output for `BRANCH_NAME` (may have `-v2` suffix if branch existed), `B
 
 Before any implementation, collect the contract the reviewers will enforce. Read the repository's `AGENTS.md` and README in the worktree, and every design doc linked by the task.
 
-1. **Design contract.** Apply [Common design rules](../design/common-rules.md). For each design the task implements, verify readiness before implementation. Capture `DESIGN_SCOPE`, `REQUIREMENT_IDS`, and `MANIFEST_CASES` verbatim from the design; for a task without a design, capture each ask verbatim as `TASK#1`, `TASK#2`, and so on. If the task links a design but does not name an existing work unit, stop and ask the user.
+1. **Design contract.** Apply [Common design rules](../design/common-rules.md). For each design the task implements, verify readiness before implementation. Capture `DESIGN_SCOPE`, `REQUIREMENT_IDS`, and `MANIFEST_CASES` verbatim from the design; for a task without a design, capture each ask verbatim as `TASK#1`, `TASK#2`, and so on. If the task links a design but does not name an existing work unit, stop and ask the user. A build covers one work unit and ships one PR with its own review cap: when the task names several (for example both phases of a design), build the first, report it, and start the next as a new build (new worktree, contract, and cap) on top of it.
 2. **local-ci.** PR checks run only on this machine with local-ci; read the `local-ci` skill. Run `bash ~/.agents/skills/build-worktree/local-ci-status.sh "$WORKTREE_PATH"`. Done when `SETUP` is empty and `LOCAL_CI` is set. For each word in `SETUP`:
    - `deps`: local-ci is declared but not installed; run the repository's install command.
    - `config`, `dev-dependency`, `global`: stop and ask the user before setting up local-ci, naming what is missing. On no, set status `BLOCKED` and stop: work does not start without local-ci. On yes, add `TASK#local-ci` to the contract and, after the base check (item 6), have the worker (record `WORKER_RUN_ID`; Step 1 resumes it) do the project-file parts in one commit, `ci: run PR checks with local-ci`:
@@ -111,13 +113,13 @@ Before any implementation, collect the contract the reviewers will enforce. Read
      - `dev-dependency`: install local-ci pinned to the latest tag (`git ls-remote --tags --refs https://github.com/tianhuil/local-ci | sort -t/ -k3 -V | tail -1`), for example `pnpm add -D github:tianhuil/local-ci#<tag>`.
      - `global` (no `package.json`): run `npm install -g github:tianhuil/local-ci#<tag>` yourself; it touches no project file.
 3. **Verify command.** Use the single verify command the repository's `AGENTS.md` defines (for example `pnpm verify`). If none is defined, derive the command list from CI (Step 2) and say in the final report that the repository lacks one. `VERIFY_COMMAND` is the fast loop run on every commit: when `AGENTS.md` leaves slow checks (for example e2e) to PR CI, leave them out; Step 5 runs them once, at the end.
-4. **Acceptance procedure.** From the design's Owner Acceptance Script and Acceptance Environment, or the repository's `AGENTS.md`, record how to check the change end to end in the environment the user actually uses (real URLs, real browser). For changes with no user-visible or integration surface, record "not applicable" and why; the requirements reviewer must confirm that from the diff. If the procedure needs a browser, probe for it in the worktree now (for example `command -v agent-browser && agent-browser --version`, or the repository's browser test command). If the probe fails, set status `BLOCKED` ("owner acceptance required: no browser tool") now rather than spending review rounds.
+4. **Acceptance procedure.** From the design's Owner Acceptance Script and Acceptance Environment, or the repository's `AGENTS.md`, record how to check the change end to end in the environment the user actually uses (real URLs, real browser). For changes with no user-visible or integration surface, record "not applicable" and why; the requirements reviewer must confirm that from the diff. If the procedure needs a browser, probe for it in the worktree now (for example `command -v agent-browser && agent-browser --version`, or the repository's browser test command). If the probe fails, set status `BLOCKED` ("owner acceptance required: no browser tool") now rather than spending review rounds. If the procedure uses a logged-in service (a cloud CLI, an external API), record `CREDENTIAL_PROBES`: one cheap read-only command per service that fails when the login is missing or expired (for example `gcloud projects describe <project>`). Run them before every round that runs acceptance; if one fails, set status `BLOCKED` and ask the user to log in, instead of launching the round.
 
    Changes to CI workflow files can only be proven by a CI run on GitHub. The requirements reviewer cites the run for `EXPECTED_HEAD` (`gh run list --commit <sha> --json conclusion,headSha`) as executed evidence. A workflow whose trigger excludes pull requests (repos using local-ci often run cloud CI only on `main`) never runs on the draft PR, so start it on the branch with `gh workflow run <file> --ref "$BRANCH_NAME"` (needs a `workflow_dispatch` trigger). Changes to `local-ci.yml` are proven by Step 5's run.
 5. **Protected paths.** Record paths named by the design and `AGENTS.md` as single-quoted git pathspecs (for example `':(glob)**/*.test.ts' 'scripts/verify.ts'`) so deleted files still match. Apply their protection rules from [Common design rules](../design/common-rules.md).
 6. **Base check.** Run `VERIFY_COMMAND` with Step 2's `validate.sh` in `WORKTREE_PATH`, which still equals `BASE_BRANCH`. If it prints a non-zero `EXIT=`, the base is broken: read [`fix-broken-base.md`](fix-broken-base.md) and follow it before any implementation.
 
-Write these items once to the **contract file**, `CONTRACT_FILE="$(git -C "$WORKTREE_PATH" rev-parse --absolute-git-dir)/build-worktree/contract.md"` (inside the git dir, so it never dirties the tree; `mkdir -p` its folder first), as `DESIGN_DOCS`, `DESIGN_SCOPE`, `REQUIREMENT_IDS`, `MANIFEST_CASES`, `VERIFY_COMMAND`, `ACCEPTANCE_PROCEDURE`, `PROTECTED_PATHS`, `BASE_BRANCH`, `EXPECTED_BRANCH`, and the user's full task text as `TASK_DESCRIPTION`. Give every worker and reviewer its path instead of retyping the values. Append the latest run ID per role and each round's verdicts to it as they change, so a fresh child or a resumed orchestrator can pick up from it.
+Write these items once to the **contract file**, `CONTRACT_FILE="$(git -C "$WORKTREE_PATH" rev-parse --absolute-git-dir)/build-worktree/contract.md"` (inside the git dir, so it never dirties the tree; `mkdir -p` its folder first), as `DESIGN_DOCS`, `DESIGN_SCOPE`, `REQUIREMENT_IDS`, `MANIFEST_CASES`, `VERIFY_COMMAND`, `ACCEPTANCE_PROCEDURE`, `CREDENTIAL_PROBES`, `PROTECTED_PATHS`, `BASE_BRANCH`, `EXPECTED_BRANCH`, and the user's full task text as `TASK_DESCRIPTION`. Give every worker and reviewer its path instead of retyping the values. Append the latest run ID per role and each round's verdicts to it as they change, so a fresh child or a resumed orchestrator can pick up from it.
 
 ## Agent Run IDs
 
@@ -135,9 +137,11 @@ subagent({ action: "resume", id: WORKER_RUN_ID, message: "<follow-up task>" })
 
 Resume keeps the child's earlier context, agent, model, and tools, and returns a **new** run ID: replace the stored ID with it every time. A resumed run is async; wait for its result before acting on it. A fix agent resumes `WORKER_RUN_ID`.
 
-Long sessions die on compaction. Resume a role at most twice; for its next continuation, or when resume rejects the run, start a fresh child for that role with the full task, `CONTRACT_FILE`, and the previous run's last report as the handoff. Record its run ID and say so in the final report. A fresh reviewer that replaces one mid-loop keeps the `REVIEW_ROUND` the old one would have had (`re-review` with the previous reviewed `HEAD`), so the re-review rule still bounds what blocks; only Step 3's final full review starts a reviewer as a full review.
+Long sessions die on compaction. Resume a role at most twice; for its next continuation, or when resume rejects the run, start a fresh child for that role with the full task, `CONTRACT_FILE`, and the previous run's last report as the handoff. Record its run ID and say so in the final report. A fresh reviewer that replaces one mid-loop keeps the `REVIEW_ROUND` the old one would have had (`re-review` or `narrow re-review` with the previous reviewed `HEAD`, plus the prior findings), so the re-review rule still bounds what blocks; only Step 3's final full review starts a reviewer as a full review.
 
 A "needs attention after repeated tool failures" notice is often a child's intended non-zero exits (absence checks, guard tests). Check `status` once; if the child is progressing, take no further action.
+
+A child that fails on a provider error (usage limit, quota, billing) produced no verdict. Set status `BLOCKED` and ask the user which model to use; the model choice is theirs.
 
 Match the action to the run's state, using only run IDs the tool returned: `status` to check a run, `steer` only while it is still running, `resume` once it has finished. Do not use `command.status`. Never launch with made-up model names to probe the registry; use the models this skill names.
 
@@ -160,7 +164,8 @@ The subagent is a small autonomous unit. Its instructions:
 5. Run validation commands through `~/.agents/skills/build-worktree/validate.sh "$WORKTREE_PATH" "<cmd>"` and quote each command's `EXIT=` line. A pass claim without `EXIT=0` is not evidence; never judge pass from cut-off output.
 6. Choose and write tests with the `verification-strategy` skill.
 7. Stop only processes you started, by PID; other sessions share the machine.
-8. Run a command you expect to fail (an absence check, a guard test) as `<cmd>; echo "rc=$?"`, so the tool call succeeds and the supervisor's watchdog does not flag it; judge the result from `rc=`.
+8. Handle the error paths and inputs the contract names. For any other failure of an external tool, stop with the tool's own error rather than classifying or repairing it: each extra handler is more code to get wrong.
+9. Run a command you expect to fail (an absence check, a guard test) as `<cmd>; echo "rc=$?"`, so the tool call succeeds and the supervisor's watchdog does not flag it; judge the result from `rc=`.
 
 Commit the worker's changes before validation and review, so reviewers see a clean tree at a known commit. Stage the files the worker reported, then confirm nothing else is left:
 
@@ -231,13 +236,15 @@ If it exits non-zero, resume `WORKER_RUN_ID` as the fix agent, with the validati
 
 Always run this step. Skip it only when the user explicitly says to; the status then stays `IN_PROGRESS` (unreviewed), never `READY`.
 
+Before round 1, size the diff: `git -C "$WORKTREE_PATH" diff --shortstat "$BASE_BRANCH"...HEAD -- . ':!*lock*'`. Past about 1,000 changed lines (generated files aside), every round reviews more than it can converge on: ask the owner whether to split the work unit before reviewing.
+
 Resolve all prompt paths relative to this skill's directory—the directory containing this `SKILL.md`—not the repository or worktree root. For example:
 
 ```bash
 SKILL_DIR="$(dirname "$(realpath ~/.agents/skills/build-worktree/SKILL.md)")"
 ```
 
-1. Do not paste the prompt files into the task (workflow tasks are capped at 16 KB). Give each reviewer the absolute path of its prompt file below and `CONTRACT_FILE`, and tell it to read and follow both: the contract file supplies `TASK_DESCRIPTION`, `BASE_BRANCH`, `EXPECTED_BRANCH`, and the Step 0.5 values verbatim. In the task, give only the per-round placeholders: `WORKTREE_PATH`, `EXPECTED_HEAD` (`git -C "$WORKTREE_PATH" rev-parse HEAD` after the latest commit), `REVIEW_ROUND` (`first`, `re-review` with the previous reviewed `HEAD`, or `final full review`), `VERIFY_RESULT` (Step 2's run; its `VERIFY_HEAD` must equal `EXPECTED_HEAD`), and the previous round's reports on re-review. Write every file a task cites before dispatching it.
+1. Do not paste the prompt files into the task (workflow tasks are capped at 16 KB). Give each reviewer the absolute path of its prompt file below and `CONTRACT_FILE`, and tell it to read and follow both: the contract file supplies `TASK_DESCRIPTION`, `BASE_BRANCH`, `EXPECTED_BRANCH`, and the Step 0.5 values verbatim. In the task, give only the per-round placeholders: `WORKTREE_PATH`, `EXPECTED_HEAD` (`git -C "$WORKTREE_PATH" rev-parse HEAD` after the latest commit), `REVIEW_ROUND` (`first`, `re-review` or `narrow re-review` with the previous reviewed `HEAD`, or `final full review`), `VERIFY_RESULT` (Step 2's run; its `VERIFY_HEAD` must equal `EXPECTED_HEAD`), and the previous round's reports on re-review. Write every file a task cites before dispatching it.
 2. Set the review-round cap from the user's request, or use `3`. The count carries across re-entries from Steps 5.5 and 6; it does not reset.
 3. Start these reviewers so they run concurrently (only the requirements reviewer for docs-only changes): the tool accepts **one `subagent` call per turn**, so launch or resume each as its own async call in consecutive turns, then wait for both results. Pass `WORKTREE_PATH` as `cwd`, with shell access and a stronger model tier than the worker (see Execution Model):
   
@@ -250,17 +257,22 @@ SKILL_DIR="$(dirname "$(realpath ~/.agents/skills/build-worktree/SKILL.md)")"
    Round 1 launches them and records each returned run ID; later rounds resume them (see Agent Run IDs). Keep each run ID paired with its reviewer; never swap them.
 
    The worktree is frozen at `EXPECTED_HEAD` until every reviewer launched this round has reported: start the fix (item 6) only then, even when one reviewer's FAIL is already in hand. A worker editing under a running reviewer voids that review.
-4. On every round, have both reviewers inspect the current diff and report whether prior issues are fixed, plus any new evidence-backed issues. Give them the new `EXPECTED_HEAD` each round; a report against a different commit does not count. In `re-review` rounds the prompts' re-review rule applies: new findings outside the fix diff (`git diff <previous reviewed HEAD>..HEAD`) block only if Critical, and the rest become follow-up notes. Round 1 is the full review; later rounds still report everything but cannot keep adding blockers outside the fix.
+4. On every round, have both reviewers inspect the current diff and report whether prior issues are fixed, plus any new evidence-backed issues. Give them the new `EXPECTED_HEAD` each round; a report against a different commit does not count. In `re-review` rounds the prompts' re-review rule applies: a new finding in the fix diff (`git diff <previous reviewed HEAD>..HEAD`) blocks only if Critical or High, one outside it only if Critical, and the rest become follow-up notes. Round 1 is the full review; round 2 still reads the whole diff, but each fix is a smaller target than the last, so the loop converges. From round 3 on, pass `REVIEW_ROUND` as `narrow re-review`: reviewers read only the fix diff and the prior findings, and carry forward everything else.
 5. If either reviewer lists Questions for the owner, decide each one yourself when the answer is reasonably clear from the design, the task, and the reviewer's recommendation (usually `rejected` or `best-effort`). Stop and ask the user only about the unclear ones, offering the recommended label and behavior. Have the worker record each decision in the design as an edge-case label ([Common design rules](../design/common-rules.md)) as part of the next fix, and list the ones you decided, plus each reviewer's Edge cases judged, in the PR body under "Edge cases decided without the owner". Have the worker record the reviewers' judgments in the design too. `rejected` and `best-effort` decisions usually need only that line and a short test or none.
-6. If either reviewer finds in-scope issues, resume `WORKER_RUN_ID` with both reports, fix only those issues, and re-run Step 2. During the fix, the worker runs only the focused tests for those findings (for example `vitest run <file> -t "<name>"`), not the full suite or slow checks; Step 2 runs the full verify command afterwards. Then resume `CODE_QUALITY_RUN_ID` and `REQUIREMENTS_RUN_ID` for the next round. Do not accept a fix agent's claim that something is fixed; the next review round checks it. Reviewers must label out-of-scope and non-blocking findings as follow-up notes; they do not trigger edits or another review round.
-7. When both reviewers approve after more than one round, run one **final full review** with a fresh requirements reviewer (a new launch, not a resume; record its run ID as `REQUIREMENTS_RUN_ID`) against the final `HEAD`, including the absence check. Resumed reviewers tend to check only their earlier findings; the fresh one reviews the whole change. It blocks only on Critical findings and on the prompt's hard conditions (checkout, requirement rows, verify result, acceptance, protected paths); its FAIL starts another round. Its High and lower findings go in the PR body under Follow-up notes. If round 1 passed, it already was a fresh full review; skip this.
-8. Stop when both reviewers and the final full review pass on the same `HEAD`, or when the review-round cap is reached. **Reaching the cap with any FAIL or UNVERIFIED sets status `BLOCKED`.** Do not continue to a ready PR or a merge. Report the hard-to-pass tests instead (see Reporting): for each requirement row or test that failed in more than one round, its name, the rounds it failed, the finding each time, and a suggestion: relabel the case `rejected` or `best-effort`, split the test, or have the owner decide the behavior.
+6. If either reviewer finds in-scope issues, resume `WORKER_RUN_ID` with both reports, fix only those issues, and re-run Step 2. The brief passes each finding verbatim with what "fixed" means; the worker designs the fix. Leave flags, error wording, and other external facts to the worker, who cites each from the tool's source, docs, or real output. Every brief says: "Prefer narrowing or deleting a check over adding one." When the finding is in handling the contract never asked for, the smallest fix is usually removing that handling. During the fix, the worker runs only the focused tests for those findings (for example `vitest run <file> -t "<name>"`), not the full suite or slow checks; Step 2 runs the full verify command afterwards. Then resume `CODE_QUALITY_RUN_ID` and `REQUIREMENTS_RUN_ID` for the next round. Do not accept a fix agent's claim that something is fixed; the next review round checks it. Reviewers must label out-of-scope and non-blocking findings as follow-up notes; they do not trigger edits or another review round.
+7. When both reviewers approve after more than one round, run one **final full review** with a fresh pair (new launches, not resumes; record their run IDs as `CODE_QUALITY_RUN_ID` and `REQUIREMENTS_RUN_ID`) against the final `HEAD`, including the absence check. Resumed reviewers tend to check only their earlier findings; the fresh pair reviews the whole change. Both block only on Critical findings, and the requirements reviewer also on its prompt's hard conditions (checkout, requirement rows, verify result, acceptance, protected paths). Their High and lower findings go in the PR body under Follow-up notes. If round 1 passed, it already was a fresh full review; skip this.
+
+   The final full review runs once per contract. A round becomes final only because both reviewers just passed, never because it is the last under the cap or the cap was raised. If it fails, the fix round is a `re-review` by the same pair (resume), and its pass ends the loop.
+8. **Stop for the owner when the loop stops converging.** Before dispatching a fix, check the findings that block: if one file has produced blocking findings in two consecutive rounds, or the number of blocking findings did not fall since the last round, stop and ask the owner instead of fixing. Offer: simplify or cut that code, defer the findings (below), or one more round.
+9. Stop when both reviewers and the final full review pass on the same `HEAD`, or when the review-round cap is reached. **Reaching the cap with any FAIL or UNVERIFIED sets status `BLOCKED`.** Do not continue to a ready PR or a merge. Report, in plain language, one line per round with its blocking findings by severity, and the hard-to-pass tests (see Reporting): for each requirement row or test that failed in more than one round, its name, the rounds it failed, the finding each time, and a suggestion: relabel the case `rejected` or `best-effort`, split the test, or have the owner decide the behavior. Then offer three choices: raise the cap, stop, or defer findings.
+
+   **Deferring** is the owner's call: they name findings to move to follow-up notes. A deferred finding stops blocking; record it in the contract file and in the PR body under "Deferred by the owner" with the owner's words. Only review findings can be deferred, never a failing `VERIFY_COMMAND`, acceptance step, CI Check, or protected-path change. Defer only on the owner's explicit naming of findings; a standing instruction such as "get it merged" is not one.
 
 ## Step 3.5: Readiness Decision
 
 Set the build status from evidence, not from any agent's summary:
 
-- `READY` only when, on the current `HEAD` with a clean working tree (`git status --porcelain` is empty): both reviewers and the final full review returned PASS; Step 2's `validate.sh` run printed `EXIT=0` for `VERIFY_COMMAND` on that `HEAD`; and the acceptance procedure passed, as recorded step by step in the requirements review (or is not applicable, as confirmed by the requirements reviewer).
+- `READY` only when, on the current `HEAD` with a clean working tree (`git status --porcelain` is empty): both reviewers and the final full review returned PASS, or every finding blocking them is deferred by the owner; Step 2's `validate.sh` run printed `EXIT=0` for `VERIFY_COMMAND` on that `HEAD`; and the acceptance procedure passed, as recorded step by step in the requirements review (or is not applicable, as confirmed by the requirements reviewer).
 - Otherwise `BLOCKED`, with the missing items listed.
 
 When the status is `READY`, record `READY_HEAD="$(git -C "$WORKTREE_PATH" rev-parse HEAD)"`, then delegate to a fresh `worker` (a new launch, not a resume of `WORKER_RUN_ID`) one commit that ticks each design `- [ ]` item the final requirements review marked MET, citing its evidence in the commit message. Items not MET stay unticked, and OWNER items are never ticked by agents: list them in the PR body for the owner. Check that commit mechanically before accepting it:
@@ -311,6 +323,9 @@ The AI must compose the PR title and body. Use this structure, copying tables fr
 ## Follow-up notes
 - <non-blocking findings from the reviewers and the final full review, or "None.">
 
+## Deferred by the owner
+- <finding — the owner's words, or "None.">
+
 ## Not verified
 - <anything not observed directly, or "Nothing.">
 ```
@@ -348,6 +363,8 @@ git push --force-with-lease origin $BRANCH_NAME
 ## Step 6: Fix CI Failures (Loop)
 
 This step requires AI to understand failure logs. Read the failure preview in Step 5's output, and `<LOCAL_CI_LOGS>/<check>.log` for each failed Check.
+
+First decide whose failure it is: re-run the failed Check once. If it passes, continue and list the flake under Follow-up notes. If it fails again and fails the same way on `BASE_BRANCH`, the cause is outside this diff: follow [`fix-broken-base.md`](fix-broken-base.md) with that Check's command as the failing command, so its fix lands in its own PR, never in this one. Otherwise the failure is this branch's; fix it below.
 
 Resume `WORKER_RUN_ID` as the fix agent. Include the failed CI logs and the locked contract in its follow-up message. Ask it to fix only failures caused by this branch or required by the task; pre-existing or adjacent failures become `BLOCKED` follow-up notes, not scope expansion. Ask it to report its changes. Commit the reported files (as in Step 1) and push:
 
@@ -400,6 +417,8 @@ After creating the PR, keep this Pi session working in `WORKTREE_PATH`. If the u
 
 ## Reporting
 
+Write every message to the user in plain language, answer first: what it means for them (can it merge, what they must decide) before the evidence. Leave run IDs, round labels, and internal file paths out unless asked.
+
 At the end, always report:
 
 - Status: `READY`, `BLOCKED` (with what is missing), or `IN_PROGRESS`
@@ -409,5 +428,6 @@ At the end, always report:
 - Requirements table from the final requirements review
 - What was not verified
 - If failed: which jobs failed and a summary of attempts made
-- If the review cap was reached: the hard-to-pass tests (Step 3, item 8)
+- If the review cap was reached: the per-round blocking findings and the hard-to-pass tests (Step 3, item 9)
+- Findings the owner deferred, if any
 

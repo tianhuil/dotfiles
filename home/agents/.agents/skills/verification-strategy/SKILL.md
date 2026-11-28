@@ -82,6 +82,7 @@ Land the refactor as its own change with test files untouched. The existing suit
 
 - **Mock the input, not the subject.** A mock is fine as the test's input: a Component Test feeds a canned response and asserts what the UI does with it. It is a smell when the assertion is really about the mocked thing (server, database, browser, transport or configuration behavior), because the test then checks the mock. Run the real code instead: in-process where possible (PGlite, tRPC `localLink`), or in a Wiring Test. Keep mocks small; when one grows to preserve a test, replace it with the real dependency.
 - **Fake only what you cannot run**: unavailable third-party services, nondeterministic inputs, and failure paths the real dependency cannot safely produce. Keep the faked contract small, and cover the integration with at least one real-stack path when feasible.
+- **A fake rejects what the real tool rejects.** Build a fake CLI or API from recorded real output (the research note in section 5), not from what the code expects; a fake that accepts every call proves nothing. For each call that changes external state (create, update, repair), run it once against the real tool and read the state back, because a call can exit 0 while changing nothing (an ignored flag, a field outside the update mask).
 
 ## 5. Test our code, not its environment
 

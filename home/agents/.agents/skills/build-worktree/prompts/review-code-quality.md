@@ -8,7 +8,7 @@ You are reviewing local git changes in WORKTREE_PATH.
 
 Expected checkout: branch EXPECTED_BRANCH at commit EXPECTED_HEAD, base BASE_BRANCH.
 
-Review round (`first`, or `re-review` with the previous reviewed HEAD): REVIEW_ROUND
+Review round (`first`, `re-review` or `narrow re-review` with the previous reviewed HEAD, or `final full review`): REVIEW_ROUND
 
 Task context:
 TASK_DESCRIPTION
@@ -26,6 +26,8 @@ Workflow:
 Only report real, evidence-backed concerns. Scope findings to defects caused by this diff or defects that prevent the captured task contract from passing. Label pre-existing defects, adjacent improvements, cleanup, preferences, and new requirements as follow-up notes; they must not create a fix round. Skip web-specific checks when the code has no web surface.
 
 An edge case is mishandled only when the code contradicts its edge-case label in the design ([Common design rules](../../design/common-rules.md)) or a judgment you made below; a `best-effort` case never blocks. If a corner case matters and the design does not decide it, make a reasonable judgment: pick the cheapest sensible label (prefer `rejected` or `best-effort`) and one-sentence behavior, and list it under Edge cases judged. Report a finding only if the code clearly contradicts a `handled` or `rejected` judgment. When the right behavior is genuinely unclear, list it under Questions for the owner instead, with your recommendation, not as a finding.
+
+Unrequested handling is `best-effort`. Error paths, inputs, and external-tool states that neither the design nor the task names are `best-effort` by default: imperfect handling of them is a follow-up note, and the smallest fix you suggest may be removing that handling. The wording of a diagnostic or help message blocks only when following it would cause damage (lost data, deleted or misconfigured resources).
 
 Blocking findings (any one makes the verdict FAIL):
 
@@ -45,7 +47,11 @@ Non-blocking findings (report under Follow-up Notes; they never make the verdict
 - Other test gaps: new code paths without tests, tests of implementation details instead of behavior, missing edge-case or error-path coverage, happy-path-only tests
 - Test isolation: leaked processes or servers, fixed ports that collide with other worktrees, real network calls that should be local, broad `pkill`/`killall` patterns that can kill other sessions' processes
 
-Re-review rule. When REVIEW_ROUND is `re-review`, first report whether each prior finding is fixed; a prior finding that is still open keeps its original blocking status. Then review the whole diff as usual and report everything you find. A new finding in lines changed by `git diff <previous reviewed HEAD>..HEAD` blocks under the normal rules. A new finding anywhere else blocks only if it is Critical; otherwise list it under Follow-up Notes marked "found late, outside the fix".
+Re-review rule. When REVIEW_ROUND is `re-review`, first report whether each prior finding is fixed; a prior finding that is still open keeps its original blocking status. Then review the whole diff as usual and report everything you find. A new finding in lines changed by `git diff <previous reviewed HEAD>..HEAD` blocks only if it is Critical or High; a new finding anywhere else blocks only if it is Critical. List the rest under Follow-up Notes marked "found late". This makes each round a smaller target than the last.
+
+Narrow re-review. When REVIEW_ROUND is `narrow re-review`, every `re-review` rule applies, and you read only `git diff <previous reviewed HEAD>..HEAD` and the prior findings instead of the whole diff. Anything the fix diff does not touch carries forward from the previous round; a Critical finding you notice outside it still blocks.
+
+Findings the contract file lists under "Deferred by the owner" do not block in any round; do not re-report them.
 
 Do not write tests or modify project files. Do not commit or push. For each finding, include severity, file and line reference, why it matters, and the smallest safe fix. Be thorough but concise; focus on the diff and only flag issues that matter.
 
@@ -75,4 +81,6 @@ Checkout: <pwd> <branch> <HEAD>  (matches expected: yes/no)
 
 ### Verdict: PASS | FAIL
 
-PASS means the checkout matched and there are no blocking findings after the re-review rule. FAIL means the checkout did not match or at least one blocking finding exists.
+In a `final full review`, only Critical findings block: list High and lower ones under Follow-up Notes marked "non-blocking (final review)".
+
+PASS means the checkout matched and there are no blocking findings after the re-review and final-review rules. FAIL means the checkout did not match or at least one blocking finding exists.
