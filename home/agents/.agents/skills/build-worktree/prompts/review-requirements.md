@@ -1,6 +1,6 @@
 # Review Requirements
 
-Use this prompt after implementation. Replace every `UPPER_CASE` placeholder before delegation (see build-worktree Step 0.5 for `DESIGN_SCOPE`, `REQUIREMENT_IDS`, and `MANIFEST_CASES`). Pass the design scope and quoted lines themselves, not a summary: the reviewer re-extracts the rows from the design and checks the orchestrator's list against them.
+Use this prompt after implementation. Each `UPPER_CASE` placeholder takes its value from the task, or else from the contract file the task names (build-worktree Step 0.5 defines `DESIGN_SCOPE`, `REQUIREMENT_IDS`, and `MANIFEST_CASES`). Pass the design scope and quoted lines themselves, not a summary: the reviewer re-extracts the rows from the design and checks the orchestrator's list against them.
 
 ---
 
@@ -42,7 +42,9 @@ Workflow:
    - `review:` judge the work against the stated criterion. Quote the `file:line` you relied on and say concretely why it is or is not met. A `grep` showing a word exists is not enough on its own.
    - `owner:` you cannot verify it. Mark it OWNER and say what the owner must check. It does not block this review, and it is never ticked by agents.
 
-   Slow checks run once, at the end. A slow check is a `cmd:` row that calls real external services or accounts (for example an e2e test against real GitHub). Run it only when every other row is MET in this round, and always in a `final full review`; otherwise mark it UNMET with "deferred: other rows UNMET". In a `re-review` round, carry forward an earlier passing run if `git diff --stat <previous reviewed HEAD>..HEAD` shows the fix touched no code the check exercises.
+   Slow checks run once, at the end. A slow check is a `cmd:` row that calls real external services or accounts (for example an e2e test against real GitHub), or a `ci:` row (it needs a CI run on EXPECTED_HEAD). Run or cite it only when every other row is MET in this round, and always in a `final full review`; otherwise mark it UNMET with "deferred: other rows UNMET". In a `re-review` round, carry forward an earlier passing run if `git diff --stat <previous reviewed HEAD>..HEAD` shows the fix touched no code or workflow file the check exercises.
+
+   Run a command you expect to fail (an absence check, a guard test) as `<cmd>; echo "rc=$?"`, so the tool call succeeds and the supervisor's watchdog does not flag it; judge the result from `rc=`.
 
    A `cmd:`, `browser:`, or `ci:` row with no executed evidence is UNMET. "Should work", "covered by CI" without the run, or a worker's report is not evidence. If a row marked `review:` or `owner:` could clearly have been an automated check, add a Medium finding suggesting the command.
 5. Check VERIFY_RESULT; do not re-run VERIFY_COMMAND. It must name EXPECTED_HEAD, and its `EXIT=` line decides: a missing result, a different HEAD, or a non-zero exit makes the verdict FAIL. Read its `LOG=` file for the decisive lines; never judge pass from cut-off output. Do not waive failures as "environmental", "flaky", "known OOM", or "unrelated": record them as UNVERIFIED with the exact error from the log.

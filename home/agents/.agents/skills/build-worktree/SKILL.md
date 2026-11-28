@@ -46,6 +46,7 @@ Or reference them by their install path at `~/.agents/skills/build-worktree/`.
 4. **Workers preserve checklist integrity.** They do not weaken protected paths by removing cases, adding skips, loosening assertions or thresholds, or editing expected values to match new output unless the task names that change. Reviewers decide; the separate readiness commit records the result. Apply checklist-ticking rules from [Common design rules](../design/common-rules.md).
 5. **Scope is locked.** Fix only findings required by the captured task contract, caused by the diff, or required to make its declared verification pass. Treat pre-existing defects, adjacent improvements, cleanup, reviewer preferences, and new requirements as follow-up notes; do not change them in this PR. If a fix would alter `DESIGN_SCOPE`, `REQUIREMENT_IDS`, `MANIFEST_CASES`, `ACCEPTANCE_PROCEDURE`, or `PROTECTED_PATHS`, stop and ask the user rather than expanding scope. A user-approved scope change starts a new contract capture and review cycle.
 6. **The orchestrator does not edit project files.** Every change to the worktree is made by a delegated agent, so the reviewers always review someone else's work. The orchestrator may run read-only commands, the helper scripts, and verification commands.
+7. **The orchestrator stays lean.** It reads what the contract needs (`AGENTS.md`, README, the design docs) and leaves exploring the code to the worker. After a worker reports, it checks `git status --porcelain` against the reported files and the locked scope, then commits; Step 2 and the reviewers verify the worker's claims. On a routine subagent notification, it replies in one line (what finished, what runs next) and saves the full report for Reporting or a user question.
 
 ## Execution Model
 
@@ -96,6 +97,8 @@ Track one status for the task and report it everywhere:
 
 Parse the output for `BRANCH_NAME` (may have `-v2` suffix if branch existed), `BASE_BRANCH`, `WORKTREE_TOOL`, and `WORKTREE_PATH`. All subsequent work uses these. If `BASE_BRANCH` is empty, set it from `git -C "$WORKTREE_PATH" symbolic-ref refs/remotes/origin/HEAD --short`. Reviewers get `EXPECTED_BRANCH="$BRANCH_NAME"`.
 
+3. **Check the base has the task's files.** The worktree starts from the remote base, so commits that exist only on the user's local base branch are missing. If `git -C "$WORKTREE_PATH" log --oneline "$BASE_BRANCH..<local base branch>"` lists commits, or a design doc the task names is absent from `WORKTREE_PATH`, stop and ask the user how to proceed (they push the base, or you rebase the empty branch onto the local commits). Pushing the base branch is the user's call.
+
 ## Step 0.5: Preconditions and Contract
 
 Before any implementation, collect the contract the reviewers will enforce. Read the repository's `AGENTS.md` and README in the worktree, and every design doc linked by the task.
@@ -107,14 +110,14 @@ Before any implementation, collect the contract the reviewers will enforce. Read
      - `config`: write `local-ci.yml` with one Check per command the PR workflows in `.github/workflows/` run (or the parts of `VERIFY_COMMAND`, when there are none).
      - `dev-dependency`: install local-ci pinned to the latest tag (`git ls-remote --tags --refs https://github.com/tianhuil/local-ci | sort -t/ -k3 -V | tail -1`), for example `pnpm add -D github:tianhuil/local-ci#<tag>`.
      - `global` (no `package.json`): run `npm install -g github:tianhuil/local-ci#<tag>` yourself; it touches no project file.
-3. **Verify command.** Use the single verify command the repository's `AGENTS.md` defines (for example `pnpm verify`). If none is defined, derive the command list from CI (Step 2) and say in the final report that the repository lacks one.
+3. **Verify command.** Use the single verify command the repository's `AGENTS.md` defines (for example `pnpm verify`). If none is defined, derive the command list from CI (Step 2) and say in the final report that the repository lacks one. `VERIFY_COMMAND` is the fast loop run on every commit: when `AGENTS.md` leaves slow checks (for example e2e) to PR CI, leave them out; Step 5 runs them once, at the end.
 4. **Acceptance procedure.** From the design's Owner Acceptance Script and Acceptance Environment, or the repository's `AGENTS.md`, record how to check the change end to end in the environment the user actually uses (real URLs, real browser). For changes with no user-visible or integration surface, record "not applicable" and why; the requirements reviewer must confirm that from the diff. If the procedure needs a browser, probe for it in the worktree now (for example `command -v agent-browser && agent-browser --version`, or the repository's browser test command). If the probe fails, set status `BLOCKED` ("owner acceptance required: no browser tool") now rather than spending review rounds.
 
    Changes to CI workflow files can only be proven by a CI run on GitHub. The requirements reviewer cites the run for `EXPECTED_HEAD` (`gh run list --commit <sha> --json conclusion,headSha`) as executed evidence. A workflow whose trigger excludes pull requests (repos using local-ci often run cloud CI only on `main`) never runs on the draft PR, so start it on the branch with `gh workflow run <file> --ref "$BRANCH_NAME"` (needs a `workflow_dispatch` trigger). Changes to `local-ci.yml` are proven by Step 5's run.
 5. **Protected paths.** Record paths named by the design and `AGENTS.md` as single-quoted git pathspecs (for example `':(glob)**/*.test.ts' 'scripts/verify.ts'`) so deleted files still match. Apply their protection rules from [Common design rules](../design/common-rules.md).
 6. **Base check.** Run `VERIFY_COMMAND` with Step 2's `validate.sh` in `WORKTREE_PATH`, which still equals `BASE_BRANCH`. If it prints a non-zero `EXIT=`, the base is broken: read [`fix-broken-base.md`](fix-broken-base.md) and follow it before any implementation.
 
-Keep these items in the orchestrator's environment as `DESIGN_DOCS`, `DESIGN_SCOPE`, `REQUIREMENT_IDS`, `MANIFEST_CASES`, `VERIFY_COMMAND`, `ACCEPTANCE_PROCEDURE`, and `PROTECTED_PATHS`. Pass them to every worker and reviewer.
+Write these items once to the **contract file**, `CONTRACT_FILE="$(git -C "$WORKTREE_PATH" rev-parse --absolute-git-dir)/build-worktree/contract.md"` (inside the git dir, so it never dirties the tree; `mkdir -p` its folder first), as `DESIGN_DOCS`, `DESIGN_SCOPE`, `REQUIREMENT_IDS`, `MANIFEST_CASES`, `VERIFY_COMMAND`, `ACCEPTANCE_PROCEDURE`, `PROTECTED_PATHS`, `BASE_BRANCH`, `EXPECTED_BRANCH`, and the user's full task text as `TASK_DESCRIPTION`. Give every worker and reviewer its path instead of retyping the values. Append the latest run ID per role and each round's verdicts to it as they change, so a fresh child or a resumed orchestrator can pick up from it.
 
 ## Agent Run IDs
 
@@ -130,7 +133,11 @@ Start a role with a normal launch (see Delegated agents) and record the `runId` 
 subagent({ action: "resume", id: WORKER_RUN_ID, message: "<follow-up task>" })
 ```
 
-Resume keeps the child's earlier context, agent, model, and tools, and returns a **new** run ID: replace the stored ID with it every time. A resumed run is async; wait for its result before acting on it. If resume rejects the run, start a fresh child for that role with the full task and context, record its run ID, and say so in the final report. A fix agent must resume `WORKER_RUN_ID`, not start a new worker.
+Resume keeps the child's earlier context, agent, model, and tools, and returns a **new** run ID: replace the stored ID with it every time. A resumed run is async; wait for its result before acting on it. A fix agent resumes `WORKER_RUN_ID`.
+
+Long sessions die on compaction. Resume a role at most twice; for its next continuation, or when resume rejects the run, start a fresh child for that role with the full task, `CONTRACT_FILE`, and the previous run's last report as the handoff. Record its run ID and say so in the final report. A fresh reviewer that replaces one mid-loop keeps the `REVIEW_ROUND` the old one would have had (`re-review` with the previous reviewed `HEAD`), so the re-review rule still bounds what blocks; only Step 3's final full review starts a reviewer as a full review.
+
+A "needs attention after repeated tool failures" notice is often a child's intended non-zero exits (absence checks, guard tests). Check `status` once; if the child is progressing, take no further action.
 
 Match the action to the run's state, using only run IDs the tool returned: `status` to check a run, `steer` only while it is still running, `resume` once it has finished. Do not use `command.status`. Never launch with made-up model names to probe the registry; use the models this skill names.
 
@@ -153,6 +160,7 @@ The subagent is a small autonomous unit. Its instructions:
 5. Run validation commands through `~/.agents/skills/build-worktree/validate.sh "$WORKTREE_PATH" "<cmd>"` and quote each command's `EXIT=` line. A pass claim without `EXIT=0` is not evidence; never judge pass from cut-off output.
 6. Choose and write tests with the `verification-strategy` skill.
 7. Stop only processes you started, by PID; other sessions share the machine.
+8. Run a command you expect to fail (an absence check, a guard test) as `<cmd>; echo "rc=$?"`, so the tool call succeeds and the supervisor's watchdog does not flag it; judge the result from `rc=`.
 
 Commit the worker's changes before validation and review, so reviewers see a clean tree at a known commit. Stage the files the worker reported, then confirm nothing else is left:
 
@@ -229,7 +237,7 @@ Resolve all prompt paths relative to this skill's directory—the directory cont
 SKILL_DIR="$(dirname "$(realpath ~/.agents/skills/build-worktree/SKILL.md)")"
 ```
 
-1. Do not paste the prompt files into the task (workflow tasks are capped at 16 KB). Give each reviewer the absolute path of its prompt file below and tell it to read and follow it. In the task, give a value for every placeholder in that file, including `TASK_DESCRIPTION` (the user's full task text, unedited), `BASE_BRANCH`, `EXPECTED_BRANCH`, `EXPECTED_HEAD` (`git -C "$WORKTREE_PATH" rev-parse HEAD` after the latest commit), `REVIEW_ROUND` (`first`, `re-review` with the previous reviewed `HEAD`, or `final full review`), `VERIFY_RESULT` (Step 2's run; its `VERIFY_HEAD` must equal `EXPECTED_HEAD`), and the Step 0.5 values. Pass design docs and requirement IDs as given; do not summarize or restate them.
+1. Do not paste the prompt files into the task (workflow tasks are capped at 16 KB). Give each reviewer the absolute path of its prompt file below and `CONTRACT_FILE`, and tell it to read and follow both: the contract file supplies `TASK_DESCRIPTION`, `BASE_BRANCH`, `EXPECTED_BRANCH`, and the Step 0.5 values verbatim. In the task, give only the per-round placeholders: `WORKTREE_PATH`, `EXPECTED_HEAD` (`git -C "$WORKTREE_PATH" rev-parse HEAD` after the latest commit), `REVIEW_ROUND` (`first`, `re-review` with the previous reviewed `HEAD`, or `final full review`), `VERIFY_RESULT` (Step 2's run; its `VERIFY_HEAD` must equal `EXPECTED_HEAD`), and the previous round's reports on re-review. Write every file a task cites before dispatching it.
 2. Set the review-round cap from the user's request, or use `3`. The count carries across re-entries from Steps 5.5 and 6; it does not reset.
 3. Start these reviewers so they run concurrently (only the requirements reviewer for docs-only changes): the tool accepts **one `subagent` call per turn**, so launch or resume each as its own async call in consecutive turns, then wait for both results. Pass `WORKTREE_PATH` as `cwd`, with shell access and a stronger model tier than the worker (see Execution Model):
   
@@ -240,6 +248,8 @@ SKILL_DIR="$(dirname "$(realpath ~/.agents/skills/build-worktree/SKILL.md)")"
   
 
    Round 1 launches them and records each returned run ID; later rounds resume them (see Agent Run IDs). Keep each run ID paired with its reviewer; never swap them.
+
+   The worktree is frozen at `EXPECTED_HEAD` until every reviewer launched this round has reported: start the fix (item 6) only then, even when one reviewer's FAIL is already in hand. A worker editing under a running reviewer voids that review.
 4. On every round, have both reviewers inspect the current diff and report whether prior issues are fixed, plus any new evidence-backed issues. Give them the new `EXPECTED_HEAD` each round; a report against a different commit does not count. In `re-review` rounds the prompts' re-review rule applies: new findings outside the fix diff (`git diff <previous reviewed HEAD>..HEAD`) block only if Critical, and the rest become follow-up notes. Round 1 is the full review; later rounds still report everything but cannot keep adding blockers outside the fix.
 5. If either reviewer lists Questions for the owner, decide each one yourself when the answer is reasonably clear from the design, the task, and the reviewer's recommendation (usually `rejected` or `best-effort`). Stop and ask the user only about the unclear ones, offering the recommended label and behavior. Have the worker record each decision in the design as an edge-case label ([Common design rules](../design/common-rules.md)) as part of the next fix, and list the ones you decided, plus each reviewer's Edge cases judged, in the PR body under "Edge cases decided without the owner". Have the worker record the reviewers' judgments in the design too. `rejected` and `best-effort` decisions usually need only that line and a short test or none.
 6. If either reviewer finds in-scope issues, resume `WORKER_RUN_ID` with both reports, fix only those issues, and re-run Step 2. During the fix, the worker runs only the focused tests for those findings (for example `vitest run <file> -t "<name>"`), not the full suite or slow checks; Step 2 runs the full verify command afterwards. Then resume `CODE_QUALITY_RUN_ID` and `REQUIREMENTS_RUN_ID` for the next round. Do not accept a fix agent's claim that something is fixed; the next review round checks it. Reviewers must label out-of-scope and non-blocking findings as follow-up notes; they do not trigger edits or another review round.

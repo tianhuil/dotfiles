@@ -1,6 +1,6 @@
 # Review Code Quality
 
-Use this prompt after implementation. Replace every `UPPER_CASE` placeholder before delegation.
+Use this prompt after implementation. Each `UPPER_CASE` placeholder takes its value from the task, or else from the contract file the task names (build-worktree Step 0.5).
 
 ---
 
